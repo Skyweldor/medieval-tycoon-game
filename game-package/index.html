@@ -200,8 +200,8 @@
     }
     
     .slot-placeholder {
-      width: var(--building-size, 42px);
-      height: calc(var(--building-size, 42px) * 0.6);
+      width: var(--placeholder-size, 42px);
+      height: calc(var(--placeholder-size, 42px) * 0.6);
       border: 2px dashed rgba(255,255,255,0.6);
       border-radius: 5px;
       display: flex;
@@ -386,9 +386,543 @@
       color: #4A3728;
       font-size: 0.85rem;
     }
-    
+
     .tips strong {
       color: #2E7D32;
+    }
+
+    /* Debug Sliders */
+    .debug-sliders {
+      margin-top: 15px;
+      padding: 15px;
+      background: linear-gradient(135deg, #333 0%, #222 100%);
+      border-radius: 10px;
+      border: 2px solid #555;
+    }
+
+    .debug-sliders .slider-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .debug-sliders label {
+      color: #fff;
+      font-size: 0.85rem;
+      min-width: 140px;
+    }
+
+    .debug-sliders input[type="range"] {
+      flex: 1;
+      height: 8px;
+      cursor: pointer;
+    }
+
+    .debug-sliders button {
+      margin-top: 10px;
+    }
+
+    /* Royal Stipend Indicator */
+    .stipend-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+      border-radius: 8px;
+      font-size: 0.75rem;
+      color: #FFD54F;
+      animation: pulse 2s infinite;
+    }
+
+    .stipend-indicator.inactive {
+      display: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Milestone notification style */
+    .notification.milestone {
+      background: linear-gradient(135deg, #FFD700 0%, #FFA000 100%);
+      color: #4E342E;
+      font-weight: 700;
+      border: 2px solid #FFECB3;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+
+    /* Milestone Panel */
+    .milestone-panel {
+      margin-top: 20px;
+      background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
+      border-radius: 12px;
+      border: 2px solid #8D6E63;
+      overflow: hidden;
+    }
+
+    .milestone-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      cursor: pointer;
+      color: #F4D03F;
+      font-weight: 700;
+      user-select: none;
+    }
+
+    .milestone-header:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .milestone-progress {
+      font-size: 0.85rem;
+      background: rgba(0,0,0,0.3);
+      padding: 3px 8px;
+      border-radius: 10px;
+    }
+
+    .milestone-list {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .milestone-list.collapsed {
+      display: none;
+    }
+
+    .milestone-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      opacity: 0.6;
+      transition: all 0.3s ease;
+    }
+
+    .milestone-item.completed {
+      opacity: 1;
+      background: rgba(124, 179, 66, 0.2);
+    }
+
+    .milestone-icon {
+      font-size: 1.2rem;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .milestone-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .milestone-name {
+      font-weight: 600;
+      color: #fff;
+      font-size: 0.85rem;
+    }
+
+    .milestone-desc {
+      font-size: 0.7rem;
+      color: #A99584;
+    }
+
+    .milestone-reward {
+      color: #F4D03F;
+      font-weight: 700;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    /* Merchant Banner - slides in from top */
+    .merchant-banner {
+      position: fixed;
+      top: -80px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #8D6E63 0%, #6D4C41 100%);
+      border-radius: 0 0 15px 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      border: 2px solid #A1887F;
+      border-top: none;
+      transition: top 0.5s ease;
+      z-index: 500;
+    }
+
+    .merchant-banner.visible {
+      top: 0;
+    }
+
+    .merchant-banner.urgent {
+      animation: urgentPulse 0.5s infinite;
+      border-color: #FF8A65;
+    }
+
+    @keyframes urgentPulse {
+      0%, 100% { background: linear-gradient(135deg, #8D6E63 0%, #6D4C41 100%); }
+      50% { background: linear-gradient(135deg, #A1887F 0%, #8D6E63 100%); }
+    }
+
+    .merchant-avatar {
+      font-size: 2rem;
+    }
+
+    .merchant-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .merchant-title {
+      font-weight: 700;
+      color: #FFF;
+      font-size: 0.95rem;
+    }
+
+    .merchant-timer {
+      font-size: 0.75rem;
+      color: #FFCC80;
+    }
+
+    .merchant-trade-btn {
+      padding: 8px 20px;
+      background: linear-gradient(135deg, #F4D03F 0%, #D4AC0D 100%);
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      color: #5D4037;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .merchant-trade-btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* Merchant Panel Overlay */
+    .merchant-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .merchant-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .merchant-panel {
+      width: 90%;
+      max-width: 500px;
+      background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
+      border-radius: 20px;
+      border: 3px solid #8D6E63;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      overflow: hidden;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .merchant-overlay.visible .merchant-panel {
+      transform: scale(1);
+    }
+
+    .merchant-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 20px;
+      background: rgba(0,0,0,0.2);
+      border-bottom: 2px solid #8D6E63;
+    }
+
+    .merchant-face {
+      font-size: 3rem;
+    }
+
+    .merchant-header-info h3 {
+      color: #F4D03F;
+      margin-bottom: 4px;
+      font-size: 1.1rem;
+    }
+
+    .merchant-dialogue {
+      color: #BCAAA4;
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+
+    .merchant-timer-badge {
+      margin-left: auto;
+      padding: 8px 15px;
+      background: linear-gradient(135deg, #FF7043 0%, #E64A19 100%);
+      border-radius: 20px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    /* Trade Rows */
+    .trade-rows {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .trade-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 15px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+
+    .trade-row:hover:not(.disabled) {
+      background: rgba(255,255,255,0.12);
+    }
+
+    .trade-row.disabled {
+      opacity: 0.5;
+    }
+
+    .trade-resource {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 100px;
+    }
+
+    .trade-icon {
+      font-size: 1.8rem;
+    }
+
+    .trade-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .trade-name {
+      font-weight: 700;
+      color: #FFF;
+      font-size: 0.9rem;
+    }
+
+    .trade-have {
+      font-size: 0.7rem;
+      color: #A99584;
+    }
+
+    .trade-price {
+      text-align: center;
+      min-width: 60px;
+    }
+
+    .price-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #F4D03F;
+    }
+
+    .price-label {
+      display: block;
+      font-size: 0.65rem;
+      color: #A99584;
+    }
+
+    .trade-limit {
+      text-align: center;
+      min-width: 50px;
+    }
+
+    .limit-value {
+      font-weight: 700;
+      color: #FFCC80;
+      font-size: 0.85rem;
+    }
+
+    .limit-label {
+      display: block;
+      font-size: 0.6rem;
+      color: #A99584;
+    }
+
+    .trade-buttons {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+    }
+
+    .trade-buttons button {
+      padding: 6px 12px;
+      background: linear-gradient(135deg, #7CB342 0%, #558B2F 100%);
+      border: none;
+      border-radius: 6px;
+      color: #FFF;
+      font-weight: 600;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .trade-buttons button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    }
+
+    .trade-buttons button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+
+    .merchant-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: rgba(0,0,0,0.2);
+      border-top: 2px solid #8D6E63;
+    }
+
+    .merchant-tip {
+      font-size: 0.75rem;
+      color: #BCAAA4;
+    }
+
+    .btn-close {
+      padding: 8px 20px;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid #8D6E63;
+      border-radius: 8px;
+      color: #FFF;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-close:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* Notification variant for merchant */
+    .notification.merchant {
+      background: linear-gradient(135deg, #8D6E63 0%, #6D4C41 100%);
+      border: 2px solid #A1887F;
+    }
+
+    .notification.info {
+      background: linear-gradient(135deg, #5C6BC0 0%, #3949AB 100%);
+      color: #fff;
+    }
+
+    /* Market Trading Panel */
+    .market-trading-panel {
+      display: none;
+      margin-top: 20px;
+      background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
+      border-radius: 12px;
+      border: 2px solid #8D6E63;
+      overflow: hidden;
+    }
+
+    .market-trading-panel.visible {
+      display: block;
+    }
+
+    .market-trading-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 15px;
+      background: rgba(0,0,0,0.2);
+      font-weight: 700;
+      color: #F4D03F;
+    }
+
+    .market-level {
+      margin-left: auto;
+      padding: 4px 10px;
+      background: linear-gradient(135deg, #7CB342 0%, #558B2F 100%);
+      border-radius: 10px;
+      font-size: 0.75rem;
+      color: #FFF;
+    }
+
+    .market-trades {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .market-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 8px;
+    }
+
+    .market-res {
+      min-width: 80px;
+      font-weight: 600;
+      color: #FFF;
+    }
+
+    .market-price {
+      color: #F4D03F;
+      font-weight: 700;
+      font-size: 0.9rem;
+      min-width: 50px;
+    }
+
+    .market-btns {
+      display: flex;
+      gap: 5px;
+      margin-left: auto;
+    }
+
+    .market-btns button {
+      padding: 5px 10px;
+      background: linear-gradient(135deg, #7CB342 0%, #558B2F 100%);
+      border: none;
+      border-radius: 5px;
+      color: #FFF;
+      font-weight: 600;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .market-btns button:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    .market-btns button:disabled {
+      background: #555;
+      cursor: not-allowed;
     }
   </style>
 </head>
@@ -434,6 +968,11 @@
           <span class="resource-rate neutral" id="wood-rate">+0/s</span>
         </div>
       </div>
+      <!-- Royal Stipend Indicator -->
+      <div class="stipend-indicator" id="stipend-indicator">
+        <span>👑</span>
+        <span>Royal Stipend: +1💰/2s</span>
+      </div>
     </div>
     
     <!-- Game World -->
@@ -464,16 +1003,91 @@
       <button class="btn btn-reset" onclick="resetGame()">🔄 Reset Game</button>
       <button class="btn btn-reset" onclick="toggleTiles()" id="toggle-tiles-btn">🙈 Hide Tiles</button>
     </div>
+
+    <!-- Debug Sliders -->
+    <div class="debug-sliders" id="debug-sliders">
+      <div class="slider-group">
+        <label>X Offset: <span id="x-offset-value">2</span>px</label>
+        <input type="range" id="x-offset-slider" min="-50" max="50" value="2" step="1">
+      </div>
+      <div class="slider-group">
+        <label>Y Offset: <span id="y-offset-value">-8</span>px</label>
+        <input type="range" id="y-offset-slider" min="-50" max="50" value="-8" step="1">
+      </div>
+      <div class="slider-group">
+        <label>Size Mult: <span id="size-mult-value">2.0</span></label>
+        <input type="range" id="size-mult-slider" min="1.0" max="3.0" value="2.0" step="0.1">
+      </div>
+      <button class="btn btn-reset" onclick="copyDebugValues()">📋 Copy Values</button>
+    </div>
     
     <!-- Tips -->
     <div class="tips">
-      💡 <strong>Tip:</strong> Build wheat farms first to unlock other buildings. 
+      💡 <strong>Tip:</strong> Build wheat farms first to unlock other buildings.
       Click buildings to construct or upgrade them!
+    </div>
+
+    <!-- Milestone Panel -->
+    <div class="milestone-panel" id="milestone-panel">
+      <div class="milestone-header" onclick="toggleMilestonePanel()">
+        <span>📜 Milestones</span>
+        <span class="milestone-progress" id="milestone-progress">0/8</span>
+      </div>
+      <div class="milestone-list" id="milestone-list">
+        <!-- Generated by JS -->
+      </div>
+    </div>
+
+    <!-- Market Trading Panel (visible when Market is built) -->
+    <div class="market-trading-panel" id="market-trading-panel">
+      <div class="market-trading-header">
+        <span>🏪</span>
+        <span>Market Trading</span>
+        <span class="market-level" id="market-level">Lv.1</span>
+      </div>
+      <div class="market-trades" id="market-trades">
+        <!-- Generated by JS -->
+      </div>
     </div>
   </div>
   
   <!-- Notifications Container -->
   <div class="notifications" id="notifications"></div>
+
+  <!-- Merchant Banner -->
+  <div class="merchant-banner" id="merchant-banner">
+    <div class="merchant-avatar">🧳</div>
+    <div class="merchant-info">
+      <div class="merchant-title">Traveling Merchant</div>
+      <div class="merchant-timer">Leaving in <span id="merchant-countdown">30</span>s</div>
+    </div>
+    <button class="merchant-trade-btn" onclick="openMerchantPanel()">Trade</button>
+  </div>
+
+  <!-- Merchant Trading Overlay -->
+  <div class="merchant-overlay" id="merchant-overlay" onclick="closeMerchantPanel()">
+    <div class="merchant-panel" onclick="event.stopPropagation()">
+      <div class="merchant-header">
+        <span class="merchant-face">🧔</span>
+        <div class="merchant-header-info">
+          <h3>Traveling Merchant</h3>
+          <p class="merchant-dialogue" id="merchant-dialogue">"What would you like to sell today?"</p>
+        </div>
+        <div class="merchant-timer-badge">
+          <span id="merchant-panel-countdown">30</span>s
+        </div>
+      </div>
+
+      <div class="trade-rows" id="merchant-trade-rows">
+        <!-- Generated by JS -->
+      </div>
+
+      <div class="merchant-footer">
+        <span class="merchant-tip">💡 Build a Market for better prices!</span>
+        <button class="btn-close" onclick="closeMerchantPanel()">Close</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // ==========================================
@@ -556,32 +1170,32 @@
         4: 'assets/lumber_basic.png',
       },
       bakery: {
-        1: null, // Not yet generated
-        2: null,
-        3: null,
-        4: null,
+        1: 'assets/bakery_basic.png',
+        2: 'assets/bakery_basic.png',
+        3: 'assets/bakery_basic.png',
+        4: 'assets/bakery_basic.png',
       },
       blacksmith: {
-        1: null,
-        2: null,
-        3: null,
-        4: null,
+        1: 'assets/blacksmith_basic.png',
+        2: 'assets/blacksmith_basic.png',
+        3: 'assets/blacksmith_basic.png',
+        4: 'assets/blacksmith_basic.png',
       },
       market: {
-        1: null,
-        2: null,
-        3: null,
-        4: null,
+        1: 'assets/market_basic.png',
+        2: 'assets/market_basic.png',
+        3: 'assets/market_basic.png',
+        4: 'assets/market_basic.png',
       },
       townhall: {
-        1: null,
-        2: null,
-        3: null,
+        1: 'assets/town_hall_basic.png',
+        2: 'assets/town_hall_basic.png',
+        3: 'assets/town_hall_basic.png',
       },
       barn: {
-        1: null,
-        2: null,
-        3: null,
+        1: 'assets/barn_basic.png',
+        2: 'assets/barn_basic.png',
+        3: 'assets/barn_basic.png',
       },
     };
     
@@ -692,6 +1306,99 @@
       },
     };
 
+    // ==========================================
+    // MILESTONE CONFIGURATION
+    // ==========================================
+    const MILESTONES = {
+      first_farm: {
+        name: "First Harvest",
+        description: "Build your first Wheat Farm",
+        condition: (res, bldgs) => countBuildings(bldgs, 'wheat_farm') >= 1,
+        reward: { gold: 15 },
+        icon: '🌱'
+      },
+      second_farm: {
+        name: "Expanding Fields",
+        description: "Build a second Wheat Farm",
+        condition: (res, bldgs) => countBuildings(bldgs, 'wheat_farm') >= 2,
+        reward: { gold: 10 },
+        icon: '🌾'
+      },
+      wheat_10: {
+        name: "First Stockpile",
+        description: "Accumulate 10 wheat",
+        condition: (res, bldgs) => res.wheat >= 10,
+        reward: { gold: 20 },
+        icon: '📦'
+      },
+      first_quarry: {
+        name: "Breaking Ground",
+        description: "Build a Stone Quarry",
+        condition: (res, bldgs) => countBuildings(bldgs, 'quarry') >= 1,
+        reward: { gold: 25 },
+        icon: '⛏️'
+      },
+      stone_5: {
+        name: "Solid Foundation",
+        description: "Accumulate 5 stone",
+        condition: (res, bldgs) => res.stone >= 5,
+        reward: { gold: 15 },
+        icon: '🪨'
+      },
+      first_lumber: {
+        name: "Into the Woods",
+        description: "Build a Lumber Camp",
+        condition: (res, bldgs) => countBuildings(bldgs, 'lumber') >= 1,
+        reward: { gold: 30 },
+        icon: '🪓'
+      },
+      wheat_30: {
+        name: "Bread Basket",
+        description: "Accumulate 30 wheat",
+        condition: (res, bldgs) => res.wheat >= 30,
+        reward: { gold: 50 },
+        icon: '🧺'
+      },
+      first_bakery: {
+        name: "Self-Sufficient!",
+        description: "Build a Bakery and start producing gold",
+        condition: (res, bldgs) => countBuildings(bldgs, 'bakery') >= 1,
+        reward: { gold: 100 },
+        icon: '🥖'
+      }
+    };
+
+    // ==========================================
+    // MERCHANT & MARKET CONFIGURATION
+    // ==========================================
+    const MERCHANT_CONFIG = {
+      firstAppearDelay: 60000,      // 60 sec before first visit
+      minInterval: 45000,           // Min time between visits
+      maxInterval: 90000,           // Max time between visits
+      visitDuration: 30000,         // How long merchant stays
+
+      prices: {
+        wheat: 2,
+        stone: 3,
+        wood: 3
+      },
+
+      maxPerVisit: {
+        wheat: 20,
+        stone: 15,
+        wood: 15
+      }
+    };
+
+    const MARKET_CONFIG = {
+      prices: {
+        wheat: 3,
+        stone: 5,
+        wood: 5
+      }
+      // No quantity limits for market
+    };
+
     // Convert grid coordinates to screen position (isometric projection)
     function gridToScreen(gridX, gridY) {
       const { gridWidth, gridHeight, cols, rows } = TILE_CONFIG;
@@ -737,8 +1444,9 @@
 
     // Convert grid (row, col) to pixel position for buildings
     // Buildings occupy a 2x2 area, so we center on the middle of the 4 tiles
-    function gridToPixel(row, col) {
-      const { tileHeight } = TILE_CONFIG;
+    // isBuilt: true for constructed buildings (use debug offsets), false for placeholders (compact UI)
+    function gridToPixel(row, col, isBuilt = false) {
+      const { tileHeight, gridWidth, gridHeight } = TILE_CONFIG;
 
       // For 2x2 footprint, center is at (col + 0.5, row + 0.5) in grid coords
       const centerCol = col + (BUILDING_FOOTPRINT - 1) / 2;
@@ -747,16 +1455,22 @@
       // Get screen position of the center point
       const pos = gridToScreen(centerCol, centerRow);
 
-      // Center the building on this point
-      // Building size scales with footprint (larger for 2x2)
-      const buildingSize = 180 * TILE_SCALE;
-      const x = pos.x - buildingSize / 2;
-      const y = pos.y + (tileHeight / 2) - buildingSize / 2;
-
-      // Z-index based on the front-most tile of the 2x2 area
-      const frontZ = (col + BUILDING_FOOTPRINT + row + BUILDING_FOOTPRINT) * 10;
-
-      return { x, y, z: frontZ };
+      if (isBuilt) {
+        // Built buildings use debug offsets for fine-tuning
+        const buildingSize = gridWidth * debugSizeMult;
+        const x = pos.x - buildingSize / 2 + debugOffsetX;
+        const y = pos.y + (tileHeight / 2) - buildingSize / 2 + debugOffsetY;
+        // Higher z-index for built buildings to appear above tiles
+        const frontZ = (col + BUILDING_FOOTPRINT + row + BUILDING_FOOTPRINT) * 10 + 100;
+        return { x, y, z: frontZ };
+      } else {
+        // Placeholders use compact positioning (original behavior)
+        const placeholderSize = 42;
+        const x = pos.x - placeholderSize / 2;
+        const y = pos.y + (tileHeight / 2) - placeholderSize / 2;
+        const frontZ = (col + BUILDING_FOOTPRINT + row + BUILDING_FOOTPRINT) * 10;
+        return { x, y, z: frontZ };
+      }
     }
 
     // Building slot positions using grid coordinates (row, col)
@@ -775,10 +1489,45 @@
     ];
 
     // ==========================================
+    // DEBUG OFFSETS (adjustable via sliders)
+    // ==========================================
+    let debugOffsetX = 2;
+    let debugOffsetY = -8;
+    let debugSizeMult = 2;
+
+    // ==========================================
     // GAME STATE
     // ==========================================
     let resources = { gold: 50, wheat: 0, stone: 0, wood: 0 };
     let buildings = SLOTS.map(() => null); // null = not built, { level: 0-3 } = built
+
+    // Royal Stipend state
+    let royalStipend = {
+      active: true,           // Currently receiving stipend
+      totalReceived: 0,       // Tracking for stats/achievements
+      endReason: null         // 'bakery' | 'blacksmith' | 'market' | 'townhall'
+    };
+
+    // Milestone tracking
+    let completedMilestones = new Set();
+
+    // Merchant state
+    let merchant = {
+      active: false,                // Is merchant currently visiting?
+      visitStartTime: null,         // When current visit started
+      soldThisVisit: {              // Track sales per visit for limits
+        wheat: 0,
+        stone: 0,
+        wood: 0
+      },
+      nextVisitTime: null,          // Scheduled next arrival
+      totalVisits: 0,               // Stats tracking
+      disabled: false,              // True once Market is built
+      visitTimeout: null,           // Reference to departure timeout
+      nextVisitTimeout: null        // Reference to next visit timeout
+    };
+
+    let merchantTimerInterval = null;
 
     // ==========================================
     // HELPER FUNCTIONS
@@ -811,6 +1560,417 @@
       div.textContent = message;
       container.appendChild(div);
       setTimeout(() => div.remove(), 3000);
+    }
+
+    // ==========================================
+    // ROYAL STIPEND FUNCTIONS
+    // ==========================================
+    function hasGoldProduction() {
+      // Returns true if player has ANY gold-producing building
+      const goldProducers = ['bakery', 'blacksmith', 'market', 'townhall'];
+
+      return buildings.some((building, i) => {
+        if (!building) return false;
+        const type = SLOTS[i].type;
+        return goldProducers.includes(type);
+      });
+    }
+
+    function checkStipendStatus() {
+      if (!royalStipend.active) return;
+
+      if (hasGoldProduction()) {
+        royalStipend.active = false;
+        // Find which building ended it (for flavor text)
+        buildings.forEach((building, i) => {
+          if (building && ['bakery', 'blacksmith', 'market', 'townhall'].includes(SLOTS[i].type)) {
+            royalStipend.endReason = SLOTS[i].type;
+          }
+        });
+        notify("The King's stipend has ended. You're self-sufficient now! 👑", 'success');
+        updateStipendIndicator();
+      }
+    }
+
+    function stipendTick() {
+      if (!royalStipend.active) return;
+
+      resources.gold += 1;
+      royalStipend.totalReceived += 1;
+    }
+
+    function updateStipendIndicator() {
+      const indicator = document.getElementById('stipend-indicator');
+      if (royalStipend.active) {
+        indicator.classList.remove('inactive');
+      } else {
+        indicator.classList.add('inactive');
+      }
+    }
+
+    // ==========================================
+    // MILESTONE FUNCTIONS
+    // ==========================================
+    function countBuildings(bldgs, type) {
+      return bldgs.filter((b, i) => b !== null && SLOTS[i].type === type).length;
+    }
+
+    function grantReward(reward) {
+      Object.entries(reward).forEach(([res, amt]) => {
+        resources[res] += amt;
+      });
+    }
+
+    function checkMilestones() {
+      let anyCompleted = false;
+
+      Object.entries(MILESTONES).forEach(([id, milestone]) => {
+        // Skip already completed
+        if (completedMilestones.has(id)) return;
+
+        // Check condition
+        if (milestone.condition(resources, buildings)) {
+          completedMilestones.add(id);
+          grantReward(milestone.reward);
+          showMilestonePopup(milestone);
+          anyCompleted = true;
+        }
+      });
+
+      if (anyCompleted) {
+        updateMilestonePanel();
+      }
+    }
+
+    function showMilestonePopup(milestone) {
+      const rewardText = Object.entries(milestone.reward)
+        .map(([res, amt]) => `+${amt} ${res === 'gold' ? '💰' : res === 'wheat' ? '🌾' : res === 'stone' ? '⛏️' : '🌲'}`)
+        .join(' ');
+
+      notify(`${milestone.icon} ${milestone.name}! ${rewardText}`, 'milestone');
+    }
+
+    function updateMilestonePanel() {
+      const list = document.getElementById('milestone-list');
+      const progress = document.getElementById('milestone-progress');
+
+      list.innerHTML = Object.entries(MILESTONES).map(([id, m]) => {
+        const done = completedMilestones.has(id);
+        const rewardText = Object.entries(m.reward)
+          .map(([r, a]) => `+${a}${r === 'gold' ? '💰' : ''}`)
+          .join(' ');
+
+        return `
+          <div class="milestone-item ${done ? 'completed' : ''}">
+            <span class="milestone-icon">${done ? '✅' : m.icon}</span>
+            <div class="milestone-info">
+              <div class="milestone-name">${m.name}</div>
+              <div class="milestone-desc">${m.description}</div>
+            </div>
+            <div class="milestone-reward">${rewardText}</div>
+          </div>
+        `;
+      }).join('');
+
+      progress.textContent = `${completedMilestones.size}/${Object.keys(MILESTONES).length}`;
+    }
+
+    let milestonePanelCollapsed = false;
+    function toggleMilestonePanel() {
+      const list = document.getElementById('milestone-list');
+      milestonePanelCollapsed = !milestonePanelCollapsed;
+      if (milestonePanelCollapsed) {
+        list.classList.add('collapsed');
+      } else {
+        list.classList.remove('collapsed');
+      }
+    }
+
+    // ==========================================
+    // MERCHANT FUNCTIONS
+    // ==========================================
+    function randomBetween(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function scheduleMerchantVisit(isFirst = false) {
+      if (merchant.disabled) return;
+
+      // Clear any existing timeout
+      if (merchant.nextVisitTimeout) {
+        clearTimeout(merchant.nextVisitTimeout);
+      }
+
+      const delay = isFirst
+        ? MERCHANT_CONFIG.firstAppearDelay
+        : randomBetween(MERCHANT_CONFIG.minInterval, MERCHANT_CONFIG.maxInterval);
+
+      merchant.nextVisitTime = Date.now() + delay;
+
+      merchant.nextVisitTimeout = setTimeout(() => {
+        if (!merchant.disabled) {
+          merchantArrives();
+        }
+      }, delay);
+    }
+
+    function merchantArrives() {
+      merchant.active = true;
+      merchant.visitStartTime = Date.now();
+      merchant.soldThisVisit = { wheat: 0, stone: 0, wood: 0 };
+      merchant.totalVisits++;
+
+      // Show merchant UI
+      showMerchantBanner();
+      notify('🧳 A traveling merchant has arrived!', 'merchant');
+
+      // Start countdown timer
+      startMerchantCountdown();
+
+      // Schedule departure
+      merchant.visitTimeout = setTimeout(() => {
+        merchantDeparts();
+      }, MERCHANT_CONFIG.visitDuration);
+    }
+
+    function merchantDeparts() {
+      if (!merchant.active) return;
+
+      merchant.active = false;
+      hideMerchantBanner();
+      closeMerchantPanel();
+      stopMerchantCountdown();
+      notify("👋 The merchant has left. They'll return soon...", 'info');
+
+      // Schedule next visit
+      scheduleMerchantVisit();
+    }
+
+    function disableMerchant() {
+      merchant.disabled = true;
+      merchant.active = false;
+
+      // Clear timeouts
+      if (merchant.visitTimeout) {
+        clearTimeout(merchant.visitTimeout);
+      }
+      if (merchant.nextVisitTimeout) {
+        clearTimeout(merchant.nextVisitTimeout);
+      }
+
+      hideMerchantBanner();
+      closeMerchantPanel();
+      stopMerchantCountdown();
+    }
+
+    function showMerchantBanner() {
+      document.getElementById('merchant-banner').classList.add('visible');
+    }
+
+    function hideMerchantBanner() {
+      const banner = document.getElementById('merchant-banner');
+      banner.classList.remove('visible');
+      banner.classList.remove('urgent');
+    }
+
+    function openMerchantPanel() {
+      if (!merchant.active) return;
+      renderMerchantTradeRows();
+      document.getElementById('merchant-overlay').classList.add('visible');
+    }
+
+    function closeMerchantPanel() {
+      document.getElementById('merchant-overlay').classList.remove('visible');
+    }
+
+    function startMerchantCountdown() {
+      if (merchantTimerInterval) clearInterval(merchantTimerInterval);
+
+      const updateCountdown = () => {
+        if (!merchant.active) {
+          clearInterval(merchantTimerInterval);
+          return;
+        }
+
+        const elapsed = Date.now() - merchant.visitStartTime;
+        const remaining = Math.max(0, Math.ceil((MERCHANT_CONFIG.visitDuration - elapsed) / 1000));
+
+        const countdownEl = document.getElementById('merchant-countdown');
+        const panelCountdownEl = document.getElementById('merchant-panel-countdown');
+
+        if (countdownEl) countdownEl.textContent = remaining;
+        if (panelCountdownEl) panelCountdownEl.textContent = remaining;
+
+        if (remaining <= 10) {
+          document.getElementById('merchant-banner').classList.add('urgent');
+        }
+      };
+
+      updateCountdown();
+      merchantTimerInterval = setInterval(updateCountdown, 1000);
+    }
+
+    function stopMerchantCountdown() {
+      if (merchantTimerInterval) {
+        clearInterval(merchantTimerInterval);
+        merchantTimerInterval = null;
+      }
+    }
+
+    function renderMerchantTradeRows() {
+      const container = document.getElementById('merchant-trade-rows');
+      const config = MERCHANT_CONFIG;
+
+      const resourceEmoji = { wheat: '🌾', stone: '⛏️', wood: '🌲' };
+
+      container.innerHTML = ['wheat', 'stone', 'wood'].map(res => {
+        const have = resources[res];
+        const sold = merchant.soldThisVisit[res];
+        const maxPerVisit = config.maxPerVisit[res];
+        const remaining = maxPerVisit - sold;
+        const price = config.prices[res];
+        const canSell = Math.min(have, remaining);
+
+        return `
+          <div class="trade-row ${canSell === 0 ? 'disabled' : ''}">
+            <div class="trade-resource">
+              <span class="trade-icon">${resourceEmoji[res]}</span>
+              <div class="trade-info">
+                <span class="trade-name">${capitalize(res)}</span>
+                <span class="trade-have">You have: ${have}</span>
+              </div>
+            </div>
+
+            <div class="trade-price">
+              <span class="price-value">${price}</span>
+              <span class="price-label">💰 each</span>
+            </div>
+
+            <div class="trade-limit">
+              <span class="limit-value">${remaining}/${maxPerVisit}</span>
+              <span class="limit-label">left</span>
+            </div>
+
+            <div class="trade-buttons">
+              <button onclick="sellToMerchant('${res}', 1)" ${canSell < 1 ? 'disabled' : ''}>Sell 1</button>
+              <button onclick="sellToMerchant('${res}', 5)" ${canSell < 5 ? 'disabled' : ''}>Sell 5</button>
+              <button onclick="sellToMerchant('${res}', ${canSell})" ${canSell === 0 ? 'disabled' : ''}>Sell All</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function sellToMerchant(resource, amount = 1) {
+      if (!merchant.active) return false;
+
+      const config = MERCHANT_CONFIG;
+      const maxCanSell = config.maxPerVisit[resource] - merchant.soldThisVisit[resource];
+      const actualAmount = Math.min(amount, maxCanSell, resources[resource]);
+
+      if (actualAmount <= 0) {
+        if (resources[resource] <= 0) {
+          notify(`No ${resource} to sell!`, 'error');
+        } else {
+          notify(`Merchant won't buy more ${resource} this visit!`, 'error');
+        }
+        return false;
+      }
+
+      const goldEarned = actualAmount * config.prices[resource];
+
+      resources[resource] -= actualAmount;
+      resources.gold += goldEarned;
+      merchant.soldThisVisit[resource] += actualAmount;
+
+      notify(`Sold ${actualAmount} ${resource} for ${goldEarned} gold!`, 'success');
+      updateUI();
+      renderMerchantTradeRows();
+
+      return true;
+    }
+
+    // ==========================================
+    // MARKET TRADING FUNCTIONS
+    // ==========================================
+    function hasMarket() {
+      return buildings.some((building, i) =>
+        building !== null && SLOTS[i].type === 'market'
+      );
+    }
+
+    function getMarketLevel() {
+      const marketIndex = SLOTS.findIndex(s => s.type === 'market');
+      const market = buildings[marketIndex];
+      return market ? market.level + 1 : 0;
+    }
+
+    function sellAtMarket(resource, amount = 1) {
+      if (!hasMarket()) return false;
+
+      const actualAmount = Math.min(amount, resources[resource]);
+
+      if (actualAmount <= 0) {
+        notify(`No ${resource} to sell!`, 'error');
+        return false;
+      }
+
+      // Market level boosts prices: +10% per upgrade level
+      const levelBonus = 1 + (getMarketLevel() - 1) * 0.1;
+      const basePrice = MARKET_CONFIG.prices[resource];
+      const finalPrice = Math.floor(basePrice * levelBonus);
+      const goldEarned = actualAmount * finalPrice;
+
+      resources[resource] -= actualAmount;
+      resources.gold += goldEarned;
+
+      notify(`Sold ${actualAmount} ${resource} for ${goldEarned} gold!`, 'success');
+      updateUI();
+      updateMarketTradingPanel();
+
+      return true;
+    }
+
+    function updateMarketTradingPanel() {
+      const panel = document.getElementById('market-trading-panel');
+
+      if (!hasMarket()) {
+        panel.classList.remove('visible');
+        return;
+      }
+
+      panel.classList.add('visible');
+
+      const level = getMarketLevel();
+      const levelBonus = 1 + (level - 1) * 0.1;
+
+      document.getElementById('market-level').textContent = `Lv.${level}`;
+
+      const container = document.getElementById('market-trades');
+      const resourceEmoji = { wheat: '🌾', stone: '⛏️', wood: '🌲' };
+
+      container.innerHTML = ['wheat', 'stone', 'wood'].map(res => {
+        const have = resources[res];
+        const basePrice = MARKET_CONFIG.prices[res];
+        const finalPrice = Math.floor(basePrice * levelBonus);
+
+        return `
+          <div class="market-row">
+            <span class="market-res">${resourceEmoji[res]} ${have}</span>
+            <span class="market-price">${finalPrice}💰</span>
+            <div class="market-btns">
+              <button onclick="sellAtMarket('${res}', 1)" ${have < 1 ? 'disabled' : ''}>1</button>
+              <button onclick="sellAtMarket('${res}', 10)" ${have < 10 ? 'disabled' : ''}>10</button>
+              <button onclick="sellAtMarket('${res}', 100)" ${have < 100 ? 'disabled' : ''}>100</button>
+              <button onclick="sellAtMarket('${res}', ${have})" ${have === 0 ? 'disabled' : ''}>All</button>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     // ==========================================
@@ -849,10 +2009,10 @@
     function tick() {
       buildings.forEach((building, i) => {
         if (!building) return;
-        
+
         const def = BUILDINGS[SLOTS[i].type];
         const mult = building.level > 0 ? def.upgrades[building.level - 1].mult : 1;
-        
+
         let canProduce = true;
         if (def.consumes) {
           canProduce = Object.entries(def.consumes).every(([res, amt]) => resources[res] >= amt);
@@ -862,14 +2022,17 @@
             });
           }
         }
-        
+
         if (canProduce) {
           Object.entries(def.production).forEach(([res, amt]) => {
             resources[res] += amt * mult;
           });
         }
       });
-      
+
+      // Check resource-based milestones after production
+      checkMilestones();
+
       updateUI();
     }
 
@@ -877,7 +2040,7 @@
       const slot = SLOTS[slotIndex];
       const def = BUILDINGS[slot.type];
       const building = buildings[slotIndex];
-      
+
       if (!building) {
         // Build new
         if (!isUnlocked(def.unlockReq)) {
@@ -888,34 +2051,78 @@
           notify('Not enough resources!', 'error');
           return;
         }
-        
+
         spendResources(def.baseCost);
         buildings[slotIndex] = { level: 0 };
         notify(`Built ${def.name}!`);
+
+        // Check if this gold-producing building ends the stipend
+        if (['bakery', 'blacksmith', 'market', 'townhall'].includes(slot.type)) {
+          checkStipendStatus();
+        }
+
+        // If Market is built, disable the traveling merchant
+        if (slot.type === 'market') {
+          disableMerchant();
+          notify('🏪 Market built! You now have permanent access to trading.', 'success');
+        }
+
+        // Check building milestones immediately
+        checkMilestones();
       } else {
         // Upgrade
         if (building.level >= def.upgrades.length) {
           notify('Already max level!', 'error');
           return;
         }
-        
+
         const upgradeCost = def.upgrades[building.level].cost;
         if (!canAfford(upgradeCost)) {
           notify('Not enough resources!', 'error');
           return;
         }
-        
+
         spendResources(upgradeCost);
         building.level++;
         notify(`Upgraded ${def.name} to Lv.${building.level + 1}!`);
       }
-      
+
       updateUI();
     }
 
     function resetGame() {
       resources = { gold: 50, wheat: 0, stone: 0, wood: 0 };
       buildings = SLOTS.map(() => null);
+
+      // Reset Royal Stipend
+      royalStipend = { active: true, totalReceived: 0, endReason: null };
+      updateStipendIndicator();
+
+      // Reset Milestones
+      completedMilestones = new Set();
+      updateMilestonePanel();
+
+      // Reset Merchant
+      if (merchant.visitTimeout) clearTimeout(merchant.visitTimeout);
+      if (merchant.nextVisitTimeout) clearTimeout(merchant.nextVisitTimeout);
+      if (merchantTimerInterval) clearInterval(merchantTimerInterval);
+      merchant = {
+        active: false,
+        visitStartTime: null,
+        soldThisVisit: { wheat: 0, stone: 0, wood: 0 },
+        nextVisitTime: null,
+        totalVisits: 0,
+        disabled: false,
+        visitTimeout: null,
+        nextVisitTimeout: null
+      };
+      hideMerchantBanner();
+      closeMerchantPanel();
+      scheduleMerchantVisit(true);
+
+      // Reset Market Trading Panel
+      updateMarketTradingPanel();
+
       notify('Game reset!');
       updateUI();
     }
@@ -945,29 +2152,41 @@
       // Calculate isometric angle from grid dimensions
       // For 2:1 isometric: angle = atan(gridHeight/2 / gridWidth/2) = atan(0.5)
       const angle = Math.atan(gridHeight / gridWidth) * (180 / Math.PI);
-      const lineLength = 2000; // Long enough to cover the grid
 
-      // Draw lines going down-right (positive slope)
-      for (let i = -cols; i <= rows + cols; i++) {
+      // Calculate line length based on the diagonal of the game world
+      // Game world is 900x500, so diagonal is about 1030px, but we need extra for angled lines
+      const lineLength = 1500;
+
+      // Extended range to ensure full coverage of 900x500 game world
+      const extendedRange = Math.max(rows, cols) * 2;
+
+      // Draw lines going down-right (positive slope in screen coords)
+      // These lines run from top-left to bottom-right direction
+      for (let i = -extendedRange; i <= extendedRange; i++) {
         const startPos = gridToScreen(0, i);
         const line = document.createElement('div');
         line.className = 'debug-line';
         line.style.width = `${lineLength}px`;
+        // Center the line on the grid intersection point
         line.style.left = `${startPos.x - lineLength / 2}px`;
         line.style.top = `${startPos.y}px`;
         line.style.transform = `rotate(${angle}deg)`;
+        line.style.transformOrigin = 'center center';
         debugGrid.appendChild(line);
       }
 
-      // Draw lines going down-left (negative slope)
-      for (let i = -rows; i <= rows + cols; i++) {
+      // Draw lines going down-left (negative slope in screen coords)
+      // These lines run from top-right to bottom-left direction
+      for (let i = -extendedRange; i <= extendedRange; i++) {
         const startPos = gridToScreen(i, 0);
         const line = document.createElement('div');
         line.className = 'debug-line';
         line.style.width = `${lineLength}px`;
+        // Center the line on the grid intersection point
         line.style.left = `${startPos.x - lineLength / 2}px`;
         line.style.top = `${startPos.y}px`;
         line.style.transform = `rotate(${-angle}deg)`;
+        line.style.transformOrigin = 'center center';
         debugGrid.appendChild(line);
       }
 
@@ -990,13 +2209,15 @@
       const world = document.getElementById('game-world');
       const groundLayer = world.querySelector('.ground-layer');
 
-      const { tileWidth, tileHeight } = TILE_CONFIG;
-      const buildingSize = 180 * TILE_SCALE;  // Larger for 2x2 footprint
+      const { tileWidth, tileHeight, gridWidth, gridHeight } = TILE_CONFIG;
+      // Building size should fit within the 2x2 tile footprint
+      const buildingSize = gridWidth * debugSizeMult;
 
       // Set CSS custom properties
       world.style.setProperty('--tile-width', `${tileWidth}px`);
       world.style.setProperty('--tile-height', `${tileHeight}px`);
       world.style.setProperty('--building-size', `${buildingSize}px`);
+      world.style.setProperty('--placeholder-size', '42px');  // Smaller size for build UI
 
       // Clear existing tiles
       groundLayer.innerHTML = '';
@@ -1008,11 +2229,19 @@
         [TILE.DIRT]: 'tile-dirt',
       };
 
+      // Get tiles occupied by buildings (for debug: hide them)
+      const occupiedTiles = getOccupiedTiles();
+
       // Collect tiles with their z-order for proper rendering
       const tiles = [];
 
       for (let row = 0; row < TILE_MAP.length; row++) {
         for (let col = 0; col < TILE_MAP[row].length; col++) {
+          // Skip tiles that are occupied by buildings (debug mode)
+          if (occupiedTiles.has(`${row},${col}`)) {
+            continue;
+          }
+
           const tileType = TILE_MAP[row][col];
           const pos = gridToScreen(col, row);
           tiles.push({ row, col, tileType, pos });
@@ -1054,10 +2283,12 @@
         div.className = `building-slot ${unlocked ? '' : 'locked'}`;
 
         // Convert grid position to pixel coordinates
-        const pos = gridToPixel(slot.row, slot.col);
+        // Pass whether building is constructed for different positioning
+        const isBuilt = building !== null;
+        const pos = gridToPixel(slot.row, slot.col, isBuilt);
         div.style.left = `${pos.x}px`;
         div.style.top = `${pos.y}px`;
-        div.style.zIndex = pos.z + 1; // Above tiles at same depth
+        div.style.zIndex = pos.z;
         div.onclick = () => buildOrUpgrade(i);
         
         if (building) {
@@ -1165,6 +2396,46 @@
       // Re-render tiles (to update occupied tiles) and buildings
       renderTileGrid();
       renderBuildings();
+
+      // Update market trading panel if visible
+      updateMarketTradingPanel();
+    }
+
+    // ==========================================
+    // DEBUG SLIDER FUNCTIONS
+    // ==========================================
+    function setupDebugSliders() {
+      const xSlider = document.getElementById('x-offset-slider');
+      const ySlider = document.getElementById('y-offset-slider');
+      const sizeSlider = document.getElementById('size-mult-slider');
+
+      xSlider.addEventListener('input', (e) => {
+        debugOffsetX = parseFloat(e.target.value);
+        document.getElementById('x-offset-value').textContent = debugOffsetX;
+        updateUI();
+      });
+
+      ySlider.addEventListener('input', (e) => {
+        debugOffsetY = parseFloat(e.target.value);
+        document.getElementById('y-offset-value').textContent = debugOffsetY;
+        updateUI();
+      });
+
+      sizeSlider.addEventListener('input', (e) => {
+        debugSizeMult = parseFloat(e.target.value);
+        document.getElementById('size-mult-value').textContent = debugSizeMult.toFixed(1);
+        updateUI();
+      });
+    }
+
+    function copyDebugValues() {
+      const values = `debugOffsetX = ${debugOffsetX};\ndebugOffsetY = ${debugOffsetY};\ndebugSizeMult = ${debugSizeMult};`;
+      navigator.clipboard.writeText(values).then(() => {
+        notify('Debug values copied to clipboard!', 'success');
+      }).catch(() => {
+        console.log(values);
+        notify('Values logged to console', 'info');
+      });
     }
 
     // ==========================================
@@ -1173,7 +2444,27 @@
     function init() {
       renderDebugGrid();  // Show debug grid (remove when done designing)
       updateUI();  // Renders tiles and buildings
+
+      // Initialize stipend indicator
+      updateStipendIndicator();
+
+      // Initialize milestone panel
+      updateMilestonePanel();
+
+      // Initialize market trading panel (hidden until market built)
+      updateMarketTradingPanel();
+
+      // Schedule first merchant visit
+      scheduleMerchantVisit(true);
+
+      // Setup debug sliders
+      setupDebugSliders();
+
+      // Start game tick (1 second)
       setInterval(tick, 1000);
+
+      // Start stipend tick (2 seconds) - faster than main tick for responsiveness
+      setInterval(stipendTick, 2000);
     }
 
     init();
