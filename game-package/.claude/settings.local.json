@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(file:*)",
+      "Bash(git init:*)",
+      "Bash(gh auth:*)",
+      "Bash(git config:*)",
+      "Bash(where gh:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

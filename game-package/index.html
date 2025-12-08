@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏰 Medieval Tycoon - With Real Assets</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(180deg, #87CEEB 0%, #90B855 40%, #5D7A3A 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .game-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      color: #4A3728;
+      text-shadow: 2px 2px 0 #F4D03F, 4px 4px 0 rgba(0,0,0,0.2);
+      margin-bottom: 5px;
+    }
+    
+    .header p {
+      color: #5D4E37;
+      font-size: 0.9rem;
+    }
+    
+    /* Resource Bar */
+    .resource-bar {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 15px 20px;
+      background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+      border: 2px solid #8D6E63;
+      margin-bottom: 20px;
+    }
+    
+    .resource {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 15px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      min-width: 120px;
+    }
+    
+    .resource-icon {
+      font-size: 1.8rem;
+      font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+    }
+    
+    .resource-info {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .resource-name {
+      font-size: 0.65rem;
+      color: #A99584;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .resource-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .resource-rate {
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    
+    .resource-rate.positive { color: #7CB342; }
+    .resource-rate.negative { color: #E57373; }
+    .resource-rate.neutral { color: #666; }
+    
+    /* Game World */
+    .game-world {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      background: linear-gradient(135deg, #7CB342 0%, #558B2F 50%, #33691E 100%);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: inset 0 4px 30px rgba(0,0,0,0.3);
+      border: 3px solid #4A7C34;
+    }
+    
+    .ground-layer {
+      position: absolute;
+      inset: 0;
+    }
+
+    /* Debug grid layer - shows tile boundaries */
+    .debug-grid {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .debug-line {
+      position: absolute;
+      background: rgba(0, 120, 180, 0.5);
+      height: 1px;
+      transform-origin: left center;
+    }
+
+    .debug-label {
+      position: absolute;
+      font-size: 7px;
+      color: rgba(0, 60, 100, 0.9);
+      font-family: monospace;
+      font-weight: bold;
+      text-shadow: 0 0 2px white, 0 0 2px white;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .tile {
+      position: absolute;
+      width: var(--tile-width, 183px);
+      height: var(--tile-height, 165px);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .tile-grass {
+      background-image: url('assets/ground_basic.png');
+    }
+
+    .tile-cobble {
+      background-image: url('assets/cobble_basic.png');
+    }
+
+    .tile-dirt {
+      background-image: url('assets/dirt_basic.png');
+    }
+    
+    /* Building Slots */
+    .building-slot {
+      position: absolute;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      width: var(--building-size, 42px);
+    }
+    
+    .building-slot:hover {
+      transform: scale(1.05);
+      z-index: 100;
+    }
+    
+    .building-slot.locked {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    
+    .building-slot.locked:hover {
+      transform: none;
+    }
+    
+    .building-image {
+      width: var(--building-size, 42px);
+      height: var(--building-size, 42px);
+      object-fit: contain;
+      filter: drop-shadow(0 0 8px rgba(255,220,100,0.6)) drop-shadow(2px 2px 3px rgba(0,0,0,0.4));
+      transition: all 0.3s ease;
+    }
+    
+    .building-slot:not(.locked):hover .building-image {
+      filter: drop-shadow(0 0 12px rgba(255,220,100,0.9)) drop-shadow(3px 3px 5px rgba(0,0,0,0.4)) brightness(1.1);
+    }
+    
+    .slot-placeholder {
+      width: var(--building-size, 42px);
+      height: calc(var(--building-size, 42px) * 0.6);
+      border: 2px dashed rgba(255,255,255,0.6);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.25);
+      font-size: 1.2rem;
+      font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 15px rgba(255,220,100,0.4);
+    }
+
+    .building-slot:not(.locked) .slot-placeholder {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 20px rgba(100,255,100,0.5);
+      border-color: rgba(100,255,100,0.7);
+    }
+
+    .building-slot:not(.locked):hover .slot-placeholder {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 25px rgba(100,255,100,0.8);
+      background: rgba(100,255,100,0.3);
+    }
+
+    .building-label {
+      font-size: 0.55rem;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+      margin-top: 2px;
+      text-align: center;
+      background: rgba(0,0,0,0.7);
+      padding: 2px 6px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+    
+    .building-cost {
+      font-size: 0.5rem;
+      color: #7CB342;
+      margin-top: 1px;
+      font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", "Segoe UI", sans-serif;
+      background: rgba(0,0,0,0.5);
+      padding: 1px 4px;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+
+    .building-cost.unaffordable {
+      color: #E57373;
+    }
+
+    .level-badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 16px;
+      height: 16px;
+      background: linear-gradient(135deg, #F4D03F 0%, #D4AC0D 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.5rem;
+      font-weight: 900;
+      color: #5D4037;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      border: 1px solid #fff;
+    }
+    
+    /* Stats Panel */
+    .stats-panel {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .stat-box {
+      padding: 15px;
+      background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
+      border-radius: 12px;
+      text-align: center;
+      border: 2px solid #8D6E63;
+    }
+    
+    .stat-label {
+      font-size: 0.7rem;
+      color: #A99584;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #F4D03F;
+    }
+    
+    /* Buttons */
+    .button-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    .btn {
+      padding: 12px 25px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-reset {
+      background: linear-gradient(135deg, #8D6E63 0%, #6D4C41 100%);
+      color: #fff;
+      border: 2px solid #A1887F;
+    }
+    
+    .btn-reset:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    
+    /* Tooltips */
+    .tooltip {
+      position: absolute;
+      background: rgba(0,0,0,0.9);
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      pointer-events: none;
+      z-index: 1000;
+      max-width: 200px;
+      display: none;
+    }
+    
+    /* Notifications */
+    .notifications {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+    
+    .notification {
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      animation: slideIn 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    
+    .notification.success {
+      background: linear-gradient(135deg, #7CB342 0%, #558B2F 100%);
+      color: #fff;
+    }
+    
+    .notification.error {
+      background: linear-gradient(135deg, #E57373 0%, #C62828 100%);
+      color: #fff;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    /* Tips */
+    .tips {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      text-align: center;
+      color: #4A3728;
+      font-size: 0.85rem;
+    }
+    
+    .tips strong {
+      color: #2E7D32;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🏰 Medieval Tycoon</h1>
+      <p>Build your village, harvest resources, grow your empire!</p>
+    </div>
+    
+    <!-- Resource Bar -->
+    <div class="resource-bar">
+      <div class="resource">
+        <span class="resource-icon">💰</span>
+        <div class="resource-info">
+          <span class="resource-name">Gold</span>
+          <span class="resource-value" id="gold-value">50</span>
+          <span class="resource-rate neutral" id="gold-rate">+0/s</span>
+        </div>
+      </div>
+      <div class="resource">
+        <span class="resource-icon">🌾</span>
+        <div class="resource-info">
+          <span class="resource-name">Wheat</span>
+          <span class="resource-value" id="wheat-value">0</span>
+          <span class="resource-rate neutral" id="wheat-rate">+0/s</span>
+        </div>
+      </div>
+      <div class="resource">
+        <span class="resource-icon">⛏️</span>
+        <div class="resource-info">
+          <span class="resource-name">Stone</span>
+          <span class="resource-value" id="stone-value">0</span>
+          <span class="resource-rate neutral" id="stone-rate">+0/s</span>
+        </div>
+      </div>
+      <div class="resource">
+        <span class="resource-icon">🌲</span>
+        <div class="resource-info">
+          <span class="resource-name">Wood</span>
+          <span class="resource-value" id="wood-value">0</span>
+          <span class="resource-rate neutral" id="wood-rate">+0/s</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Game World -->
+    <div class="game-world" id="game-world">
+      <div class="debug-grid"></div>
+      <div class="ground-layer"></div>
+      <!-- Buildings will be inserted here by JavaScript -->
+    </div>
+    
+    <!-- Stats -->
+    <div class="stats-panel">
+      <div class="stat-box">
+        <div class="stat-label">Buildings</div>
+        <div class="stat-value" id="stat-buildings">0/9</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Total Levels</div>
+        <div class="stat-value" id="stat-levels">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Net Worth</div>
+        <div class="stat-value" id="stat-worth">50</div>
+      </div>
+    </div>
+    
+    <!-- Buttons -->
+    <div class="button-row">
+      <button class="btn btn-reset" onclick="resetGame()">🔄 Reset Game</button>
+      <button class="btn btn-reset" onclick="toggleTiles()" id="toggle-tiles-btn">🙈 Hide Tiles</button>
+    </div>
+    
+    <!-- Tips -->
+    <div class="tips">
+      💡 <strong>Tip:</strong> Build wheat farms first to unlock other buildings. 
+      Click buildings to construct or upgrade them!
+    </div>
+  </div>
+  
+  <!-- Notifications Container -->
+  <div class="notifications" id="notifications"></div>
+
+  <script>
+    // ==========================================
+    // TILE GRID CONFIGURATION
+    // Generated by Tile Calibrator
+    // ==========================================
+    // Scale factor to fit tiles in game world (adjust to zoom in/out)
+    const TILE_SCALE = 0.35;
+
+    const TILE_CONFIG = {
+      // Full tile dimensions (including depth edge) - scaled
+      tileWidth: 183 * TILE_SCALE,
+      tileHeight: 191 * TILE_SCALE,
+
+      // Grid diamond dimensions (flat top face only) - scaled
+      gridWidth: 183 * TILE_SCALE,
+      gridHeight: 113 * TILE_SCALE,
+
+      // Depth edge (3D effect) - scaled
+      depthHeight: 78 * TILE_SCALE,
+
+      // Grid offset (if tile isn't centered) - scaled
+      gridOffsetY: -47 * TILE_SCALE,
+
+      // Grid size
+      cols: 10,
+      rows: 10,
+    };
+
+    // Tile type constants
+    const TILE = {
+      GRASS: 0,
+      COBBLE: 1,
+      DIRT: 2,
+    };
+
+    // Map array: 0=grass, 1=cobble, 2=dirt
+    // Layout: 10 cols × 10 rows isometric grid
+    const TILE_MAP = [
+      //0  1  2  3  4  5  6  7  8  9
+      [ 0, 0, 0, 0, 1, 1, 0, 0, 0, 0 ],  // Row 0
+      [ 0, 0, 0, 1, 1, 1, 1, 0, 0, 0 ],  // Row 1
+      [ 0, 0, 1, 1, 1, 1, 1, 1, 0, 0 ],  // Row 2
+      [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 ],  // Row 3
+      [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],  // Row 4 - center
+      [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],  // Row 5 - center
+      [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 ],  // Row 6
+      [ 0, 0, 1, 1, 1, 1, 1, 1, 0, 0 ],  // Row 7
+      [ 0, 0, 0, 1, 1, 1, 1, 0, 0, 0 ],  // Row 8
+      [ 0, 0, 0, 0, 1, 1, 0, 0, 0, 0 ],  // Row 9
+    ];
+
+    // ==========================================
+    // ASSET CONFIGURATION
+    // ==========================================
+    // Update these paths to point to your asset files
+    const ASSETS = {
+      // Ground tiles
+      ground: 'assets/ground_basic.png',
+      cobble: 'assets/cobble_basic.png',
+      dirt: 'assets/dirt_basic.png',
+      
+      // Buildings - organized by type and level
+      wheat_farm: {
+        1: 'assets/wheat_basic_young.png',
+        2: 'assets/wheat_basic_young.png', // Replace with lv2 when ready
+        3: 'assets/wheat_basic_young.png', // Replace with lv3 when ready
+        4: 'assets/wheat_basic_young.png', // Replace with lv4 when ready
+      },
+      quarry: {
+        1: 'assets/quarry_basic.png',
+        2: 'assets/quarry_basic.png',
+        3: 'assets/quarry_basic.png',
+        4: 'assets/quarry_basic.png',
+      },
+      lumber: {
+        1: 'assets/lumber_basic.png',
+        2: 'assets/lumber_basic.png',
+        3: 'assets/lumber_basic.png',
+        4: 'assets/lumber_basic.png',
+      },
+      bakery: {
+        1: null, // Not yet generated
+        2: null,
+        3: null,
+        4: null,
+      },
+      blacksmith: {
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+      },
+      market: {
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+      },
+      townhall: {
+        1: null,
+        2: null,
+        3: null,
+      },
+      barn: {
+        1: null,
+        2: null,
+        3: null,
+      },
+    };
+    
+    // Fallback emojis when assets aren't available
+    const EMOJI_FALLBACKS = {
+      wheat_farm: '🌾',
+      quarry: '⛏️',
+      lumber: '🪓',
+      bakery: '🥖',
+      blacksmith: '⚒️',
+      market: '🏪',
+      townhall: '🏛️',
+      barn: '🏚️',
+    };
+
+    // ==========================================
+    // GAME CONFIGURATION
+    // ==========================================
+    const BUILDINGS = {
+      wheat_farm: {
+        name: 'Wheat Farm',
+        baseCost: { gold: 10 },
+        production: { wheat: 1 },
+        upgrades: [
+          { cost: { gold: 50 }, mult: 2 },
+          { cost: { gold: 200 }, mult: 3 },
+          { cost: { gold: 800 }, mult: 5 },
+        ],
+        unlockReq: null,
+      },
+      quarry: {
+        name: 'Stone Quarry',
+        baseCost: { gold: 25 },
+        production: { stone: 1 },
+        upgrades: [
+          { cost: { gold: 100 }, mult: 2 },
+          { cost: { gold: 400 }, mult: 3 },
+          { cost: { gold: 1500 }, mult: 5 },
+        ],
+        unlockReq: { wheat: 10 },
+      },
+      lumber: {
+        name: 'Lumber Camp',
+        baseCost: { gold: 40 },
+        production: { wood: 1 },
+        upgrades: [
+          { cost: { gold: 150 }, mult: 2 },
+          { cost: { gold: 500 }, mult: 3 },
+          { cost: { gold: 2000 }, mult: 5 },
+        ],
+        unlockReq: { stone: 5 },
+      },
+      bakery: {
+        name: 'Bakery',
+        baseCost: { gold: 100, wheat: 20 },
+        production: { gold: 3 },
+        consumes: { wheat: 1 },
+        upgrades: [
+          { cost: { gold: 300 }, mult: 2 },
+          { cost: { gold: 1000 }, mult: 3 },
+          { cost: { gold: 4000 }, mult: 5 },
+        ],
+        unlockReq: { wheat: 30 },
+      },
+      blacksmith: {
+        name: 'Blacksmith',
+        baseCost: { gold: 200, stone: 30, wood: 20 },
+        production: { gold: 8 },
+        consumes: { stone: 1, wood: 1 },
+        upgrades: [
+          { cost: { gold: 600 }, mult: 2 },
+          { cost: { gold: 2000 }, mult: 3 },
+          { cost: { gold: 8000 }, mult: 5 },
+        ],
+        unlockReq: { stone: 50, wood: 30 },
+      },
+      market: {
+        name: 'Market',
+        baseCost: { gold: 500, wood: 50 },
+        production: { gold: 15 },
+        upgrades: [
+          { cost: { gold: 1500 }, mult: 2 },
+          { cost: { gold: 5000 }, mult: 3 },
+          { cost: { gold: 20000 }, mult: 5 },
+        ],
+        unlockReq: { gold: 300 },
+      },
+      townhall: {
+        name: 'Town Hall',
+        baseCost: { gold: 2000, stone: 100, wood: 100 },
+        production: { gold: 50 },
+        upgrades: [
+          { cost: { gold: 8000 }, mult: 2 },
+          { cost: { gold: 30000 }, mult: 3 },
+        ],
+        unlockReq: { gold: 1000, stone: 80, wood: 80 },
+      },
+      barn: {
+        name: 'Barn',
+        baseCost: { gold: 75, wood: 15 },
+        production: {},
+        storageBonus: 100,
+        upgrades: [
+          { cost: { gold: 200 }, mult: 2 },
+          { cost: { gold: 600 }, mult: 3 },
+        ],
+        unlockReq: { wood: 10 },
+      },
+    };
+
+    // Convert grid coordinates to screen position (isometric projection)
+    function gridToScreen(gridX, gridY) {
+      const { gridWidth, gridHeight, cols, rows } = TILE_CONFIG;
+
+      // Calculate center of grid (middle tile)
+      const centerGridX = (cols - 1) / 2;
+      const centerGridY = (rows - 1) / 2;
+
+      // Center of game world (900px wide, 500px tall)
+      const worldCenterX = 450;
+      const worldCenterY = 250;
+
+      // Offset so center of grid is at center of world
+      const offsetX = worldCenterX - (centerGridX - centerGridY) * (gridWidth / 2);
+      const offsetY = worldCenterY - (centerGridX + centerGridY) * (gridHeight / 2);
+
+      return {
+        x: offsetX + (gridX - gridY) * (gridWidth / 2),
+        y: offsetY + (gridX + gridY) * (gridHeight / 2),
+        z: (gridX + gridY) * 10
+      };
+    }
+
+    // Building footprint size (2x2 tiles)
+    const BUILDING_FOOTPRINT = 2;
+
+    // Get set of tile positions occupied by built buildings
+    // Returns a Set of "row,col" strings for quick lookup
+    function getOccupiedTiles() {
+      const occupied = new Set();
+      SLOTS.forEach((slot, i) => {
+        if (buildings[i] !== null) {
+          // Mark all tiles in the building's 2x2 footprint as occupied
+          for (let dr = 0; dr < BUILDING_FOOTPRINT; dr++) {
+            for (let dc = 0; dc < BUILDING_FOOTPRINT; dc++) {
+              occupied.add(`${slot.row + dr},${slot.col + dc}`);
+            }
+          }
+        }
+      });
+      return occupied;
+    }
+
+    // Convert grid (row, col) to pixel position for buildings
+    // Buildings occupy a 2x2 area, so we center on the middle of the 4 tiles
+    function gridToPixel(row, col) {
+      const { tileHeight } = TILE_CONFIG;
+
+      // For 2x2 footprint, center is at (col + 0.5, row + 0.5) in grid coords
+      const centerCol = col + (BUILDING_FOOTPRINT - 1) / 2;
+      const centerRow = row + (BUILDING_FOOTPRINT - 1) / 2;
+
+      // Get screen position of the center point
+      const pos = gridToScreen(centerCol, centerRow);
+
+      // Center the building on this point
+      // Building size scales with footprint (larger for 2x2)
+      const buildingSize = 180 * TILE_SCALE;
+      const x = pos.x - buildingSize / 2;
+      const y = pos.y + (tileHeight / 2) - buildingSize / 2;
+
+      // Z-index based on the front-most tile of the 2x2 area
+      const frontZ = (col + BUILDING_FOOTPRINT + row + BUILDING_FOOTPRINT) * 10;
+
+      return { x, y, z: frontZ };
+    }
+
+    // Building slot positions using grid coordinates (row, col)
+    // Each building occupies a 2x2 area starting from (row, col)
+    // Positioned on cobblestone tiles from TILE_MAP
+    const SLOTS = [
+      { row: 1, col: 3, type: 'wheat_farm' },    // Top-left area
+      { row: 1, col: 5, type: 'wheat_farm' },    // Top-right area
+      { row: 3, col: 1, type: 'quarry' },        // Left side
+      { row: 3, col: 6, type: 'bakery' },        // Right side
+      { row: 5, col: 1, type: 'blacksmith' },    // Lower left
+      { row: 5, col: 6, type: 'market' },        // Lower right
+      { row: 5, col: 3, type: 'barn' },          // Center
+      { row: 3, col: 4, type: 'lumber' },        // Center-top (behind barn)
+      { row: 7, col: 3, type: 'townhall' },      // Bottom center
+    ];
+
+    // ==========================================
+    // GAME STATE
+    // ==========================================
+    let resources = { gold: 50, wheat: 0, stone: 0, wood: 0 };
+    let buildings = SLOTS.map(() => null); // null = not built, { level: 0-3 } = built
+
+    // ==========================================
+    // HELPER FUNCTIONS
+    // ==========================================
+    function formatNumber(num) {
+      if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+      return Math.floor(num).toString();
+    }
+
+    function canAfford(cost) {
+      return Object.entries(cost).every(([res, amt]) => resources[res] >= amt);
+    }
+
+    function isUnlocked(req) {
+      if (!req) return true;
+      return Object.entries(req).every(([res, amt]) => resources[res] >= amt);
+    }
+
+    function spendResources(cost) {
+      Object.entries(cost).forEach(([res, amt]) => {
+        resources[res] -= amt;
+      });
+    }
+
+    function notify(message, type = 'success') {
+      const container = document.getElementById('notifications');
+      const div = document.createElement('div');
+      div.className = `notification ${type}`;
+      div.textContent = message;
+      container.appendChild(div);
+      setTimeout(() => div.remove(), 3000);
+    }
+
+    // ==========================================
+    // GAME LOGIC
+    // ==========================================
+    function calculateProduction() {
+      const production = { gold: 0, wheat: 0, stone: 0, wood: 0 };
+      
+      buildings.forEach((building, i) => {
+        if (!building) return;
+        
+        const def = BUILDINGS[SLOTS[i].type];
+        const mult = building.level > 0 ? def.upgrades[building.level - 1].mult : 1;
+        
+        // Check if we can produce (have resources to consume)
+        let canProduce = true;
+        if (def.consumes) {
+          canProduce = Object.entries(def.consumes).every(([res, amt]) => resources[res] >= amt);
+        }
+        
+        if (canProduce) {
+          Object.entries(def.production).forEach(([res, amt]) => {
+            production[res] += amt * mult;
+          });
+          if (def.consumes) {
+            Object.entries(def.consumes).forEach(([res, amt]) => {
+              production[res] -= amt;
+            });
+          }
+        }
+      });
+      
+      return production;
+    }
+
+    function tick() {
+      buildings.forEach((building, i) => {
+        if (!building) return;
+        
+        const def = BUILDINGS[SLOTS[i].type];
+        const mult = building.level > 0 ? def.upgrades[building.level - 1].mult : 1;
+        
+        let canProduce = true;
+        if (def.consumes) {
+          canProduce = Object.entries(def.consumes).every(([res, amt]) => resources[res] >= amt);
+          if (canProduce) {
+            Object.entries(def.consumes).forEach(([res, amt]) => {
+              resources[res] -= amt;
+            });
+          }
+        }
+        
+        if (canProduce) {
+          Object.entries(def.production).forEach(([res, amt]) => {
+            resources[res] += amt * mult;
+          });
+        }
+      });
+      
+      updateUI();
+    }
+
+    function buildOrUpgrade(slotIndex) {
+      const slot = SLOTS[slotIndex];
+      const def = BUILDINGS[slot.type];
+      const building = buildings[slotIndex];
+      
+      if (!building) {
+        // Build new
+        if (!isUnlocked(def.unlockReq)) {
+          notify('Building not unlocked yet!', 'error');
+          return;
+        }
+        if (!canAfford(def.baseCost)) {
+          notify('Not enough resources!', 'error');
+          return;
+        }
+        
+        spendResources(def.baseCost);
+        buildings[slotIndex] = { level: 0 };
+        notify(`Built ${def.name}!`);
+      } else {
+        // Upgrade
+        if (building.level >= def.upgrades.length) {
+          notify('Already max level!', 'error');
+          return;
+        }
+        
+        const upgradeCost = def.upgrades[building.level].cost;
+        if (!canAfford(upgradeCost)) {
+          notify('Not enough resources!', 'error');
+          return;
+        }
+        
+        spendResources(upgradeCost);
+        building.level++;
+        notify(`Upgraded ${def.name} to Lv.${building.level + 1}!`);
+      }
+      
+      updateUI();
+    }
+
+    function resetGame() {
+      resources = { gold: 50, wheat: 0, stone: 0, wood: 0 };
+      buildings = SLOTS.map(() => null);
+      notify('Game reset!');
+      updateUI();
+    }
+
+    // Toggle tile visibility for debugging
+    let tilesVisible = true;
+    function toggleTiles() {
+      const groundLayer = document.querySelector('.ground-layer');
+      const btn = document.getElementById('toggle-tiles-btn');
+      tilesVisible = !tilesVisible;
+      groundLayer.style.display = tilesVisible ? 'block' : 'none';
+      btn.textContent = tilesVisible ? '🙈 Hide Tiles' : '👁️ Show Tiles';
+    }
+
+    // ==========================================
+    // UI RENDERING
+    // ==========================================
+
+    // Debug grid - draws isometric grid lines
+    function renderDebugGrid() {
+      const world = document.getElementById('game-world');
+      const debugGrid = world.querySelector('.debug-grid');
+      debugGrid.innerHTML = '';
+
+      const { gridWidth, gridHeight, rows, cols } = TILE_CONFIG;
+
+      // Calculate isometric angle from grid dimensions
+      // For 2:1 isometric: angle = atan(gridHeight/2 / gridWidth/2) = atan(0.5)
+      const angle = Math.atan(gridHeight / gridWidth) * (180 / Math.PI);
+      const lineLength = 2000; // Long enough to cover the grid
+
+      // Draw lines going down-right (positive slope)
+      for (let i = -cols; i <= rows + cols; i++) {
+        const startPos = gridToScreen(0, i);
+        const line = document.createElement('div');
+        line.className = 'debug-line';
+        line.style.width = `${lineLength}px`;
+        line.style.left = `${startPos.x - lineLength / 2}px`;
+        line.style.top = `${startPos.y}px`;
+        line.style.transform = `rotate(${angle}deg)`;
+        debugGrid.appendChild(line);
+      }
+
+      // Draw lines going down-left (negative slope)
+      for (let i = -rows; i <= rows + cols; i++) {
+        const startPos = gridToScreen(i, 0);
+        const line = document.createElement('div');
+        line.className = 'debug-line';
+        line.style.width = `${lineLength}px`;
+        line.style.left = `${startPos.x - lineLength / 2}px`;
+        line.style.top = `${startPos.y}px`;
+        line.style.transform = `rotate(${-angle}deg)`;
+        debugGrid.appendChild(line);
+      }
+
+      // Add coordinate labels at tile centers
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const pos = gridToScreen(col, row);
+
+          const label = document.createElement('div');
+          label.className = 'debug-label';
+          label.style.left = `${pos.x - 12}px`;
+          label.style.top = `${pos.y + gridHeight / 4}px`;
+          label.textContent = `${row},${col}`;
+          debugGrid.appendChild(label);
+        }
+      }
+    }
+
+    function renderTileGrid() {
+      const world = document.getElementById('game-world');
+      const groundLayer = world.querySelector('.ground-layer');
+
+      const { tileWidth, tileHeight } = TILE_CONFIG;
+      const buildingSize = 180 * TILE_SCALE;  // Larger for 2x2 footprint
+
+      // Set CSS custom properties
+      world.style.setProperty('--tile-width', `${tileWidth}px`);
+      world.style.setProperty('--tile-height', `${tileHeight}px`);
+      world.style.setProperty('--building-size', `${buildingSize}px`);
+
+      // Clear existing tiles
+      groundLayer.innerHTML = '';
+
+      // Tile class mapping
+      const tileClasses = {
+        [TILE.GRASS]: 'tile-grass',
+        [TILE.COBBLE]: 'tile-cobble',
+        [TILE.DIRT]: 'tile-dirt',
+      };
+
+      // Collect tiles with their z-order for proper rendering
+      const tiles = [];
+
+      for (let row = 0; row < TILE_MAP.length; row++) {
+        for (let col = 0; col < TILE_MAP[row].length; col++) {
+          const tileType = TILE_MAP[row][col];
+          const pos = gridToScreen(col, row);
+          tiles.push({ row, col, tileType, pos });
+        }
+      }
+
+      // Sort by z-order (back to front)
+      tiles.sort((a, b) => a.pos.z - b.pos.z);
+
+      // Render tiles
+      tiles.forEach(({ tileType, pos }) => {
+        const tile = document.createElement('div');
+        tile.className = `tile ${tileClasses[tileType]}`;
+
+        // Position tile centered on grid point
+        tile.style.left = `${pos.x - tileWidth / 2}px`;
+        tile.style.top = `${pos.y}px`;
+        tile.style.zIndex = Math.floor(pos.z);
+
+        groundLayer.appendChild(tile);
+      });
+    }
+
+    function renderBuildings() {
+      const world = document.getElementById('game-world');
+
+      // Remove existing building slots (keep ground-layer)
+      world.querySelectorAll('.building-slot').forEach(el => el.remove());
+      
+      SLOTS.forEach((slot, i) => {
+        const def = BUILDINGS[slot.type];
+        const building = buildings[i];
+        const unlocked = isUnlocked(def.unlockReq);
+        const affordable = building ? 
+          (building.level < def.upgrades.length && canAfford(def.upgrades[building.level].cost)) :
+          canAfford(def.baseCost);
+        
+        const div = document.createElement('div');
+        div.className = `building-slot ${unlocked ? '' : 'locked'}`;
+
+        // Convert grid position to pixel coordinates
+        const pos = gridToPixel(slot.row, slot.col);
+        div.style.left = `${pos.x}px`;
+        div.style.top = `${pos.y}px`;
+        div.style.zIndex = pos.z + 1; // Above tiles at same depth
+        div.onclick = () => buildOrUpgrade(i);
+        
+        if (building) {
+          // Built - show asset or emoji
+          const level = building.level + 1;
+          const assetPath = ASSETS[slot.type]?.[level];
+          
+          if (assetPath) {
+            const img = document.createElement('img');
+            img.src = assetPath;
+            img.className = 'building-image';
+            img.alt = def.name;
+            img.onerror = () => {
+              // Fallback to emoji if image fails to load
+              img.style.display = 'none';
+              const fallback = document.createElement('div');
+              fallback.className = 'slot-placeholder';
+              fallback.textContent = EMOJI_FALLBACKS[slot.type];
+              div.insertBefore(fallback, div.firstChild);
+            };
+            div.appendChild(img);
+          } else {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'slot-placeholder';
+            placeholder.textContent = EMOJI_FALLBACKS[slot.type];
+            div.appendChild(placeholder);
+          }
+          
+          // Level badge
+          const badge = document.createElement('div');
+          badge.className = 'level-badge';
+          badge.textContent = level;
+          div.appendChild(badge);
+          
+          // Label
+          const label = document.createElement('div');
+          label.className = 'building-label';
+          label.textContent = def.name;
+          div.appendChild(label);
+          
+          // Upgrade cost
+          if (building.level < def.upgrades.length) {
+            const cost = document.createElement('div');
+            cost.className = `building-cost ${affordable ? '' : 'unaffordable'}`;
+            cost.textContent = '⬆️ ' + Object.entries(def.upgrades[building.level].cost)
+              .map(([r, a]) => `${a}${r === 'gold' ? '💰' : r === 'wheat' ? '🌾' : r === 'stone' ? '⛏' : '🌲'}`)
+              .join(' ');
+            div.appendChild(cost);
+          }
+        } else {
+          // Not built - show placeholder
+          const placeholder = document.createElement('div');
+          placeholder.className = 'slot-placeholder';
+          placeholder.textContent = unlocked ? EMOJI_FALLBACKS[slot.type] : '🔒';
+          div.appendChild(placeholder);
+          
+          const label = document.createElement('div');
+          label.className = 'building-label';
+          label.textContent = def.name;
+          div.appendChild(label);
+          
+          if (unlocked) {
+            const cost = document.createElement('div');
+            cost.className = `building-cost ${affordable ? '' : 'unaffordable'}`;
+            cost.textContent = Object.entries(def.baseCost)
+              .map(([r, a]) => `${a}${r === 'gold' ? '💰' : r === 'wheat' ? '🌾' : r === 'stone' ? '⛏' : '🌲'}`)
+              .join(' ');
+            div.appendChild(cost);
+          } else {
+            const req = document.createElement('div');
+            req.className = 'building-cost unaffordable';
+            req.textContent = '🔒 ' + Object.entries(def.unlockReq)
+              .map(([r, a]) => `${a}${r === 'gold' ? '💰' : r === 'wheat' ? '🌾' : r === 'stone' ? '⛏' : '🌲'}`)
+              .join(' ');
+            div.appendChild(req);
+          }
+        }
+        
+        world.appendChild(div);
+      });
+    }
+
+    function updateUI() {
+      const production = calculateProduction();
+      
+      // Update resources
+      ['gold', 'wheat', 'stone', 'wood'].forEach(res => {
+        document.getElementById(`${res}-value`).textContent = formatNumber(resources[res]);
+        
+        const rateEl = document.getElementById(`${res}-rate`);
+        const rate = production[res];
+        rateEl.textContent = (rate >= 0 ? '+' : '') + rate.toFixed(1) + '/s';
+        rateEl.className = `resource-rate ${rate > 0 ? 'positive' : rate < 0 ? 'negative' : 'neutral'}`;
+      });
+      
+      // Update stats
+      const builtCount = buildings.filter(b => b !== null).length;
+      const totalLevels = buildings.reduce((sum, b) => sum + (b ? b.level + 1 : 0), 0);
+      const netWorth = Object.values(resources).reduce((a, b) => a + b, 0);
+      
+      document.getElementById('stat-buildings').textContent = `${builtCount}/${SLOTS.length}`;
+      document.getElementById('stat-levels').textContent = totalLevels;
+      document.getElementById('stat-worth').textContent = formatNumber(netWorth);
+
+      // Re-render tiles (to update occupied tiles) and buildings
+      renderTileGrid();
+      renderBuildings();
+    }
+
+    // ==========================================
+    // INITIALIZATION
+    // ==========================================
+    function init() {
+      renderDebugGrid();  // Show debug grid (remove when done designing)
+      updateUI();  // Renders tiles and buildings
+      setInterval(tick, 1000);
+    }
+
+    init();
+  </script>
+</body>
+</html>
