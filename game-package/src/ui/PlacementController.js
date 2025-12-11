@@ -80,6 +80,7 @@ export class PlacementController {
     this._hoverRow = null;
     this._hoverCol = null;
 
+    this._disableBuildingInteraction();  // Disable clicking on placed buildings during placement
     this.renderBuildList();
     this._notify(`Move cursor over the map to place ${BUILDINGS[type].name}`, 'info');
   }
@@ -94,6 +95,7 @@ export class PlacementController {
     this._hoverCol = null;
 
     this._clearHighlights();
+    this._enableBuildingInteraction();  // Re-enable clicking on placed buildings
     this.renderBuildList();
   }
 
@@ -143,6 +145,31 @@ export class PlacementController {
         }
       }
     }
+  }
+
+  // ==========================================
+  // BUILDING INTERACTION CONTROL
+  // ==========================================
+
+  /**
+   * Disable pointer events on placed buildings during placement mode
+   * This prevents buildings from capturing clicks/hovers when trying to place behind them
+   * @private
+   */
+  _disableBuildingInteraction() {
+    document.querySelectorAll('.building-slot').forEach(slot => {
+      slot.style.pointerEvents = 'none';
+    });
+  }
+
+  /**
+   * Re-enable pointer events on placed buildings after placement mode ends
+   * @private
+   */
+  _enableBuildingInteraction() {
+    document.querySelectorAll('.building-slot').forEach(slot => {
+      slot.style.pointerEvents = '';  // Reset to default (CSS handles it)
+    });
   }
 
   // ==========================================
@@ -265,6 +292,27 @@ export class PlacementController {
   // ==========================================
 
   /**
+   * Format unlock requirements as readable text
+   * @param {Object} unlockReq - Unlock requirements object (e.g., {wheat: 10})
+   * @returns {string} Formatted requirement text
+   * @private
+   */
+  _formatUnlockReq(unlockReq) {
+    if (!unlockReq) return '';
+
+    const RESOURCE_ICONS = {
+      gold: '💰',
+      wheat: '🌾',
+      stone: '⛏️',
+      wood: '🌲'
+    };
+
+    return Object.entries(unlockReq)
+      .map(([res, amt]) => `${amt}${RESOURCE_ICONS[res] || res}`)
+      .join(' ');
+  }
+
+  /**
    * Render the build list UI
    */
   renderBuildList() {
@@ -289,8 +337,12 @@ export class PlacementController {
       const isSelected = this._active && this._buildingType === type;
       const isLocked = !unlocked;
 
-      let statusText = '';
-      if (!unlocked) statusText = '🔒 Locked';
+      // Unlock requirements text for locked buildings
+      let unlockText = '';
+      if (!unlocked && def.unlockReq) {
+        const reqText = this._formatUnlockReq(def.unlockReq);
+        unlockText = `🔒 Need: ${reqText}`;
+      }
 
       return `
         <div class="build-item ${isLocked ? 'locked' : ''} ${isSelected ? 'selected' : ''}"
@@ -299,8 +351,8 @@ export class PlacementController {
           <div class="build-item-info">
             <div class="build-item-name">${def.name}</div>
             <div class="build-item-cost ${affordable && !isLocked ? 'affordable' : 'unaffordable'}">${costText}</div>
+            ${unlockText ? `<div class="build-item-unlock">${unlockText}</div>` : ''}
           </div>
-          ${statusText ? `<span class="build-item-status">${statusText}</span>` : ''}
         </div>
       `;
     }).join('');

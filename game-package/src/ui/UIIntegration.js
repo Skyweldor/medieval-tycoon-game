@@ -33,6 +33,7 @@ export class UIIntegration {
     this._setupBuildingSubscriptions();
     this._setupMilestoneSubscriptions();
     this._setupStipendSubscriptions();
+    this._setupTickSubscriptions();
 
     console.log('[UIIntegration] Event subscriptions initialized');
   }
@@ -143,6 +144,24 @@ export class UIIntegration {
     this._unsubscribers.push(
       this._eventBus.subscribe(Events.STIPEND_ENDED, () => {
         this._requestUIUpdate();
+      })
+    );
+  }
+
+  // ==========================================
+  // TICK EVENT SUBSCRIPTIONS
+  // ==========================================
+
+  /**
+   * Set up tick-related event subscriptions
+   * @private
+   */
+  _setupTickSubscriptions() {
+    // On each tick, refresh the build list to update affordability/unlock states
+    this._unsubscribers.push(
+      this._eventBus.subscribe(Events.TICK, () => {
+        // Refresh build list so unlock conditions and affordability update
+        this._placementController.renderBuildList();
       })
     );
   }

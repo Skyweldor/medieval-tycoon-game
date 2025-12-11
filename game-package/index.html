@@ -125,6 +125,9 @@
     .build-item-info {
       flex: 1;
       min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
 
     .build-item-name {
@@ -136,6 +139,7 @@
     .build-item-cost {
       color: #A99584;
       font-size: 0.7rem;
+      white-space: nowrap;
     }
 
     .build-item-cost.affordable {
@@ -144,6 +148,12 @@
 
     .build-item-cost.unaffordable {
       color: #E57373;
+    }
+
+    .build-item-unlock {
+      font-size: 0.65rem;
+      color: #FFB74D;
+      padding: 2px 0;
     }
 
     .build-item-status {
@@ -1985,7 +1995,12 @@
     let placedBuildings;
 
     // Get set of tile positions occupied by built buildings (uses local placedBuildings)
+    // Delegates to BuildingService via global bridge
     function getOccupiedTiles() {
+      if (window.getOccupiedTiles) {
+        return window.getOccupiedTiles();
+      }
+      // Fallback: compute from shared placedBuildings
       const occupied = new Set();
       placedBuildings.forEach(building => {
         for (let dr = 0; dr < BUILDING_FOOTPRINT; dr++) {
@@ -1997,8 +2012,12 @@
       return occupied;
     }
 
-    // Check if a 2x2 area starting at (row, col) is valid for placement (uses local state)
+    // Delegates to BuildingService via global bridge
     function canPlaceAt(row, col) {
+      if (window.canPlaceAt) {
+        return window.canPlaceAt(row, col);
+      }
+      // Fallback: local implementation
       const { rows, cols } = TILE_CONFIG;
 
       // Check bounds - building needs 2x2 space
@@ -2019,6 +2038,9 @@
       return true;
     }
 
+    /* ========================================
+     * LEGACY COMMENTED OUT - Now using BuildingService
+     * ========================================
     // Place a building at the specified grid position
     function placeBuilding(type, row, col) {
       const def = BUILDINGS[type];
@@ -2068,12 +2090,48 @@
       updateUI();
       return true;
     }
+    * END LEGACY */
+
+    // Slim delegation to BuildingService
+    // Side effects (stipend check, merchant disable, milestones) handled via EventBus subscriptions
+    function placeBuilding(type, row, col) {
+      const result = window._buildingService.placeBuilding(type, row, col);
+      if (result.success) {
+        const def = BUILDINGS[type];
+        notify(`${def.name} built!`, 'success');
+        if (type === 'market') {
+          notify('Market built! You now have permanent access to trading.', 'success');
+        }
+
+        // Remove tiles under the new building (2x2 footprint) to avoid stutter
+        for (let dr = 0; dr < BUILDING_FOOTPRINT; dr++) {
+          for (let dc = 0; dc < BUILDING_FOOTPRINT; dc++) {
+            const tile = document.querySelector(`.tile[data-row="${row + dr}"][data-col="${col + dc}"]`);
+            if (tile) tile.remove();
+          }
+        }
+
+        // Render just the new building (it's the last one added)
+        const buildings = window._gameState.getBuildings();
+        const newBuildingIndex = buildings.length - 1;
+        window._buildingRenderer.renderSingle(buildings[newBuildingIndex], newBuildingIndex);
+
+        updateUI();  // Update resources/stats only (no full re-render)
+      } else if (result.error) {
+        notify(result.error, 'error');
+      }
+      return result.success;
+    }
 
     // Expose placeBuilding for PlacementController
     window.placeBuilding = placeBuilding;
 
-    // Find building at a specific grid position
+    // Find building at a specific grid position - delegates to BuildingService
     function getBuildingAt(row, col) {
+      if (window.getBuildingAt) {
+        return window.getBuildingAt(row, col);
+      }
+      // Fallback: local implementation
       return placedBuildings.find(b =>
         row >= b.row && row < b.row + BUILDING_FOOTPRINT &&
         col >= b.col && col < b.col + BUILDING_FOOTPRINT
@@ -2117,17 +2175,26 @@
       return false;
     }
 
-    // Royal Stipend state
+    /* ========================================
+     * LEGACY STATE - Now managed by services
+     * These are kept for backwards compatibility with UI functions
+     * Real state lives in GameStateService, accessed via:
+     * - window._stipendService.getState()
+     * - window._milestoneService.getCompletedMilestones()
+     * - window._merchantService.getState()
+     * ======================================== */
+
+    // Royal Stipend state (LEGACY - use StipendService)
     let royalStipend = {
       active: true,           // Currently receiving stipend
       totalReceived: 0,       // Tracking for stats/achievements
       endReason: null         // 'bakery' | 'blacksmith' | 'market' | 'townhall'
     };
 
-    // Milestone tracking
+    // Milestone tracking (LEGACY - use MilestoneService)
     let completedMilestones = new Set();
 
-    // Merchant state
+    // Merchant state (LEGACY - use MerchantService)
     let merchant = {
       active: false,                // Is merchant currently visiting?
       visitStartTime: null,         // When current visit started
@@ -2148,29 +2215,33 @@
     // ==========================================
     // HELPER FUNCTIONS
     // ==========================================
-    // NOTE: Delegates to ResourceService via global bridge
+    // NOTE: These use shared state from GameStateService via getBuildingsRef()/getResourcesRef()
+    // They could delegate to window.* service bridges but work fine with shared state
+
+    // Delegates to ResourceService via global bridge
     function formatNumber(num) {
       return window.formatNumber ? window.formatNumber(num) : Math.floor(num).toString();
     }
 
-    // Check if player can afford a cost (uses shared GameStateService resources)
+    // Check if player can afford a cost - could use window.canAfford
     function canAfford(cost) {
-      return Object.entries(cost).every(([res, amt]) => resources[res] >= amt);
+      return window.canAfford ? window.canAfford(cost) : Object.entries(cost).every(([res, amt]) => resources[res] >= amt);
     }
 
-    // Check if requirement is met (uses shared resources state)
+    // Check if requirement is met - could use window.isUnlocked
     function isUnlocked(req) {
-      if (!req) return true;
-      return Object.entries(req).every(([res, amt]) => resources[res] >= amt);
+      return window.isUnlocked ? window.isUnlocked(req) : (!req || Object.entries(req).every(([res, amt]) => resources[res] >= amt));
     }
 
-    // NOTE: No longer need to override window.canAfford/isUnlocked
-    // Service versions now read from same GameStateService state
-
+    // Spend resources - could use window.spendResources
     function spendResources(cost) {
-      Object.entries(cost).forEach(([res, amt]) => {
-        resources[res] -= amt;
-      });
+      if (window.spendResources) {
+        window.spendResources(cost);
+      } else {
+        Object.entries(cost).forEach(([res, amt]) => {
+          resources[res] -= amt;
+        });
+      }
     }
 
     function notify(message, type = 'success') {
@@ -2185,15 +2256,19 @@
     // ==========================================
     // ROYAL STIPEND FUNCTIONS
     // ==========================================
+    // Delegates to BuildingService via global bridge
     function hasGoldProduction() {
-      // Returns true if player has ANY gold-producing building
+      if (window.hasGoldProduction) {
+        return window.hasGoldProduction();
+      }
+      // Fallback: local implementation
       const goldProducers = ['bakery', 'blacksmith', 'market', 'townhall'];
-
-      return placedBuildings.some((building) => {
-        return goldProducers.includes(building.type);
-      });
+      return placedBuildings.some((building) => goldProducers.includes(building.type));
     }
 
+    /* ========================================
+     * LEGACY COMMENTED OUT - StipendService handles via EventBus subscription
+     * ========================================
     function checkStipendStatus() {
       if (!royalStipend.active) return;
 
@@ -2209,17 +2284,38 @@
         updateStipendIndicator();
       }
     }
+    * END LEGACY */
 
+    // StipendService subscribes to BUILDING_PLACED event and auto-checks
+    function checkStipendStatus() {
+      // Handled by StipendService via EventBus subscription to BUILDING_PLACED
+      // This function kept for backwards compatibility (may be called from old code)
+      if (window._stipendService) {
+        window._stipendService.checkStatus();
+      }
+    }
+
+    /* ========================================
+     * LEGACY COMMENTED OUT - StipendService handles via EventBus subscription
+     * ========================================
     function stipendTick() {
       if (!royalStipend.active) return;
 
       resources.gold += 1;
       royalStipend.totalReceived += 1;
     }
+    * END LEGACY */
+
+    // Publish STIPEND_TICK event - StipendService handles the tick
+    function stipendTick() {
+      window._eventBus.publish(window._Events.STIPEND_TICK);
+    }
 
     function updateStipendIndicator() {
       const indicator = document.getElementById('stipend-indicator');
-      if (royalStipend.active) {
+      // Use service state if available
+      const isActive = window._stipendService ? window._stipendService.isActive() : royalStipend.active;
+      if (isActive) {
         indicator.classList.remove('inactive');
       } else {
         indicator.classList.add('inactive');
@@ -2233,6 +2329,9 @@
       return bldgs.filter((b) => b.type === type).length;
     }
 
+    /* ========================================
+     * LEGACY COMMENTED OUT - MilestoneService handles via EventBus subscription
+     * ========================================
     function grantReward(reward) {
       Object.entries(reward).forEach(([res, amt]) => {
         resources[res] += amt;
@@ -2259,6 +2358,23 @@
         updateMilestonePanel();
       }
     }
+    * END LEGACY */
+
+    // MilestoneService subscribes to TICK and BUILDING_PLACED events
+    function checkMilestones() {
+      // Handled by MilestoneService via EventBus
+      // This function kept for backwards compatibility
+      if (window._milestoneService) {
+        const completed = window._milestoneService.checkMilestones();
+        // Show popup for each completed milestone
+        completed.forEach(({ milestone }) => {
+          showMilestonePopup(milestone);
+        });
+        if (completed.length > 0) {
+          updateMilestonePanel();
+        }
+      }
+    }
 
     function showMilestonePopup(milestone) {
       const rewardText = Object.entries(milestone.reward)
@@ -2272,8 +2388,16 @@
       const list = document.getElementById('milestone-list');
       const progress = document.getElementById('milestone-progress');
 
+      // Use MilestoneService if available, fall back to legacy state
+      const isCompleted = window._milestoneService
+        ? (id) => window._milestoneService.isCompleted(id)
+        : (id) => completedMilestones.has(id);
+      const completedCount = window._milestoneService
+        ? window._milestoneService.getCompletedCount()
+        : completedMilestones.size;
+
       list.innerHTML = Object.entries(MILESTONES).map(([id, m]) => {
-        const done = completedMilestones.has(id);
+        const done = isCompleted(id);
         const rewardText = Object.entries(m.reward)
           .map(([r, a]) => `+${a}${r === 'gold' ? '💰' : ''}`)
           .join(' ');
@@ -2290,7 +2414,7 @@
         `;
       }).join('');
 
-      progress.textContent = `${completedMilestones.size}/${Object.keys(MILESTONES).length}`;
+      progress.textContent = `${completedCount}/${Object.keys(MILESTONES).length}`;
     }
 
     let milestonePanelCollapsed = false;
@@ -2529,6 +2653,9 @@
       return window.calculateProduction ? window.calculateProduction() : { gold: 0, wheat: 0, stone: 0, wood: 0 };
     }
 
+    /* ========================================
+     * LEGACY COMMENTED OUT - Now using ProductionService via EventBus
+     * ========================================
     function tick() {
       placedBuildings.forEach((building) => {
         const def = BUILDINGS[building.type];
@@ -2556,6 +2683,14 @@
       // Check resource-based milestones after production
       checkMilestones();
 
+      updateUI();
+    }
+    * END LEGACY */
+
+    // Slim tick() - publish TICK event, services handle production/milestones
+    function tick() {
+      // ProductionService and MilestoneService subscribe to TICK event
+      window._eventBus.publish(window._Events.TICK);
       updateUI();
     }
 
@@ -2595,7 +2730,7 @@
       updateMarketTradingPanel();
 
       notify('Game reset!');
-      updateUI();
+      updateUI(true);  // Re-render buildings since all were cleared
     }
 
     // NOTE: toggleTiles, toggleDebugSliders, toggleDarkMode are now provided
@@ -2607,6 +2742,9 @@
     // NOTE: renderDebugGrid, renderTileGrid are provided by Phase 7 Renderers via global bridges.
     // renderBuildings uses placedBuildings which now references GameStateService's buildings array.
 
+    /* ========================================
+     * LEGACY COMMENTED OUT - Now using BuildingRenderer
+     * ========================================
     // Render buildings (placedBuildings points to GameStateService._state.buildings)
     function renderBuildings() {
       console.log('[renderBuildings] Called with', placedBuildings.length, 'buildings');
@@ -2674,7 +2812,14 @@
 
     // Override global bridge to use local implementation
     window.renderBuildings = renderBuildings;
+    * END LEGACY */
 
+    // renderBuildings now provided by BuildingRenderer via global bridge in main.js
+    // No local override needed - uses window.renderBuildings from main.js
+
+    /* ========================================
+     * LEGACY COMMENTED OUT - Now using BuildingService
+     * ========================================
     // Upgrade a placed building
     function upgradeBuilding(index) {
       const building = placedBuildings[index];
@@ -2706,8 +2851,36 @@
       notify(`${def.name} upgraded to level ${building.level + 1}!`, 'success');
       updateUI();
     }
+    * END LEGACY */
 
-    function updateUI() {
+    // Slim delegation to BuildingService
+    function upgradeBuilding(index) {
+      const result = window._buildingService.upgradeBuilding(index);
+      if (result.success) {
+        const building = window._buildingService.getBuildingByIndex(index);
+        const def = BUILDINGS[building.type];
+        notify(`${def.name} upgraded to level ${building.level + 1}!`, 'success');
+
+        // Update just the level badge on this building (no full re-render to avoid stutter)
+        const slots = document.querySelectorAll('.building-slot');
+        if (slots[index]) {
+          const badge = slots[index].querySelector('.level-badge');
+          if (badge) {
+            badge.textContent = building.level + 1;
+          }
+        }
+
+        updateUI();  // Update resources/stats only (no building re-render)
+      } else if (result.error) {
+        notify(result.error, result.error.includes('max level') ? 'info' : 'error');
+      }
+    }
+
+    /**
+     * Update UI elements
+     * @param {boolean} [renderBuildings=false] - Whether to re-render buildings (only needed when buildings change)
+     */
+    function updateUI(renderBuildings = false) {
       const production = calculateProduction();
 
       // Update resources
@@ -2729,15 +2902,18 @@
       document.getElementById('stat-levels').textContent = totalLevels;
       document.getElementById('stat-worth').textContent = formatNumber(netWorth);
 
-      // Re-render tiles (to update occupied tiles) and buildings
-      window.renderTileGrid();
-      window.renderBuildings();
+      // Only re-render tiles and buildings when buildings actually change
+      // This prevents the visual "stutter" from clearing and recreating elements every tick
+      if (renderBuildings) {
+        window.renderTileGrid();
+        window.renderBuildings();
 
-      // Re-apply placement highlights if in placement mode (tiles were just recreated)
-      if (window._placementController && window._placementController.isActive()) {
-        const hoverPos = window._placementController.getHoverPosition();
-        if (hoverPos.row !== null && hoverPos.col !== null) {
-          window._placementController.showHighlightAt(hoverPos.row, hoverPos.col);
+        // Re-apply placement highlights if in placement mode (tiles were just recreated)
+        if (window._placementController && window._placementController.isActive()) {
+          const hoverPos = window._placementController.getHoverPosition();
+          if (hoverPos.row !== null && hoverPos.col !== null) {
+            window._placementController.showHighlightAt(hoverPos.row, hoverPos.col);
+          }
         }
       }
 
@@ -2857,6 +3033,11 @@
       document.getElementById('building-info-content').style.display = 'none';
     }
 
+    // Expose building interaction functions for BuildingRenderer callbacks
+    window.upgradeBuilding = upgradeBuilding;
+    window.showBuildingInfoForPlaced = showBuildingInfoForPlaced;
+    window.hideBuildingInfo = hideBuildingInfo;
+
     // ==========================================
     // DEBUG SLIDER FUNCTIONS
     // ==========================================
@@ -2868,7 +3049,7 @@
     // ==========================================
     function init() {
       window.renderDebugGrid();  // Show debug grid (remove when done designing)
-      updateUI();  // Renders tiles and buildings
+      updateUI(true);  // Initial render - include tiles and buildings
 
       // Initialize stipend indicator
       updateStipendIndicator();
@@ -2886,6 +3067,21 @@
       // This sets up event listeners and wires EventBus subscriptions
       if (window.initializeUI) {
         window.initializeUI();
+      }
+
+      // Subscribe to service events for UI updates
+      if (window._eventBus && window._Events) {
+        // Show milestone popup when MilestoneService completes a milestone
+        window._eventBus.subscribe(window._Events.MILESTONE_COMPLETED, (data) => {
+          showMilestonePopup(data.milestone);
+          updateMilestonePanel();
+        });
+
+        // Update stipend indicator when stipend ends
+        window._eventBus.subscribe(window._Events.STIPEND_ENDED, (data) => {
+          notify("The King's stipend has ended. You're self-sufficient now! 👑", 'success');
+          updateStipendIndicator();
+        });
       }
 
       // Start game tick (1 second)

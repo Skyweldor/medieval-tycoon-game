@@ -147,6 +147,9 @@
 .build-item-info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .build-item-name {
@@ -158,6 +161,7 @@
 .build-item-cost {
   color: #A99584;
   font-size: 0.7rem;
+  white-space: nowrap;
 }
 
 .build-item-cost.affordable {
@@ -166,6 +170,12 @@
 
 .build-item-cost.unaffordable {
   color: #E57373;
+}
+
+.build-item-unlock {
+  font-size: 0.65rem;
+  color: #FFB74D;
+  padding: 2px 0;
 }
 
 .build-item-status {
