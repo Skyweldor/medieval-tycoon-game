@@ -1,0 +1,279 @@
+/* Medieval Tycoon - Merchant Styles */
+/* Merchant banner, overlay, panel, and trade UI */
+
+/* Merchant Banner - slides in from top */
+.merchant-banner {
+  position: fixed;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #8D6E63 0%, #6D4C41 100%);
+  border-radius: 0 0 15px 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  border: 2px solid #A1887F;
+  border-top: none;
+  transition: top 0.5s ease;
+  z-index: 500;
+}
+
+.merchant-banner.visible {
+  top: 0;
+}
+
+.merchant-banner.urgent {
+  animation: urgentPulse 0.5s infinite;
+  border-color: #FF8A65;
+}
+
+.merchant-avatar {
+  font-size: 2rem;
+}
+
+.merchant-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.merchant-title {
+  font-weight: 700;
+  color: #FFF;
+  font-size: 0.95rem;
+}
+
+.merchant-timer {
+  font-size: 0.75rem;
+  color: #FFCC80;
+}
+
+.merchant-trade-btn {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #F4D03F 0%, #D4AC0D 100%);
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  color: #5D4037;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.merchant-trade-btn:hover {
+  transform: scale(1.05);
+}
+
+/* Merchant Panel Overlay */
+.merchant-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.merchant-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.merchant-panel {
+  width: 90%;
+  max-width: 500px;
+  background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
+  border-radius: 20px;
+  border: 3px solid #8D6E63;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  overflow: hidden;
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.merchant-overlay.visible .merchant-panel {
+  transform: scale(1);
+}
+
+.merchant-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  background: rgba(0,0,0,0.2);
+  border-bottom: 2px solid #8D6E63;
+}
+
+.merchant-face {
+  font-size: 3rem;
+}
+
+.merchant-header-info h3 {
+  color: #F4D03F;
+  margin-bottom: 4px;
+  font-size: 1.1rem;
+}
+
+.merchant-dialogue {
+  color: #BCAAA4;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.merchant-timer-badge {
+  margin-left: auto;
+  padding: 8px 15px;
+  background: linear-gradient(135deg, #FF7043 0%, #E64A19 100%);
+  border-radius: 20px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* Trade Rows */
+.trade-rows {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trade-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 15px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.trade-row:hover:not(.disabled) {
+  background: rgba(255,255,255,0.12);
+}
+
+.trade-row.disabled {
+  opacity: 0.5;
+}
+
+.trade-resource {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 100px;
+}
+
+.trade-icon {
+  font-size: 1.8rem;
+}
+
+.trade-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.trade-name {
+  font-weight: 700;
+  color: #FFF;
+  font-size: 0.9rem;
+}
+
+.trade-have {
+  font-size: 0.7rem;
+  color: #A99584;
+}
+
+.trade-price {
+  text-align: center;
+  min-width: 60px;
+}
+
+.price-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #F4D03F;
+}
+
+.price-label {
+  display: block;
+  font-size: 0.65rem;
+  color: #A99584;
+}
+
+.trade-limit {
+  text-align: center;
+  min-width: 50px;
+}
+
+.limit-value {
+  font-weight: 700;
+  color: #FFCC80;
+  font-size: 0.85rem;
+}
+
+.limit-label {
+  display: block;
+  font-size: 0.6rem;
+  color: #A99584;
+}
+
+.trade-buttons {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.trade-buttons button {
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #7CB342 0%, #558B2F 100%);
+  border: none;
+  border-radius: 6px;
+  color: #FFF;
+  font-weight: 600;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.trade-buttons button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+}
+
+.trade-buttons button:disabled {
+  background: #666;
+  cursor: not-allowed;
+}
+
+.merchant-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: rgba(0,0,0,0.2);
+  border-top: 2px solid #8D6E63;
+}
+
+.merchant-tip {
+  font-size: 0.75rem;
+  color: #BCAAA4;
+}
+
+.btn-close {
+  padding: 8px 20px;
+  background: rgba(255,255,255,0.1);
+  border: 2px solid #8D6E63;
+  border-radius: 8px;
+  color: #FFF;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-close:hover {
+  background: rgba(255,255,255,0.2);
+}

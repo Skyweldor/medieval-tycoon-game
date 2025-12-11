@@ -1,0 +1,254 @@
+/* Medieval Tycoon - Layout Styles */
+/* Main layout, panels, and grid structure */
+
+/* Main 3-column layout */
+.main-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* Left Panel - Building Info */
+.left-panel {
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.left-tabbed-panel {
+  background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
+  border-radius: 12px;
+  border: 2px solid #8D6E63;
+  overflow: hidden;
+  min-height: 300px;
+}
+
+.left-tabbed-panel .tab-buttons {
+  display: flex;
+  background: rgba(0,0,0,0.2);
+  border-bottom: 2px solid #8D6E63;
+}
+
+.left-tabbed-panel .tab-btn {
+  flex: 1;
+  padding: 10px;
+  font-size: 1.2rem;
+}
+
+.left-tabbed-panel .tab-content {
+  padding: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Center Content */
+.center-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Right Panel - Tabs */
+.right-panel {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.tabbed-panel {
+  background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
+  border-radius: 12px;
+  border: 2px solid #8D6E63;
+  overflow: hidden;
+}
+
+.tab-buttons {
+  display: flex;
+  background: rgba(0,0,0,0.2);
+  border-bottom: 2px solid #8D6E63;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px 10px;
+  background: transparent;
+  border: none;
+  color: #A99584;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+}
+
+.tab-btn.active {
+  background: rgba(255,255,255,0.1);
+  color: #F4D03F;
+  box-shadow: inset 0 -2px 0 #F4D03F;
+}
+
+.tab-content {
+  display: none;
+  padding: 15px;
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Building Info Panel */
+.building-info-panel {
+  background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
+  border-radius: 12px;
+  border: 2px solid #8D6E63;
+  padding: 15px;
+  min-height: 300px;
+}
+
+.building-info-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #8D6E63;
+}
+
+.building-info-icon {
+  font-size: 2.5rem;
+}
+
+.building-info-title {
+  flex: 1;
+}
+
+.building-info-title h3 {
+  color: #F4D03F;
+  font-size: 1.1rem;
+  margin-bottom: 2px;
+}
+
+.building-info-title .level-text {
+  color: #A99584;
+  font-size: 0.75rem;
+}
+
+.building-info-empty {
+  color: #A99584;
+  text-align: center;
+  padding: 40px 20px;
+  font-style: italic;
+}
+
+.building-info-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.info-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+}
+
+.info-stat-label {
+  color: #A99584;
+  font-size: 0.8rem;
+}
+
+.info-stat-value {
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.info-stat-value.positive { color: #7CB342; }
+.info-stat-value.negative { color: #E57373; }
+
+.info-production {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #8D6E63;
+}
+
+.info-production-title {
+  color: #F4D03F;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+/* Stats Panel */
+.stats-panel {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.stat-box {
+  padding: 15px;
+  background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
+  border-radius: 12px;
+  text-align: center;
+  border: 2px solid #8D6E63;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: #A99584;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #F4D03F;
+}
+
+/* Button Row */
+.button-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* Debug Sliders */
+.debug-sliders {
+  margin-top: 15px;
+  padding: 15px;
+  background: linear-gradient(135deg, #333 0%, #222 100%);
+  border-radius: 10px;
+  border: 2px solid #555;
+}
+
+.debug-sliders .slider-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.debug-sliders label {
+  color: #fff;
+  font-size: 0.85rem;
+  min-width: 140px;
+}
+
+.debug-sliders input[type="range"] {
+  flex: 1;
+  height: 8px;
+  cursor: pointer;
+}
+
+.debug-sliders button {
+  margin-top: 10px;
+}

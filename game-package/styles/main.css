@@ -1,0 +1,82 @@
+/* Medieval Tycoon - Base Styles */
+/* CSS Variables and Reset */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(180deg, #87CEEB 0%, #90B855 40%, #5D7A3A 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.game-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  color: #4A3728;
+  text-shadow: 2px 2px 0 #F4D03F, 4px 4px 0 rgba(0,0,0,0.2);
+  margin-bottom: 5px;
+}
+
+.header p {
+  color: #5D4E37;
+  font-size: 0.9rem;
+}
+
+/* Tips */
+.tips {
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  text-align: center;
+  color: #4A3728;
+  font-size: 0.85rem;
+}
+
+.tips strong {
+  color: #2E7D32;
+}
+
+/* Tooltips */
+.tooltip {
+  position: absolute;
+  background: rgba(0,0,0,0.9);
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  pointer-events: none;
+  z-index: 1000;
+  max-width: 200px;
+  display: none;
+}
+
+/* Scrollbar styling for tab content */
+.tab-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tab-content::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
+.tab-content::-webkit-scrollbar-thumb {
+  background: #8D6E63;
+  border-radius: 3px;
+}

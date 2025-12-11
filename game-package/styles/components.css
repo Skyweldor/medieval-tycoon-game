@@ -1,0 +1,555 @@
+/* Medieval Tycoon - Component Styles */
+/* Buttons, resource bar, milestones, market, build list */
+
+/* Buttons */
+.btn {
+  padding: 12px 25px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reset {
+  background: linear-gradient(135deg, #8D6E63 0%, #6D4C41 100%);
+  color: #fff;
+  border: 2px solid #A1887F;
+}
+
+.btn-reset:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* Resource Bar */
+.resource-bar {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+  border: 2px solid #8D6E63;
+  margin-bottom: 20px;
+}
+
+.resource {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  min-width: 120px;
+}
+
+.resource-icon {
+  font-size: 1.8rem;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+}
+
+.resource-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.resource-name {
+  font-size: 0.65rem;
+  color: #A99584;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.resource-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+}
+
+.resource-rate {
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.resource-rate.positive { color: #7CB342; }
+.resource-rate.negative { color: #E57373; }
+.resource-rate.neutral { color: #666; }
+
+/* Royal Stipend Indicator */
+.stipend-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: #FFD54F;
+  animation: pulse 2s infinite;
+}
+
+.stipend-indicator.inactive {
+  display: none;
+}
+
+/* Build Tab Styles */
+.build-tab-header {
+  color: #A99584;
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.build-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.build-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.build-item:hover:not(.locked):not(.selected) {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.build-item.selected {
+  background: rgba(124, 179, 66, 0.3);
+  border-color: #7CB342;
+}
+
+.build-item.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.build-item-icon {
+  font-size: 1.5rem;
+  width: 36px;
+  text-align: center;
+}
+
+.build-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.build-item-name {
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.build-item-cost {
+  color: #A99584;
+  font-size: 0.7rem;
+}
+
+.build-item-cost.affordable {
+  color: #7CB342;
+}
+
+.build-item-cost.unaffordable {
+  color: #E57373;
+}
+
+.build-item-status {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.3);
+  color: #A99584;
+}
+
+.build-item-status.built {
+  color: #7CB342;
+}
+
+.build-cancel {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.build-cancel button {
+  width: 100%;
+}
+
+/* Empty slot marker */
+.slot-empty {
+  width: 32px !important;
+  height: 32px !important;
+  font-size: 1rem !important;
+  opacity: 0.6;
+  background: rgba(0,0,0,0.3) !important;
+  border-radius: 50% !important;
+  border: 2px dashed rgba(255,255,255,0.4) !important;
+}
+
+.building-slot:hover .slot-empty {
+  opacity: 1;
+  border-color: rgba(255,255,255,0.8) !important;
+}
+
+/* Milestone Panel */
+.milestone-panel {
+  margin-top: 20px;
+  background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
+  border-radius: 12px;
+  border: 2px solid #8D6E63;
+  overflow: hidden;
+}
+
+.milestone-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  cursor: pointer;
+  color: #F4D03F;
+  font-weight: 700;
+  user-select: none;
+}
+
+.milestone-header:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.milestone-progress {
+  font-size: 0.85rem;
+  background: rgba(0,0,0,0.3);
+  padding: 3px 8px;
+  border-radius: 10px;
+}
+
+.milestone-list {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.milestone-list.collapsed {
+  display: none;
+}
+
+.milestone-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.milestone-item.completed {
+  opacity: 1;
+  background: rgba(124, 179, 66, 0.2);
+}
+
+.milestone-icon {
+  font-size: 1.2rem;
+  min-width: 24px;
+  text-align: center;
+}
+
+.milestone-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.milestone-name {
+  font-weight: 600;
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.milestone-desc {
+  font-size: 0.7rem;
+  color: #A99584;
+}
+
+.milestone-reward {
+  color: #F4D03F;
+  font-weight: 700;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+/* Milestone in tabs */
+.milestone-progress-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 6px;
+  margin-bottom: 10px;
+  color: #F4D03F;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.tab-content .milestone-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tab-content .milestone-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.tab-content .milestone-item.completed {
+  opacity: 1;
+  background: rgba(124, 179, 66, 0.2);
+}
+
+.tab-content .milestone-icon {
+  font-size: 1rem;
+  min-width: 20px;
+}
+
+.tab-content .milestone-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tab-content .milestone-name {
+  font-weight: 600;
+  color: #fff;
+  font-size: 0.8rem;
+}
+
+.tab-content .milestone-desc {
+  font-size: 0.65rem;
+  color: #A99584;
+}
+
+.tab-content .milestone-reward {
+  color: #F4D03F;
+  font-weight: 700;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+/* Market styles in tab */
+.market-locked {
+  text-align: center;
+  padding: 30px 15px;
+  color: #A99584;
+  font-size: 0.9rem;
+}
+
+.market-level-display {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 6px;
+  margin-bottom: 10px;
+  color: #7CB342;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.tab-content .market-trades {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tab-content .market-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+}
+
+.tab-content .market-res {
+  min-width: 60px;
+  font-weight: 600;
+  color: #FFF;
+  font-size: 0.85rem;
+}
+
+.tab-content .market-price {
+  color: #F4D03F;
+  font-weight: 700;
+  font-size: 0.8rem;
+  min-width: 40px;
+}
+
+.tab-content .market-btns {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.tab-content .market-btns button {
+  padding: 4px 8px;
+  font-size: 0.65rem;
+}
+
+/* Market Trading Panel */
+.market-trading-panel {
+  display: none;
+  margin-top: 20px;
+  background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
+  border-radius: 12px;
+  border: 2px solid #8D6E63;
+  overflow: hidden;
+}
+
+.market-trading-panel.visible {
+  display: block;
+}
+
+.market-trading-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  background: rgba(0,0,0,0.2);
+  font-weight: 700;
+  color: #F4D03F;
+}
+
+.market-level {
+  margin-left: auto;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #7CB342 0%, #558B2F 100%);
+  border-radius: 10px;
+  font-size: 0.75rem;
+  color: #FFF;
+}
+
+.market-trades {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.market-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 8px;
+}
+
+.market-res {
+  min-width: 80px;
+  font-weight: 600;
+  color: #FFF;
+}
+
+.market-price {
+  color: #F4D03F;
+  font-weight: 700;
+  font-size: 0.9rem;
+  min-width: 50px;
+}
+
+.market-btns {
+  display: flex;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.market-btns button {
+  padding: 5px 10px;
+  background: linear-gradient(135deg, #7CB342 0%, #558B2F 100%);
+  border: none;
+  border-radius: 5px;
+  color: #FFF;
+  font-weight: 600;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.market-btns button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.market-btns button:disabled {
+  background: #555;
+  cursor: not-allowed;
+}
+
+/* Notifications */
+.notifications {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.notification {
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  animation: slideIn 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.notification.success {
+  background: linear-gradient(135deg, #7CB342 0%, #558B2F 100%);
+  color: #fff;
+}
+
+.notification.error {
+  background: linear-gradient(135deg, #E57373 0%, #C62828 100%);
+  color: #fff;
+}
+
+.notification.milestone {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA000 100%);
+  color: #4E342E;
+  font-weight: 700;
+  border: 2px solid #FFECB3;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.notification.merchant {
+  background: linear-gradient(135deg, #8D6E63 0%, #6D4C41 100%);
+  border: 2px solid #A1887F;
+}
+
+.notification.info {
+  background: linear-gradient(135deg, #5C6BC0 0%, #3949AB 100%);
+  color: #fff;
+}
