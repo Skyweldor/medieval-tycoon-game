@@ -1,0 +1,279 @@
+/**
+ * ResourceService
+ * Handles resource operations: checking affordability, spending, and granting rewards
+ */
+
+import { Events } from '../core/EventBus.js';
+
+export class ResourceService {
+  /**
+   * @param {import('./GameStateService.js').GameStateService} gameState
+   * @param {import('../core/EventBus.js').EventBus} eventBus
+   */
+  constructor(gameState, eventBus) {
+    this._gameState = gameState;
+    this._eventBus = eventBus;
+  }
+
+  // ==========================================
+  // RESOURCE QUERIES
+  // ==========================================
+
+  /**
+   * Get current resources
+   * @returns {{gold: number, wheat: number, stone: number, wood: number}}
+   */
+  getResources() {
+    return this._gameState.getResources();
+  }
+
+  /**
+   * Get a specific resource amount
+   * @param {string} type - Resource type (gold, wheat, stone, wood)
+   * @returns {number}
+   */
+  getResource(type) {
+    return this._gameState.getResource(type);
+  }
+
+  // ==========================================
+  // AFFORDABILITY CHECKS
+  // ==========================================
+
+  /**
+   * Check if player can afford a cost
+   * @param {Object} cost - Cost object {gold: n, wheat: n, etc.}
+   * @returns {boolean}
+   */
+  canAfford(cost) {
+    if (!cost) return true;
+
+    const resources = this._gameState.getResources();
+    return Object.entries(cost).every(([res, amt]) => {
+      return (resources[res] || 0) >= amt;
+    });
+  }
+
+  /**
+   * Check if a building/feature is unlocked based on requirements
+   * @param {Object|null} req - Requirements object {gold: n, wheat: n, etc.}
+   * @returns {boolean}
+   */
+  isUnlocked(req) {
+    if (!req) return true;
+
+    const resources = this._gameState.getResources();
+    return Object.entries(req).every(([res, amt]) => {
+      return (resources[res] || 0) >= amt;
+    });
+  }
+
+  /**
+   * Get missing resources for a cost
+   * @param {Object} cost - Cost object
+   * @returns {Object} Object with missing amounts (empty if affordable)
+   */
+  getMissingResources(cost) {
+    if (!cost) return {};
+
+    const resources = this._gameState.getResources();
+    const missing = {};
+
+    Object.entries(cost).forEach(([res, amt]) => {
+      const have = resources[res] || 0;
+      if (have < amt) {
+        missing[res] = amt - have;
+      }
+    });
+
+    return missing;
+  }
+
+  // ==========================================
+  // RESOURCE MODIFICATIONS
+  // ==========================================
+
+  /**
+   * Spend resources (deduct cost)
+   * @param {Object} cost - Cost object {gold: n, wheat: n, etc.}
+   * @returns {boolean} True if successful, false if insufficient resources
+   */
+  spendResources(cost) {
+    if (!cost) return true;
+
+    if (!this.canAfford(cost)) {
+      return false;
+    }
+
+    return this._gameState.subtractResources(cost);
+  }
+
+  /**
+   * Grant a reward (add resources)
+   * @param {Object} reward - Reward object {gold: n, wheat: n, etc.}
+   */
+  grantReward(reward) {
+    if (!reward) return;
+    this._gameState.addResources(reward);
+  }
+
+  /**
+   * Add a specific resource
+   * @param {string} type - Resource type
+   * @param {number} amount - Amount to add
+   */
+  addResource(type, amount) {
+    this._gameState.addResources({ [type]: amount });
+  }
+
+  /**
+   * Subtract a specific resource
+   * @param {string} type - Resource type
+   * @param {number} amount - Amount to subtract
+   * @returns {boolean} True if successful
+   */
+  subtractResource(type, amount) {
+    return this._gameState.subtractResources({ [type]: amount });
+  }
+
+  // ==========================================
+  // PRODUCTION HELPERS
+  // ==========================================
+
+  /**
+   * Apply production (add resources from buildings)
+   * @param {Object} production - Production amounts {gold: n, wheat: n, etc.}
+   */
+  applyProduction(production) {
+    if (!production || Object.keys(production).length === 0) return;
+    this._gameState.addResources(production);
+  }
+
+  /**
+   * Apply consumption (subtract resources used by buildings)
+   * @param {Object} consumption - Consumption amounts
+   * @returns {boolean} True if all consumption was satisfied
+   */
+  applyConsumption(consumption) {
+    if (!consumption || Object.keys(consumption).length === 0) return true;
+
+    // Check if we can afford all consumption
+    if (!this.canAfford(consumption)) {
+      return false;
+    }
+
+    return this._gameState.subtractResources(consumption);
+  }
+
+  /**
+   * Process production with consumption
+   * Only produces if consumption can be satisfied
+   * @param {Object} production - What the building produces
+   * @param {Object} consumption - What the building consumes
+   * @returns {boolean} True if production occurred
+   */
+  processProductionWithConsumption(production, consumption) {
+    // If there's consumption, check if we can afford it
+    if (consumption && Object.keys(consumption).length > 0) {
+      if (!this.canAfford(consumption)) {
+        return false;
+      }
+      this._gameState.subtractResources(consumption);
+    }
+
+    // Apply production
+    if (production && Object.keys(production).length > 0) {
+      this._gameState.addResources(production);
+    }
+
+    return true;
+  }
+
+  // ==========================================
+  // TRADING HELPERS
+  // ==========================================
+
+  /**
+   * Sell resources for gold
+   * @param {string} resourceType - Type of resource to sell
+   * @param {number} quantity - Amount to sell
+   * @param {number} pricePerUnit - Gold received per unit
+   * @returns {{success: boolean, goldReceived: number}} Result
+   */
+  sellResource(resourceType, quantity, pricePerUnit) {
+    const currentAmount = this.getResource(resourceType);
+
+    if (currentAmount < quantity) {
+      return { success: false, goldReceived: 0 };
+    }
+
+    const goldReceived = quantity * pricePerUnit;
+
+    // Deduct resource and add gold
+    this._gameState.subtractResources({ [resourceType]: quantity });
+    this._gameState.addResources({ gold: goldReceived });
+
+    return { success: true, goldReceived };
+  }
+
+  /**
+   * Buy resources with gold
+   * @param {string} resourceType - Type of resource to buy
+   * @param {number} quantity - Amount to buy
+   * @param {number} pricePerUnit - Gold cost per unit
+   * @returns {{success: boolean, goldSpent: number}} Result
+   */
+  buyResource(resourceType, quantity, pricePerUnit) {
+    const totalCost = quantity * pricePerUnit;
+
+    if (!this.canAfford({ gold: totalCost })) {
+      return { success: false, goldSpent: 0 };
+    }
+
+    // Deduct gold and add resource
+    this._gameState.subtractResources({ gold: totalCost });
+    this._gameState.addResources({ [resourceType]: quantity });
+
+    return { success: true, goldSpent: totalCost };
+  }
+
+  // ==========================================
+  // FORMATTING HELPERS
+  // ==========================================
+
+  /**
+   * Format a number for display (K, M suffixes)
+   * @param {number} num
+   * @returns {string}
+   */
+  formatNumber(num) {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return Math.floor(num).toString();
+  }
+
+  /**
+   * Format a cost object for display
+   * @param {Object} cost - Cost object
+   * @returns {string}
+   */
+  formatCost(cost) {
+    if (!cost) return '';
+
+    const EMOJIS = { gold: '💰', wheat: '🌾', stone: '⛏️', wood: '🌲' };
+
+    return Object.entries(cost)
+      .map(([res, amt]) => `${this.formatNumber(amt)} ${EMOJIS[res] || res}`)
+      .join(' ');
+  }
+
+  /**
+   * Get resource emoji
+   * @param {string} type - Resource type
+   * @returns {string}
+   */
+  getResourceEmoji(type) {
+    const EMOJIS = { gold: '💰', wheat: '🌾', stone: '⛏️', wood: '🌲' };
+    return EMOJIS[type] || type;
+  }
+}

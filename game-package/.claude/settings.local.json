@@ -9,7 +9,11 @@
       "Bash(where gh:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(node --check:*)",
+      "Bash(npx http-server:*)",
+      "Bash(timeout /t 3 /nobreak)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
