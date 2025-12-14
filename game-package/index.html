@@ -517,18 +517,9 @@
       font-size: 0.9rem;
     }
     
-    /* Resource Bar */
+    /* Resource Bar - Hidden (moved to in-canvas overlay) */
     .resource-bar {
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      flex-wrap: wrap;
-      padding: 15px 20px;
-      background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
-      border: 2px solid #8D6E63;
-      margin-bottom: 20px;
+      display: none;
     }
     
     .resource {
@@ -1520,6 +1511,29 @@
       <div class="center-content">
         <!-- Game World -->
         <div class="game-world" id="game-world">
+          <!-- In-Canvas Resource Overlay -->
+          <div class="resource-overlay" id="resource-overlay">
+            <div class="resource-overlay-item">
+              <span class="resource-overlay-icon">💰</span>
+              <span class="resource-overlay-value" id="overlay-gold-value">50</span>
+              <span class="resource-overlay-rate neutral" id="overlay-gold-rate">+0/s</span>
+            </div>
+            <div class="resource-overlay-item">
+              <span class="resource-overlay-icon">🌾</span>
+              <span class="resource-overlay-value" id="overlay-wheat-value">0</span>
+              <span class="resource-overlay-rate neutral" id="overlay-wheat-rate">+0/s</span>
+            </div>
+            <div class="resource-overlay-item">
+              <span class="resource-overlay-icon">⛏️</span>
+              <span class="resource-overlay-value" id="overlay-stone-value">0</span>
+              <span class="resource-overlay-rate neutral" id="overlay-stone-rate">+0/s</span>
+            </div>
+            <div class="resource-overlay-item">
+              <span class="resource-overlay-icon">🌲</span>
+              <span class="resource-overlay-value" id="overlay-wood-value">0</span>
+              <span class="resource-overlay-rate neutral" id="overlay-wood-rate">+0/s</span>
+            </div>
+          </div>
           <div class="debug-grid"></div>
           <div class="ground-layer"></div>
           <div class="highlight-layer"></div>
@@ -2883,14 +2897,28 @@
     function updateUI(renderBuildings = false) {
       const production = calculateProduction();
 
-      // Update resources
+      // Update resources (both original bar and in-canvas overlay)
       ['gold', 'wheat', 'stone', 'wood'].forEach(res => {
-        document.getElementById(`${res}-value`).textContent = formatNumber(resources[res]);
-
-        const rateEl = document.getElementById(`${res}-rate`);
+        const value = formatNumber(resources[res]);
         const rate = production[res];
-        rateEl.textContent = (rate >= 0 ? '+' : '') + rate.toFixed(1) + '/s';
-        rateEl.className = `resource-rate ${rate > 0 ? 'positive' : rate < 0 ? 'negative' : 'neutral'}`;
+        const rateText = (rate >= 0 ? '+' : '') + rate.toFixed(1) + '/s';
+        const rateClass = `resource-rate ${rate > 0 ? 'positive' : rate < 0 ? 'negative' : 'neutral'}`;
+        const overlayRateClass = `resource-overlay-rate ${rate > 0 ? 'positive' : rate < 0 ? 'negative' : 'neutral'}`;
+
+        // Update original resource bar
+        document.getElementById(`${res}-value`).textContent = value;
+        const rateEl = document.getElementById(`${res}-rate`);
+        rateEl.textContent = rateText;
+        rateEl.className = rateClass;
+
+        // Update in-canvas overlay
+        const overlayValueEl = document.getElementById(`overlay-${res}-value`);
+        const overlayRateEl = document.getElementById(`overlay-${res}-rate`);
+        if (overlayValueEl) overlayValueEl.textContent = value;
+        if (overlayRateEl) {
+          overlayRateEl.textContent = rateText;
+          overlayRateEl.className = overlayRateClass;
+        }
       });
 
       // Update stats

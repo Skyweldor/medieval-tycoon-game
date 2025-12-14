@@ -23,9 +23,9 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-/* Resource Bar */
+/* Resource Bar - Hidden (moved to in-canvas overlay) */
 .resource-bar {
-  display: flex;
+  display: none;
   gap: 15px;
   justify-content: center;
   flex-wrap: wrap;
@@ -79,6 +79,54 @@
 .resource-rate.positive { color: #7CB342; }
 .resource-rate.negative { color: #E57373; }
 .resource-rate.neutral { color: #666; }
+
+/* In-Canvas Resource Overlay */
+.resource-overlay {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(62, 39, 35, 0.9);
+  border-radius: 10px;
+  border: 2px solid rgba(141, 110, 99, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.resource-overlay-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 100px;
+}
+
+.resource-overlay-icon {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.resource-overlay-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  min-width: 45px;
+}
+
+.resource-overlay-rate {
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.resource-overlay-rate.positive { color: #7CB342; }
+.resource-overlay-rate.negative { color: #E57373; }
+.resource-overlay-rate.neutral { color: #888; }
 
 /* Royal Stipend Indicator */
 .stipend-indicator {

@@ -13,7 +13,10 @@
       "Bash(node --check:*)",
       "Bash(npx http-server:*)",
       "Bash(timeout /t 3 /nobreak)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" remote -v)",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" status)",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" add game-package/)"
     ],
     "deny": [],
     "ask": []
