@@ -13,6 +13,15 @@ export class ResourceService {
   constructor(gameState, eventBus) {
     this._gameState = gameState;
     this._eventBus = eventBus;
+    this._storageService = null;  // Set via setStorageService() after initialization
+  }
+
+  /**
+   * Set the storage service reference (called after service container setup)
+   * @param {import('./StorageService.js').StorageService} storageService
+   */
+  setStorageService(storageService) {
+    this._storageService = storageService;
   }
 
   // ==========================================
@@ -275,5 +284,118 @@ export class ResourceService {
   getResourceEmoji(type) {
     const EMOJIS = { gold: '💰', wheat: '🌾', stone: '⛏️', wood: '🌲' };
     return EMOJIS[type] || type;
+  }
+
+  // ==========================================
+  // STORAGE CAP QUERIES
+  // ==========================================
+
+  /**
+   * Get storage cap for a resource
+   * @param {string} type - Resource type
+   * @returns {number} Cap (Infinity if uncapped or no storage service)
+   */
+  getCap(type) {
+    if (!this._storageService) return Infinity;
+    return this._storageService.getCap(type);
+  }
+
+  /**
+   * Get all storage caps
+   * @returns {{gold: number, wheat: number, stone: number, wood: number}}
+   */
+  getAllCaps() {
+    if (!this._storageService) {
+      return { gold: Infinity, wheat: Infinity, stone: Infinity, wood: Infinity };
+    }
+    return this._storageService.getAllCaps();
+  }
+
+  /**
+   * Check if a resource is at its storage cap
+   * @param {string} type - Resource type
+   * @returns {boolean}
+   */
+  isAtCap(type) {
+    if (!this._storageService) return false;
+    return this._storageService.isAtCap(type);
+  }
+
+  /**
+   * Get remaining storage space for a resource
+   * @param {string} type - Resource type
+   * @returns {number}
+   */
+  getRemainingSpace(type) {
+    if (!this._storageService) return Infinity;
+    return this._storageService.getRemainingSpace(type);
+  }
+
+  /**
+   * Get storage utilization percentage (0-100)
+   * @param {string} type - Resource type
+   * @returns {number}
+   */
+  getUtilization(type) {
+    if (!this._storageService) return 0;
+    return this._storageService.getUtilization(type);
+  }
+
+  /**
+   * Get full storage info for all resources
+   * @returns {Object}
+   */
+  getStorageInfo() {
+    if (!this._storageService) {
+      const resources = this._gameState.getResources();
+      const info = {};
+      Object.keys(resources).forEach(type => {
+        info[type] = {
+          current: resources[type],
+          cap: Infinity,
+          isCapped: false,
+          remaining: Infinity,
+          utilization: 0,
+          isAtCap: false,
+          displayCap: null
+        };
+      });
+      return info;
+    }
+    return this._storageService.getStorageInfo();
+  }
+
+  /**
+   * Format a resource value with its cap for display
+   * @param {string} type - Resource type
+   * @returns {string} e.g., "80/200" or "500" if uncapped
+   */
+  formatWithCap(type) {
+    const current = this.getResource(type);
+    const cap = this.getCap(type);
+
+    if (cap === Infinity) {
+      return this.formatNumber(current);
+    }
+    return `${this.formatNumber(current)}/${this.formatNumber(cap)}`;
+  }
+
+  /**
+   * Check if resource has a storage cap
+   * @param {string} type - Resource type
+   * @returns {boolean}
+   */
+  isCapped(type) {
+    return this.getCap(type) !== Infinity;
+  }
+
+  /**
+   * Get resources that are at or near cap (for warnings)
+   * @param {number} [threshold=90] - Warning threshold percentage
+   * @returns {string[]}
+   */
+  getResourcesNearCap(threshold = 90) {
+    if (!this._storageService) return [];
+    return this._storageService.getResourcesNearCap(threshold);
   }
 }

@@ -830,3 +830,116 @@
   border-color: #7CB342;
   color: #7CB342;
 }
+
+/* ==========================================
+   Storage Cap Styles
+   ========================================== */
+
+/* Resource value at storage cap */
+.resource-value.at-cap,
+.resource-overlay-value.at-cap {
+  color: #E57373;
+}
+
+/* Resource value near cap (>90%) */
+.resource-value.near-cap,
+.resource-overlay-value.near-cap {
+  color: #FFB74D;
+}
+
+/* Rate indicator when at cap */
+.resource-rate.at-cap,
+.resource-overlay-rate.at-cap {
+  color: #E57373;
+  font-weight: 700;
+}
+
+/* ==========================================
+   Demolish Mode Styles
+   ========================================== */
+
+/* Demolish section in build tab */
+.demolish-section {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Demolish button */
+.btn-demolish {
+  width: 100%;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #8D6E63 0%, #6D4C41 100%);
+  color: #fff;
+  border: 2px solid #A1887F;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-demolish:hover:not(.disabled) {
+  background: linear-gradient(135deg, #C62828 0%, #B71C1C 100%);
+  border-color: #EF5350;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(198, 40, 40, 0.4);
+}
+
+.btn-demolish.selected {
+  background: linear-gradient(135deg, #C62828 0%, #B71C1C 100%);
+  border-color: #EF5350;
+  box-shadow: 0 0 15px rgba(229, 115, 115, 0.5);
+  animation: demolish-pulse 1s infinite;
+}
+
+.btn-demolish.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Demolish cancel button */
+.demolish-cancel {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.demolish-cancel button {
+  width: 100%;
+}
+
+/* Building slot in demolish mode */
+.building-slot.demolish-mode {
+  cursor: crosshair !important;
+}
+
+.building-slot.demolish-mode:hover {
+  filter: brightness(1.2) saturate(0.5) sepia(1) hue-rotate(-50deg);
+  transform: scale(1.05);
+  z-index: 100;
+}
+
+.building-slot.demolish-mode::after {
+  content: '🗑️';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.building-slot.demolish-mode:hover::after {
+  opacity: 1;
+}
+
+/* Demolish pulse animation */
+@keyframes demolish-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(229, 115, 115, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(229, 115, 115, 0.8);
+  }
+}

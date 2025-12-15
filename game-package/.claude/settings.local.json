@@ -16,7 +16,19 @@
       "Bash(curl:*)",
       "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" remote -v)",
       "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" status)",
-      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" add game-package/)"
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" add game-package/)",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" diff --cached --stat)",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" commit -m \"$(cat <<''EOF''\nAdd in-canvas resource overlay and improve placement UX\n\n- Add resource overlay displaying gold/wheat/stone/wood with live rates directly on game canvas\n- Improve CSS styling for resource overlay with semi-transparent background\n- Update local Claude settings\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" push)",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" pull)",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" log --oneline -3)",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" add game-package/src/services/SaveLoadService.js game-package/src/ui/DevPanelController.js game-package/index.html game-package/src/core/GameController.js game-package/src/main.js game-package/styles/components.css)",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" commit -m \"$(cat <<''EOF''\nAdd persistence system and dev panel (Milestone B)\n\n- Add SaveLoadService with autosave, localStorage, schema versioning\n- Debounced save on building placed/upgraded, milestones, sales\n- Auto-load saved state on page refresh\n- Add DevPanelController with playtest controls (?dev=1)\n- Speed controls (0.5x to 10x), resource spawning, save/load UI\n- Export/import save JSON for scenario testing\n- Update GameController to use GameLoop for speed control support\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" log --oneline -5)",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" diff --stat)",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" diff game-package/src/main.js)",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" diff game-package/src/services/BuildingService.js)",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" diff game-package/src/ui/PlacementController.js)"
     ],
     "deny": [],
     "ask": []

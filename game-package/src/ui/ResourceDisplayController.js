@@ -69,16 +69,30 @@ export class ResourceDisplayController {
    * @private
    */
   _updateResourceDisplay(type, value, rate) {
-    const formattedValue = this._resourceService.formatNumber(value);
-    const rateText = this._formatRate(rate);
-    const rateClass = this._getRateClass(rate);
-    const overlayRateClass = this._getOverlayRateClass(rate);
+    // Get storage info for cap display
+    const cap = this._resourceService.getCap(type);
+    const isCapped = cap !== Infinity;
+    const isAtCap = isCapped && value >= cap;
+    const isNearCap = isCapped && !isAtCap && (value / cap) >= 0.9;
+
+    // Format value with cap if applicable
+    const formattedValue = isCapped
+      ? `${this._resourceService.formatNumber(value)}/${this._resourceService.formatNumber(cap)}`
+      : this._resourceService.formatNumber(value);
+
+    const rateText = this._formatRate(rate, isAtCap);
+    const rateClass = this._getRateClass(rate, isAtCap);
+    const overlayRateClass = this._getOverlayRateClass(rate, isAtCap);
+    const valueClass = this._getValueClass(isAtCap, isNearCap);
 
     // Update main resource bar
     const valueEl = document.getElementById(`${type}-value`);
     const rateEl = document.getElementById(`${type}-rate`);
 
-    if (valueEl) valueEl.textContent = formattedValue;
+    if (valueEl) {
+      valueEl.textContent = formattedValue;
+      valueEl.className = `resource-value ${valueClass}`;
+    }
     if (rateEl) {
       rateEl.textContent = rateText;
       rateEl.className = rateClass;
@@ -88,7 +102,10 @@ export class ResourceDisplayController {
     const overlayValueEl = document.getElementById(`overlay-${type}-value`);
     const overlayRateEl = document.getElementById(`overlay-${type}-rate`);
 
-    if (overlayValueEl) overlayValueEl.textContent = formattedValue;
+    if (overlayValueEl) {
+      overlayValueEl.textContent = formattedValue;
+      overlayValueEl.className = `resource-overlay-value ${valueClass}`;
+    }
     if (overlayRateEl) {
       overlayRateEl.textContent = rateText;
       overlayRateEl.className = overlayRateClass;
@@ -96,12 +113,30 @@ export class ResourceDisplayController {
   }
 
   /**
-   * Format production rate for display
-   * @param {number} rate
+   * Get CSS class for resource value based on cap status
+   * @param {boolean} isAtCap
+   * @param {boolean} isNearCap
    * @returns {string}
    * @private
    */
-  _formatRate(rate) {
+  _getValueClass(isAtCap, isNearCap) {
+    if (isAtCap) return 'at-cap';
+    if (isNearCap) return 'near-cap';
+    return '';
+  }
+
+  /**
+   * Format production rate for display
+   * @param {number} rate
+   * @param {boolean} [isAtCap=false] - Whether resource is at storage cap
+   * @returns {string}
+   * @private
+   */
+  _formatRate(rate, isAtCap = false) {
+    // Show "FULL" indicator when at cap with positive production
+    if (isAtCap && rate > 0) {
+      return 'FULL';
+    }
     const prefix = rate >= 0 ? '+' : '';
     return `${prefix}${rate.toFixed(1)}/s`;
   }
@@ -109,10 +144,12 @@ export class ResourceDisplayController {
   /**
    * Get CSS class for resource rate element
    * @param {number} rate
+   * @param {boolean} [isAtCap=false] - Whether resource is at storage cap
    * @returns {string}
    * @private
    */
-  _getRateClass(rate) {
+  _getRateClass(rate, isAtCap = false) {
+    if (isAtCap && rate > 0) return 'resource-rate at-cap';
     if (rate > 0) return 'resource-rate positive';
     if (rate < 0) return 'resource-rate negative';
     return 'resource-rate neutral';
@@ -121,10 +158,12 @@ export class ResourceDisplayController {
   /**
    * Get CSS class for overlay rate element
    * @param {number} rate
+   * @param {boolean} [isAtCap=false] - Whether resource is at storage cap
    * @returns {string}
    * @private
    */
-  _getOverlayRateClass(rate) {
+  _getOverlayRateClass(rate, isAtCap = false) {
+    if (isAtCap && rate > 0) return 'resource-overlay-rate at-cap';
     if (rate > 0) return 'resource-overlay-rate positive';
     if (rate < 0) return 'resource-overlay-rate negative';
     return 'resource-overlay-rate neutral';

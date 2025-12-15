@@ -47,6 +47,16 @@ export class GameStateService {
   constructor(eventBus) {
     this._eventBus = eventBus;
     this._state = this._createInitialState();
+    this._storageService = null;  // Set via setStorageService() after initialization
+  }
+
+  /**
+   * Set the storage service reference (called after service container setup)
+   * This enables resource clamping based on storage caps
+   * @param {import('./StorageService.js').StorageService} storageService
+   */
+  setStorageService(storageService) {
+    this._storageService = storageService;
   }
 
   /**
@@ -80,11 +90,24 @@ export class GameStateService {
 
   /**
    * Set resources directly (use sparingly - prefer add/subtract)
+   * Applies storage caps if StorageService is available
    * @param {Object} resources - Resource amounts
    */
   setResources(resources) {
     const oldResources = { ...this._state.resources };
-    this._state.resources = { ...this._state.resources, ...resources };
+    const newResources = { ...this._state.resources, ...resources };
+
+    // Apply storage caps if available
+    if (this._storageService) {
+      Object.keys(newResources).forEach(type => {
+        const cap = this._storageService.getCap(type);
+        if (newResources[type] > cap) {
+          newResources[type] = cap;
+        }
+      });
+    }
+
+    this._state.resources = newResources;
     this._eventBus.publish(Events.RESOURCES_CHANGED, {
       oldResources,
       newResources: this.getResources(),
@@ -93,19 +116,40 @@ export class GameStateService {
   }
 
   /**
-   * Add to resources
+   * Add to resources (with storage cap enforcement)
    * @param {Object} amounts - Resource amounts to add
+   * @returns {{added: Object, capped: Object}} Actual amounts added and any that were capped
    */
   addResources(amounts) {
     const oldResources = { ...this._state.resources };
+    const actualDelta = {};
+    const capped = {};
+
     Object.entries(amounts).forEach(([type, amount]) => {
-      this._state.resources[type] = (this._state.resources[type] || 0) + amount;
+      const current = this._state.resources[type] || 0;
+      let newValue = current + amount;
+
+      // Apply storage cap if StorageService is available
+      if (this._storageService) {
+        const cap = this._storageService.getCap(type);
+        if (newValue > cap) {
+          capped[type] = newValue - cap;  // Track overflow
+          newValue = cap;
+        }
+      }
+
+      this._state.resources[type] = newValue;
+      actualDelta[type] = newValue - current;
     });
+
     this._eventBus.publish(Events.RESOURCES_CHANGED, {
       oldResources,
       newResources: this.getResources(),
-      delta: amounts
+      delta: actualDelta,
+      capped: Object.keys(capped).length > 0 ? capped : null
     });
+
+    return { added: actualDelta, capped };
   }
 
   /**
@@ -204,6 +248,19 @@ export class GameStateService {
    */
   countBuildings(type) {
     return this._state.buildings.filter(b => b.type === type).length;
+  }
+
+  /**
+   * Remove a building by index
+   * @param {number} index - Building index to remove
+   * @returns {Object|null} The removed building or null if index invalid
+   */
+  removeBuilding(index) {
+    if (index < 0 || index >= this._state.buildings.length) {
+      return null;
+    }
+    const removed = this._state.buildings.splice(index, 1)[0];
+    return removed;
   }
 
   // ==========================================

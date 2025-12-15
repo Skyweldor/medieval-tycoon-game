@@ -122,21 +122,15 @@ export class TileRenderer {
     world.style.setProperty('--tile-height', `${tileHeight}px`);
     world.style.setProperty('--building-size', `${gridWidth * this._debugSizeMult}px`);
 
-    // Get tiles occupied by buildings (to skip rendering them)
-    const occupiedTiles = this._buildingService.getOccupiedTiles();
-
     // Clear existing tiles
     groundLayer.innerHTML = '';
 
     // Collect tiles with their z-order for sorting
+    // Note: Always render ALL tiles - buildings render on top of them
     const tilesToRender = [];
 
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
-        // Skip tiles occupied by buildings
-        const key = `${row},${col}`;
-        if (occupiedTiles.has(key)) continue;
-
         const tileType = TILE_MAP[row]?.[col] ?? TILE.GRASS;
         const pos = this._coordinateService.gridToScreen(col, row);
 

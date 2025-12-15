@@ -14,8 +14,8 @@ const STORAGE_KEY = 'medieval_tycoon_save';
 /** Autosave interval in milliseconds (30 seconds) */
 const AUTOSAVE_INTERVAL = 30000;
 
-/** Debounce delay for event-triggered saves (2 seconds) */
-const DEBOUNCE_DELAY = 2000;
+/** Debounce delay for event-triggered saves (500ms - responsive but still batches rapid actions) */
+const DEBOUNCE_DELAY = 500;
 
 export class SaveLoadService {
   /**
@@ -47,9 +47,10 @@ export class SaveLoadService {
    * @private
    */
   _setupEventListeners() {
-    // Building placed/upgraded - important save trigger
+    // Building placed/upgraded/removed - important save trigger
     this._eventBus.subscribe(Events.BUILDING_PLACED, () => this._debouncedSave());
     this._eventBus.subscribe(Events.BUILDING_UPGRADED, () => this._debouncedSave());
+    this._eventBus.subscribe(Events.BUILDING_REMOVED, () => this._debouncedSave());
 
     // Milestone completed - save achievement progress
     this._eventBus.subscribe(Events.MILESTONE_COMPLETED, () => this._debouncedSave());
@@ -57,6 +58,16 @@ export class SaveLoadService {
     // Merchant sale - save after trading
     this._eventBus.subscribe(Events.MERCHANT_SALE, () => this._debouncedSave());
     this._eventBus.subscribe(Events.MARKET_SALE, () => this._debouncedSave());
+
+    // Save immediately when user leaves/refreshes the page
+    window.addEventListener('beforeunload', () => {
+      if (this._debounceTimeoutId !== null) {
+        // There's a pending save - do it now!
+        clearTimeout(this._debounceTimeoutId);
+        this._debounceTimeoutId = null;
+        this.save();
+      }
+    });
   }
 
   /**

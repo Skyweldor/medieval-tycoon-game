@@ -100,6 +100,7 @@ export class BuildingRenderer {
     // Create container
     const slot = document.createElement('div');
     slot.className = 'building-slot built';
+    slot.dataset.buildingIndex = index;  // Track index for reliable lookups
     slot.style.left = `${pos.x}px`;
     slot.style.top = `${pos.y}px`;
     slot.style.zIndex = Math.floor(pos.z);
@@ -216,10 +217,10 @@ export class BuildingRenderer {
     const building = buildings[index];
     if (!building) return;
 
-    // Remove old element and re-render
-    const slots = world.querySelectorAll('.building-slot');
-    if (slots[index]) {
-      slots[index].remove();
+    // Remove old element by data attribute (not DOM order)
+    const oldSlot = world.querySelector(`.building-slot[data-building-index="${index}"]`);
+    if (oldSlot) {
+      oldSlot.remove();
     }
 
     const element = this._createBuildingElement(building, index);
@@ -236,7 +237,6 @@ export class BuildingRenderer {
     const world = gameWorld || document.getElementById('game-world');
     if (!world) return null;
 
-    const slots = world.querySelectorAll('.building-slot');
-    return slots[index] || null;
+    return world.querySelector(`.building-slot[data-building-index="${index}"]`);
   }
 }

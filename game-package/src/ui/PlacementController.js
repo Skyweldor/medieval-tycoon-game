@@ -50,6 +50,9 @@ export class PlacementController {
     this._hoverRow = null;
     this._hoverCol = null;
 
+    // Demolish mode state
+    this._demolishMode = false;
+
     // Bound event handlers (for removal)
     this._boundMouseMove = this._handleMouseMove.bind(this);
     this._boundClick = this._handleClick.bind(this);
@@ -94,6 +97,14 @@ export class PlacementController {
     return { row: this._hoverRow, col: this._hoverCol };
   }
 
+  /**
+   * Check if demolish mode is active
+   * @returns {boolean}
+   */
+  isDemolishMode() {
+    return this._demolishMode;
+  }
+
   // ==========================================
   // PLACEMENT MODE CONTROL
   // ==========================================
@@ -103,6 +114,11 @@ export class PlacementController {
    * @param {string} type - Building type to place
    */
   selectBuilding(type) {
+    // Cancel demolish mode if active
+    if (this._demolishMode) {
+      this.cancelDemolish();
+    }
+
     // Clicking same building again cancels
     if (this._active && this._buildingType === type) {
       this.cancel();
@@ -131,6 +147,92 @@ export class PlacementController {
     this._clearHighlights();
     this._enableBuildingInteraction();  // Re-enable clicking on placed buildings
     this.renderBuildList();
+  }
+
+  // ==========================================
+  // DEMOLISH MODE CONTROL
+  // ==========================================
+
+  /**
+   * Toggle demolish mode on/off
+   */
+  toggleDemolishMode() {
+    if (this._demolishMode) {
+      this.cancelDemolish();
+    } else {
+      this.enterDemolishMode();
+    }
+  }
+
+  /**
+   * Enter demolish mode
+   */
+  enterDemolishMode() {
+    // Cancel placement mode if active
+    if (this._active) {
+      this.cancel();
+    }
+
+    this._demolishMode = true;
+    this._enableDemolishHighlights();
+    this.renderBuildList();
+    this._notify('Click on a building to demolish it (50% refund)', 'info');
+  }
+
+  /**
+   * Cancel demolish mode
+   */
+  cancelDemolish() {
+    this._demolishMode = false;
+    this._clearDemolishHighlights();
+    this.renderBuildList();
+  }
+
+  /**
+   * Add demolish highlight styling to all building slots
+   * @private
+   */
+  _enableDemolishHighlights() {
+    document.querySelectorAll('.building-slot').forEach(slot => {
+      slot.classList.add('demolish-mode');
+    });
+  }
+
+  /**
+   * Remove demolish highlight styling from all building slots
+   * @private
+   */
+  _clearDemolishHighlights() {
+    document.querySelectorAll('.building-slot').forEach(slot => {
+      slot.classList.remove('demolish-mode');
+    });
+  }
+
+  /**
+   * Handle demolishing a building
+   * @param {Object} building - Building to demolish
+   */
+  demolishBuilding(building) {
+    if (!this._demolishMode) return;
+
+    const def = BUILDINGS[building.type];
+    const buildingName = def?.name || building.type;
+
+    // Calculate refund for notification
+    const refund = this._buildingService.calculateRefund(building);
+    const refundText = Object.entries(refund)
+      .map(([r, a]) => `${a} ${r}`)
+      .join(', ');
+
+    const result = this._buildingService.removeBuildingByRef(building);
+
+    if (result.success) {
+      this._notify(`${buildingName} demolished! Refund: ${refundText}`, 'success');
+      // Note: BUILDING_REMOVED event will trigger UI updates
+      this.cancelDemolish();
+    } else if (result.error) {
+      this._notify(result.error, 'error');
+    }
   }
 
   // ==========================================
@@ -426,10 +528,26 @@ export class PlacementController {
       }
     });
 
-    // Show/hide cancel button
+    // Show/hide cancel button (for placement mode)
     const cancelBtn = document.getElementById('build-cancel');
     if (cancelBtn) {
       cancelBtn.style.display = this._active ? 'block' : 'none';
+    }
+
+    // Update demolish button state
+    const demolishBtn = document.getElementById('demolish-btn');
+    if (demolishBtn) {
+      demolishBtn.classList.toggle('selected', this._demolishMode);
+      // Disable if no buildings to demolish
+      const hasBuildings = this._buildingService.getBuildingCount() > 0;
+      demolishBtn.classList.toggle('disabled', !hasBuildings);
+      demolishBtn.disabled = !hasBuildings;
+    }
+
+    // Show/hide demolish cancel button
+    const demolishCancelBtn = document.getElementById('demolish-cancel');
+    if (demolishCancelBtn) {
+      demolishCancelBtn.style.display = this._demolishMode ? 'block' : 'none';
     }
   }
 }

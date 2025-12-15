@@ -34,6 +34,9 @@ export class GameController {
 
     console.log('[GameController] Initializing...');
 
+    // Initialize storage service (must happen before load to enable clamping)
+    this._container.get('storageService');
+
     // Load saved state if available (do this BEFORE rendering)
     this._loadSavedState();
 
@@ -159,11 +162,41 @@ export class GameController {
     this._eventBus.subscribe(Events.BUILDING_PLACED, (data) => {
       this._uiControllers.placement.renderBuildList();
 
+      // Invalidate storage cache (barns affect caps)
+      const storageService = this._container.get('storageService');
+      storageService.invalidateCache();
+
       // Render just the new building (avoids flash from clearing all buildings)
       const buildingRenderer = this._container.get('buildingRenderer');
       const buildings = this._container.get('gameState').getBuildings();
       const index = buildings.length - 1;
       buildingRenderer.renderSingle(data.building, index);
+    });
+
+    // Handle building upgrade - re-render building and invalidate storage cache
+    this._eventBus.subscribe(Events.BUILDING_UPGRADED, (data) => {
+      // Re-render the upgraded building to update sprite and level badge
+      const buildingRenderer = this._container.get('buildingRenderer');
+      buildingRenderer.updateBuilding(data.index);
+
+      // Invalidate storage cache (barn upgrades affect caps)
+      const storageService = this._container.get('storageService');
+      storageService.invalidateCache();
+    });
+
+    // Handle building removal (demolish) - re-render tiles, buildings and update storage
+    this._eventBus.subscribe(Events.BUILDING_REMOVED, () => {
+      // Re-render tiles (tiles under demolished building need to reappear)
+      const tileRenderer = this._container.get('tileRenderer');
+      tileRenderer.render();
+
+      // Re-render all buildings (indices may have changed after removal)
+      const buildingRenderer = this._container.get('buildingRenderer');
+      buildingRenderer.render();
+
+      // Invalidate storage cache (barns affect caps)
+      const storageService = this._container.get('storageService');
+      storageService.invalidateCache();
     });
 
     // Update build list on every tick so affordability/unlock states refresh

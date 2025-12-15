@@ -111,6 +111,15 @@ export class UIIntegration {
         this._requestUIUpdate();
       })
     );
+
+    // Building removed (demolished) - update UI
+    this._unsubscribers.push(
+      this._eventBus.subscribe(Events.BUILDING_REMOVED, () => {
+        this._requestUIUpdate();
+        // Re-render build list to update affordability and demolish button state
+        this._placementController.renderBuildList();
+      })
+    );
   }
 
   // ==========================================

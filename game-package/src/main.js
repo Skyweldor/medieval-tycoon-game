@@ -78,6 +78,9 @@ import { MilestoneService } from './services/MilestoneService.js';
 import { MerchantService } from './services/MerchantService.js';
 import { MarketService } from './services/MarketService.js';
 
+// Services (Phase C - Storage)
+import { StorageService } from './services/StorageService.js';
+
 // Services (Phase B - Persistence)
 import { SaveLoadService } from './services/SaveLoadService.js';
 
@@ -145,6 +148,10 @@ import {
 // Placement Controller - for build list onclick and cancel button
 window.selectBuildingForPlacement = (type) => container.get('placementController').selectBuilding(type);
 window.cancelPlacement = () => container.get('placementController').cancel();
+
+// Demolish Mode - for demolish button onclick handlers
+window.toggleDemolishMode = () => container.get('placementController').toggleDemolishMode();
+window.cancelDemolish = () => container.get('placementController').cancelDemolish();
 
 // Tab Controller - for tab button onclick handlers
 window.switchTab = (tabName) => container.get('tabController').switchTab(tabName);
@@ -241,6 +248,15 @@ container.register('marketService', (c) => new MarketService(
   c.get('resourceService'),
   c.get('eventBus')
 ));
+
+// Phase C services (Storage)
+container.register('storageService', (c) => {
+  const storageService = new StorageService(c.get('gameState'));
+  // Wire up cross-references for clamping
+  c.get('gameState').setStorageService(storageService);
+  c.get('resourceService').setStorageService(storageService);
+  return storageService;
+});
 
 // Phase B services (Persistence)
 container.register('saveLoadService', (c) => new SaveLoadService(
@@ -350,7 +366,18 @@ container.register('buildingRenderer', (c) => {
     c.get('gameState'),
     {
       onBuildingClick: (index) => {
-        // Delegate to buildingService for upgrade, then show notification
+        const placementController = c.get('placementController');
+
+        // Check if demolish mode is active
+        if (placementController.isDemolishMode()) {
+          const building = c.get('buildingService').getBuildingByIndex(index);
+          if (building) {
+            placementController.demolishBuilding(building);
+          }
+          return;
+        }
+
+        // Normal mode: Delegate to buildingService for upgrade
         const result = c.get('buildingService').upgradeBuilding(index);
         if (result.success) {
           const building = c.get('buildingService').getBuildingByIndex(index);
@@ -430,6 +457,8 @@ export {
   // Services (Phase 6)
   MerchantService,
   MarketService,
+  // Services (Phase C - Storage)
+  StorageService,
   // Services (Phase B - Persistence)
   SaveLoadService,
   // UI Controllers (Phase 8)

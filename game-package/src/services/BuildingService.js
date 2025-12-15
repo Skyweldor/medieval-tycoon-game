@@ -227,6 +227,100 @@ export class BuildingService {
   }
 
   // ==========================================
+  // BUILDING REMOVAL (DEMOLISH)
+  // ==========================================
+
+  /**
+   * Calculate refund amount for removing a building (50% of costs)
+   * @param {Object} building - Building object with type and level
+   * @returns {Object} Refund amounts by resource type
+   */
+  calculateRefund(building) {
+    const def = getBuildingDef(building.type);
+    if (!def) return {};
+
+    const refund = {};
+    const REFUND_RATE = 0.5; // 50% refund
+
+    // Add 50% of base cost
+    Object.entries(def.baseCost).forEach(([resource, amount]) => {
+      refund[resource] = (refund[resource] || 0) + Math.floor(amount * REFUND_RATE);
+    });
+
+    // Add 50% of upgrade costs (for all levels up to current)
+    if (def.upgrades && building.level > 0) {
+      for (let i = 0; i < building.level; i++) {
+        const upgradeCost = def.upgrades[i]?.cost;
+        if (upgradeCost) {
+          Object.entries(upgradeCost).forEach(([resource, amount]) => {
+            refund[resource] = (refund[resource] || 0) + Math.floor(amount * REFUND_RATE);
+          });
+        }
+      }
+    }
+
+    return refund;
+  }
+
+  /**
+   * Remove a building and refund resources
+   * @param {number} index - Building index to remove
+   * @returns {{success: boolean, error: string|null, refund: Object|null}}
+   */
+  removeBuilding(index) {
+    const buildings = this._gameState.getBuildings();
+    const building = buildings[index];
+
+    if (!building) {
+      return { success: false, error: 'Building not found', refund: null };
+    }
+
+    const def = getBuildingDef(building.type);
+    if (!def) {
+      return { success: false, error: 'Unknown building type', refund: null };
+    }
+
+    // Calculate refund before removal
+    const refund = this.calculateRefund(building);
+
+    // Remove the building from state
+    const removed = this._gameState.removeBuilding(index);
+    if (!removed) {
+      return { success: false, error: 'Failed to remove building', refund: null };
+    }
+
+    // Grant refund
+    if (Object.keys(refund).length > 0) {
+      this._resourceService.grantReward(refund);
+    }
+
+    // Publish removal event
+    this._eventBus.publish(Events.BUILDING_REMOVED, {
+      building: removed,
+      index,
+      refund,
+      type: removed.type,
+      row: removed.row,
+      col: removed.col
+    });
+
+    return { success: true, error: null, refund };
+  }
+
+  /**
+   * Remove a building by reference
+   * @param {Object} building - Building to remove
+   * @returns {{success: boolean, error: string|null, refund: Object|null}}
+   */
+  removeBuildingByRef(building) {
+    const index = this.getBuildingIndex(building);
+    if (index === -1) {
+      return { success: false, error: 'Building not found', refund: null };
+    }
+    return this.removeBuilding(index);
+  }
+
+  // ==========================================
   // BUILDING UPGRADES
   // ==========================================
 
