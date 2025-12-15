@@ -78,11 +78,17 @@ import { MilestoneService } from './services/MilestoneService.js';
 import { MerchantService } from './services/MerchantService.js';
 import { MarketService } from './services/MarketService.js';
 
+// Services (Phase B - Persistence)
+import { SaveLoadService } from './services/SaveLoadService.js';
+
 // UI Controllers (Phase 8)
 import { PlacementController } from './ui/PlacementController.js';
 import { TabController } from './ui/TabController.js';
 import { MerchantPanelController } from './ui/MerchantPanelController.js';
 import { DebugController } from './ui/DebugController.js';
+
+// UI Controllers (Phase B - Dev Panel)
+import { DevPanelController } from './ui/DevPanelController.js';
 
 // UI Controllers (Phase 10 - New controllers for full modular architecture)
 import { NotificationController } from './ui/NotificationController.js';
@@ -161,6 +167,17 @@ window.toggleDebugSliders = () => container.get('debugController').toggleSliders
 window.toggleDarkMode = () => container.get('debugController').toggleDarkMode();
 window.copyDebugValues = () => container.get('debugController').copyValues();
 
+// Dev Panel Controller - for dev panel onclick handlers
+window.devSaveNow = () => container.get('devPanelController').saveNow();
+window.devLoadSave = () => container.get('devPanelController').loadSave();
+window.devClearSave = () => container.get('devPanelController').clearSave();
+window.devExportSave = () => container.get('devPanelController').exportSave();
+window.devImportSave = () => container.get('devPanelController').importSave();
+window.devToggleAutosave = () => container.get('devPanelController').toggleAutosave();
+window.devSetSpeed = (idx) => container.get('devPanelController').setSpeed(idx);
+window.devSpawnResource = (type) => container.get('devPanelController').spawnResource(type);
+window.devSpawnAll = () => container.get('devPanelController').spawnAll();
+
 // Game Controller - initialization and reset
 window.initializeUI = () => {
   const gameController = container.get('gameController');
@@ -225,6 +242,12 @@ container.register('marketService', (c) => new MarketService(
   c.get('eventBus')
 ));
 
+// Phase B services (Persistence)
+container.register('saveLoadService', (c) => new SaveLoadService(
+  c.get('gameState'),
+  c.get('eventBus')
+));
+
 // Phase 8 UI Controllers
 // Note: These require DOM elements, so they're created but not initialized until DOM ready
 container.register('placementController', (c) => new PlacementController(
@@ -245,6 +268,15 @@ container.register('merchantPanelController', (c) => new MerchantPanelController
 ));
 
 container.register('debugController', (c) => new DebugController(
+  c.get('eventBus')
+));
+
+// Phase B Dev Panel Controller
+container.register('devPanelController', (c) => new DevPanelController(
+  c.get('saveLoadService'),
+  c.get('gameState'),
+  c.get('resourceService'),
+  c.get('gameLoop'),
   c.get('eventBus')
 ));
 
@@ -398,11 +430,15 @@ export {
   // Services (Phase 6)
   MerchantService,
   MarketService,
+  // Services (Phase B - Persistence)
+  SaveLoadService,
   // UI Controllers (Phase 8)
   PlacementController,
   TabController,
   MerchantPanelController,
   DebugController,
+  // UI Controllers (Phase B - Dev Panel)
+  DevPanelController,
   // UI Controllers (Phase 10)
   NotificationController,
   ResourceDisplayController,

@@ -13,9 +13,6 @@ export class GameController {
   constructor(container, eventBus) {
     this._container = container;
     this._eventBus = eventBus;
-
-    this._tickInterval = null;
-    this._stipendInterval = null;
     this._initialized = false;
 
     // UI Controllers (will be set during initialization)
@@ -24,6 +21,7 @@ export class GameController {
 
   /**
    * Initialize the game
+   * - Loads saved state if available
    * - Sets up all UI controllers
    * - Renders initial state
    * - Starts game loops
@@ -36,6 +34,9 @@ export class GameController {
 
     console.log('[GameController] Initializing...');
 
+    // Load saved state if available (do this BEFORE rendering)
+    this._loadSavedState();
+
     // Initialize UI controllers
     this._initializeUIControllers();
 
@@ -45,14 +46,40 @@ export class GameController {
     // Set up event subscriptions for UI updates
     this._setupEventSubscriptions();
 
-    // Start game loops
+    // Start game loops (uses GameLoop for speed control support)
     this._startGameLoops();
 
-    // Schedule first merchant visit
+    // Schedule first merchant visit (only if not loaded from save)
     this._scheduleMerchantVisit();
+
+    // Start autosave
+    this._startAutosave();
 
     this._initialized = true;
     console.log('[GameController] Initialization complete');
+  }
+
+  /**
+   * Load saved state if available
+   * @private
+   */
+  _loadSavedState() {
+    const saveLoadService = this._container.get('saveLoadService');
+    if (saveLoadService.hasSave()) {
+      const result = saveLoadService.load();
+      if (result.success) {
+        console.log('[GameController] Loaded saved game');
+      }
+    }
+  }
+
+  /**
+   * Start autosave
+   * @private
+   */
+  _startAutosave() {
+    const saveLoadService = this._container.get('saveLoadService');
+    saveLoadService.startAutosave();
   }
 
   /**
@@ -87,6 +114,10 @@ export class GameController {
     placementController.renderBuildList();
     debugController.setupSliders();
 
+    // Dev panel controller (only initializes if ?dev=1)
+    const devPanelController = this._container.get('devPanelController');
+    devPanelController.initialize();
+
     // Store references
     this._uiControllers = {
       notification: notificationController,
@@ -99,7 +130,8 @@ export class GameController {
       placement: placementController,
       tab: tabController,
       merchantPanel: merchantPanelController,
-      debug: debugController
+      debug: debugController,
+      devPanel: devPanelController
     };
   }
 
@@ -176,22 +208,30 @@ export class GameController {
     this._eventBus.subscribe(Events.GAME_RESET, () => {
       this._onGameReset();
     });
+
+    // Handle state loaded (from save)
+    this._eventBus.subscribe(Events.STATE_LOADED, () => {
+      this._onStateLoaded();
+    });
   }
 
   /**
-   * Start game loops
+   * Handle state loaded from save
+   * @private
+   */
+  _onStateLoaded() {
+    // Re-render everything
+    this._renderInitialState();
+    console.log('[GameController] State loaded, re-rendered UI');
+  }
+
+  /**
+   * Start game loops (uses GameLoop for speed control support)
    * @private
    */
   _startGameLoops() {
-    // Main game tick (1 second)
-    this._tickInterval = setInterval(() => {
-      this._eventBus.publish(Events.TICK);
-    }, 1000);
-
-    // Stipend tick (2 seconds)
-    this._stipendInterval = setInterval(() => {
-      this._eventBus.publish(Events.STIPEND_TICK);
-    }, 2000);
+    const gameLoop = this._container.get('gameLoop');
+    gameLoop.start();
   }
 
   /**
@@ -199,14 +239,8 @@ export class GameController {
    * @private
    */
   _stopGameLoops() {
-    if (this._tickInterval) {
-      clearInterval(this._tickInterval);
-      this._tickInterval = null;
-    }
-    if (this._stipendInterval) {
-      clearInterval(this._stipendInterval);
-      this._stipendInterval = null;
-    }
+    const gameLoop = this._container.get('gameLoop');
+    gameLoop.stop();
   }
 
   /**
