@@ -84,8 +84,20 @@ import { TabController } from './ui/TabController.js';
 import { MerchantPanelController } from './ui/MerchantPanelController.js';
 import { DebugController } from './ui/DebugController.js';
 
+// UI Controllers (Phase 10 - New controllers for full modular architecture)
+import { NotificationController } from './ui/NotificationController.js';
+import { ResourceDisplayController } from './ui/ResourceDisplayController.js';
+import { StatsDisplayController } from './ui/StatsDisplayController.js';
+import { StipendIndicatorController } from './ui/StipendIndicatorController.js';
+import { MilestonePanelController } from './ui/MilestonePanelController.js';
+import { MarketPanelController } from './ui/MarketPanelController.js';
+import { BuildingInfoController } from './ui/BuildingInfoController.js';
+
 // UI Integration (Phase 9)
 import { UIIntegration } from './ui/UIIntegration.js';
+
+// Game Controller (Phase 10)
+import { GameController } from './core/GameController.js';
 
 // Renderers (Phase 7)
 import { TileRenderer } from './renderers/TileRenderer.js';
@@ -119,210 +131,39 @@ import {
 } from './config/index.js';
 
 // ==========================================
-// GLOBAL BRIDGES (Backwards Compatibility)
+// GLOBAL BRIDGES (Required for HTML onclick handlers)
 // ==========================================
-// These expose modules to the global scope so existing inline scripts continue to work.
-// They will be removed in Phase 9 when we migrate to fully modular code.
+// Minimal window.* bridges needed for HTML onclick attribute handlers.
+// All other functionality is encapsulated in modules and EventBus subscriptions.
 
-window.TILE_SCALE = TILE_SCALE;
-window.TILE_CONFIG = TILE_CONFIG;
-window.TILE = TILE;
-window.TILE_MAP = TILE_MAP;
-window.BUILDING_FOOTPRINT = BUILDING_FOOTPRINT;
-window.ASSETS = ASSETS;
-window.EMOJI_FALLBACKS = EMOJI_FALLBACKS;
-window.RESOURCE_EMOJIS = RESOURCE_EMOJIS;
-window.BUILDINGS = BUILDINGS;
-window.GOLD_PRODUCERS = GOLD_PRODUCERS;
-window.MILESTONES = MILESTONES;
-window.MERCHANT_CONFIG = MERCHANT_CONFIG;
-window.MARKET_CONFIG = MARKET_CONFIG;
-
-// Helper functions
-window.countBuildings = countBuildings;
-window.getBuildingDef = getBuildingDef;
-window.getMilestoneDef = getMilestoneDef;
-window.getMarketPrice = getMarketPrice;
-window.getMerchantPrice = getMerchantPrice;
-
-// Models (Phase 1)
-window.Building = Building;
-window.Position = Position;
-window.createPositionSet = createPositionSet;
-window.hasPosition = hasPosition;
-
-// Coordinate functions (Phase 1) - bridge to service methods
-// These wrap the CoordinateService singleton for backwards compatibility
-window.gridToScreen = (gridX, gridY) => coordinateService.gridToScreen(gridX, gridY);
-window.screenToGrid = (screenX, screenY) => coordinateService.screenToGrid(screenX, screenY);
-window.gridToPixel = (row, col, isBuilt) => coordinateService.gridToPixel(row, col, isBuilt);
-
-// Core infrastructure (for debugging/testing)
-window._eventBus = eventBus;
-window._Events = Events;
-window._container = container;
-window._coordinateService = coordinateService;
-
-// Phase 2 services - lazy getters (services created on first access)
-// Resource functions bridge to ResourceService
-Object.defineProperty(window, '_gameState', {
-  get: () => container.get('gameState'),
-  configurable: true
-});
-Object.defineProperty(window, '_resourceService', {
-  get: () => container.get('resourceService'),
-  configurable: true
-});
-
-// Resource function bridges (Phase 2)
-// These wrap the ResourceService for backwards compatibility with inline code
-window.canAfford = (cost) => container.get('resourceService').canAfford(cost);
-window.isUnlocked = (req) => container.get('resourceService').isUnlocked(req);
-window.spendResources = (cost) => container.get('resourceService').spendResources(cost);
-window.grantReward = (reward) => container.get('resourceService').grantReward(reward);
-window.formatNumber = (num) => container.get('resourceService').formatNumber(num);
-
-// Phase 3 services - lazy getter
-Object.defineProperty(window, '_buildingService', {
-  get: () => container.get('buildingService'),
-  configurable: true
-});
-
-// Building function bridges (Phase 3)
-// These wrap the BuildingService for backwards compatibility with inline code
-window.getOccupiedTiles = () => container.get('buildingService').getOccupiedTiles();
-window.canPlaceAt = (row, col) => container.get('buildingService').canPlaceAt(row, col);
-window.getBuildingAt = (row, col) => container.get('buildingService').getBuildingAt(row, col);
-window.hasGoldProduction = () => container.get('buildingService').hasGoldProduction();
-window.hasMarket = () => container.get('buildingService').hasMarket();
-window.getMarketLevel = () => container.get('buildingService').getMarketLevel();
-
-// Phase 4 services - lazy getter
-Object.defineProperty(window, '_productionService', {
-  get: () => container.get('productionService'),
-  configurable: true
-});
-
-// Production function bridges (Phase 4)
-// These wrap the ProductionService for backwards compatibility with inline code
-window.calculateProduction = () => container.get('productionService').calculateProduction();
-
-// Phase 5 services - lazy getters
-Object.defineProperty(window, '_stipendService', {
-  get: () => container.get('stipendService'),
-  configurable: true
-});
-Object.defineProperty(window, '_milestoneService', {
-  get: () => container.get('milestoneService'),
-  configurable: true
-});
-
-// Stipend function bridges (Phase 5)
-window.checkStipendStatus = () => container.get('stipendService').checkStatus();
-
-// Milestone function bridges (Phase 5)
-window.checkMilestones = () => container.get('milestoneService').checkMilestones();
-
-// Phase 6 services - lazy getters
-Object.defineProperty(window, '_merchantService', {
-  get: () => container.get('merchantService'),
-  configurable: true
-});
-Object.defineProperty(window, '_marketService', {
-  get: () => container.get('marketService'),
-  configurable: true
-});
-
-// Merchant function bridges (Phase 6)
-window.scheduleMerchantVisit = (isFirst) => container.get('merchantService').scheduleVisit(isFirst);
-window.merchantArrives = () => container.get('merchantService').arrive();
-window.merchantDeparts = () => container.get('merchantService').depart();
-window.disableMerchant = () => container.get('merchantService').disable();
-window.sellToMerchant = (resource, amount) => {
-  const result = container.get('merchantService').sell(resource, amount);
-  if (!result.success && result.error) {
-    // Legacy code expects notify() to be called - handled by caller
-  }
-  return result.success;
-};
-
-// Market function bridges (Phase 6)
-window.sellAtMarket = (resource, amount) => {
-  const result = container.get('marketService').sell(resource, amount);
-  if (!result.success && result.error) {
-    // Legacy code expects notify() to be called - handled by caller
-  }
-  return result.success;
-};
-
-// Phase 8 UI Controller - lazy getters
-Object.defineProperty(window, '_placementController', {
-  get: () => container.get('placementController'),
-  configurable: true
-});
-Object.defineProperty(window, '_tabController', {
-  get: () => container.get('tabController'),
-  configurable: true
-});
-Object.defineProperty(window, '_merchantPanelController', {
-  get: () => container.get('merchantPanelController'),
-  configurable: true
-});
-Object.defineProperty(window, '_debugController', {
-  get: () => container.get('debugController'),
-  configurable: true
-});
-
-// Placement Controller function bridges (Phase 8)
+// Placement Controller - for build list onclick and cancel button
 window.selectBuildingForPlacement = (type) => container.get('placementController').selectBuilding(type);
 window.cancelPlacement = () => container.get('placementController').cancel();
 
-// Tab Controller function bridges (Phase 8)
+// Tab Controller - for tab button onclick handlers
 window.switchTab = (tabName) => container.get('tabController').switchTab(tabName);
 window.switchLeftTab = (tabName) => container.get('tabController').switchLeftTab(tabName);
 
-// Merchant Panel Controller function bridges (Phase 8)
+// Merchant Panel Controller - for merchant banner and panel onclick handlers
 window.openMerchantPanel = () => container.get('merchantPanelController').open();
 window.closeMerchantPanel = () => container.get('merchantPanelController').close();
 
-// Debug Controller function bridges (Phase 8)
+// Debug Controller - for debug button onclick handlers
 window.toggleTiles = () => container.get('debugController').toggleTiles();
 window.toggleDebugSliders = () => container.get('debugController').toggleSliders();
 window.toggleDarkMode = () => container.get('debugController').toggleDarkMode();
 window.copyDebugValues = () => container.get('debugController').copyValues();
 
-// Phase 9 UI Integration - lazy getter
-Object.defineProperty(window, '_uiIntegration', {
-  get: () => container.get('uiIntegration'),
-  configurable: true
-});
-
-// Phase 9 initialization function bridge
-// Call this after DOM is ready and legacy functions (notify, updateUI, renderBuildings) are defined
+// Game Controller - initialization and reset
 window.initializeUI = () => {
-  const uiIntegration = container.get('uiIntegration');
-  uiIntegration.initialize();
-  uiIntegration.initializeControllers();
+  const gameController = container.get('gameController');
+  gameController.initialize();
 };
 
-// Phase 7 Renderers - lazy getters
-Object.defineProperty(window, '_tileRenderer', {
-  get: () => container.get('tileRenderer'),
-  configurable: true
-});
-Object.defineProperty(window, '_buildingRenderer', {
-  get: () => container.get('buildingRenderer'),
-  configurable: true
-});
-Object.defineProperty(window, '_debugRenderer', {
-  get: () => container.get('debugRenderer'),
-  configurable: true
-});
-
-// Renderer function bridges (Phase 7)
-window.renderTileGrid = () => container.get('tileRenderer').render();
-window.renderBuildings = () => container.get('buildingRenderer').render();
-window.renderDebugGrid = () => container.get('debugRenderer').render();
+window.resetGame = () => {
+  const gameController = container.get('gameController');
+  gameController.resetGame();
+};
 
 // ==========================================
 // SERVICE CONTAINER SETUP
@@ -383,8 +224,8 @@ container.register('placementController', (c) => new PlacementController(
   c.get('buildingService'),
   c.get('resourceService'),
   c.get('coordinateService'),
-  window.notify, // Will be defined in index.html
-  window.renderBuildings // Will be defined in index.html
+  c.get('eventBus'),
+  () => c.get('buildingRenderer').render() // Direct call to BuildingRenderer
 ));
 
 container.register('tabController', (c) => new TabController(
@@ -396,9 +237,8 @@ container.register('merchantPanelController', (c) => new MerchantPanelController
   c.get('gameState')
 ));
 
-container.register('debugController', () => new DebugController(
-  window.updateUI, // Will be defined in index.html
-  window.notify // Will be defined in index.html
+container.register('debugController', (c) => new DebugController(
+  c.get('eventBus')
 ));
 
 // Phase 9 UI Integration
@@ -410,21 +250,89 @@ container.register('uiIntegration', (c) => new UIIntegration(
   c.get('debugController')
 ));
 
+// Phase 10 UI Controllers (New)
+container.register('notificationController', (c) => new NotificationController(
+  c.get('eventBus')
+));
+
+container.register('resourceDisplayController', (c) => new ResourceDisplayController(
+  c.get('gameState'),
+  c.get('productionService'),
+  c.get('resourceService'),
+  c.get('eventBus')
+));
+
+container.register('statsDisplayController', (c) => new StatsDisplayController(
+  c.get('gameState'),
+  c.get('buildingService'),
+  c.get('resourceService'),
+  c.get('eventBus')
+));
+
+container.register('stipendIndicatorController', (c) => new StipendIndicatorController(
+  c.get('stipendService'),
+  c.get('eventBus')
+));
+
+container.register('milestonePanelController', (c) => new MilestonePanelController(
+  c.get('milestoneService'),
+  c.get('eventBus')
+));
+
+container.register('marketPanelController', (c) => new MarketPanelController(
+  c.get('marketService'),
+  c.get('resourceService'),
+  c.get('eventBus')
+));
+
+container.register('buildingInfoController', (c) => new BuildingInfoController(
+  c.get('gameState'),
+  c.get('productionService'),
+  c.get('eventBus')
+));
+
+// Phase 10 Game Controller
+container.register('gameController', (c) => new GameController(
+  c,  // Pass container for access to all services
+  c.get('eventBus')
+));
+
 // Phase 7 Renderers
 container.register('tileRenderer', (c) => new TileRenderer(
   c.get('coordinateService'),
   c.get('buildingService')
 ));
 
-container.register('buildingRenderer', (c) => new BuildingRenderer(
-  c.get('coordinateService'),
-  c.get('gameState'),
-  {
-    onBuildingClick: window.upgradeBuilding,
-    onBuildingHover: window.showBuildingInfoForPlaced,
-    onBuildingLeave: window.hideBuildingInfo
-  }
-));
+container.register('buildingRenderer', (c) => {
+  // Get buildingInfoController for hover handlers
+  // Note: Using lazy callbacks to avoid circular dependency issues
+  return new BuildingRenderer(
+    c.get('coordinateService'),
+    c.get('gameState'),
+    {
+      onBuildingClick: (index) => {
+        // Delegate to buildingService for upgrade, then show notification
+        const result = c.get('buildingService').upgradeBuilding(index);
+        if (result.success) {
+          const building = c.get('buildingService').getBuildingByIndex(index);
+          const def = c.get('buildingService').getBuildingDef?.(building.type) ||
+            { name: building.type };
+          c.get('eventBus').publish(Events.NOTIFICATION, {
+            message: `${def.name || building.type} upgraded to level ${building.level + 1}!`,
+            type: 'success'
+          });
+        } else if (result.error) {
+          c.get('eventBus').publish(Events.NOTIFICATION, {
+            message: result.error,
+            type: result.error.includes('max level') ? 'info' : 'error'
+          });
+        }
+      },
+      onBuildingHover: (index) => c.get('buildingInfoController').show(index),
+      onBuildingLeave: () => c.get('buildingInfoController').hide()
+    }
+  );
+});
 
 container.register('debugRenderer', (c) => new DebugRenderer(
   c.get('coordinateService')
@@ -441,13 +349,10 @@ container.register('debugRenderer', (c) => new DebugRenderer(
 export function initModules() {
   console.log('[Medieval Tycoon] Modular infrastructure loaded');
   console.log('[Medieval Tycoon] Services registered:', container.getNames().join(', '));
-
-  // Note: UI controllers need to be initialized after legacy functions are defined
-  // Call window.initializeUI() from index.html after defining notify, updateUI, renderBuildings
 }
 
-// Note: initializeUI is set on window object above (line ~302)
-// It's the entry point for index.html to initialize UI controllers
+// Note: initializeUI() is the entry point called from index.html bootstrap script
+// It creates the GameController which initializes all UI controllers and game loops
 
 // Auto-initialize when DOM is ready
 if (document.readyState === 'loading') {
@@ -491,8 +396,18 @@ export {
   TabController,
   MerchantPanelController,
   DebugController,
+  // UI Controllers (Phase 10)
+  NotificationController,
+  ResourceDisplayController,
+  StatsDisplayController,
+  StipendIndicatorController,
+  MilestonePanelController,
+  MarketPanelController,
+  BuildingInfoController,
   // UI Integration (Phase 9)
   UIIntegration,
+  // Game Controller (Phase 10)
+  GameController,
   // Renderers (Phase 7)
   TileRenderer,
   BuildingRenderer,

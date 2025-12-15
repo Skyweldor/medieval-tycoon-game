@@ -127,23 +127,24 @@ export class MarketService {
     }
 
     const finalPrice = this.getPrice(resource);
-    const goldEarned = actualAmount * finalPrice;
 
-    // Update resources directly for performance
-    const resources = this._gameState.getResourcesRef();
-    resources[resource] -= actualAmount;
-    resources.gold += goldEarned;
+    // Use ResourceService mutation API for the trade
+    const result = this._resourceService.sellResource(resource, actualAmount, finalPrice);
+
+    if (!result.success) {
+      return { success: false, amount: 0, gold: 0, error: `Failed to sell ${resource}!` };
+    }
 
     // Publish event
     this._eventBus.publish(Events.MARKET_SALE, {
       resource,
       amount: actualAmount,
       pricePerUnit: finalPrice,
-      goldEarned,
+      goldEarned: result.goldReceived,
       marketLevel: this.getLevel()
     });
 
-    return { success: true, amount: actualAmount, gold: goldEarned, error: null };
+    return { success: true, amount: actualAmount, gold: result.goldReceived, error: null };
   }
 
   /**

@@ -44,6 +44,7 @@ export class EventBus {
     PLACEMENT_MODE_CHANGED: 'placement:changed',
     TAB_SWITCHED: 'tab:switched',
     UI_UPDATE_REQUESTED: 'ui:updateRequested',
+    NOTIFICATION: 'ui:notification',
 
     // State events
     GAME_RESET: 'game:reset',

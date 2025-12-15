@@ -147,11 +147,11 @@ export class ProductionService {
    * Called automatically via EventBus subscription to TICK event
    */
   tick() {
-    const buildings = this._gameState.getBuildingsRef();
-    const resources = this._gameState.getResourcesRef();
+    const buildings = this._gameState.getBuildings();
 
-    let totalProduced = { gold: 0, wheat: 0, stone: 0, wood: 0 };
-    let totalConsumed = { gold: 0, wheat: 0, stone: 0, wood: 0 };
+    // Accumulate all production and consumption for batch processing
+    const totalProduction = { gold: 0, wheat: 0, stone: 0, wood: 0 };
+    const totalConsumption = { gold: 0, wheat: 0, stone: 0, wood: 0 };
 
     buildings.forEach(building => {
       const def = getBuildingDef(building.type);
@@ -160,34 +160,43 @@ export class ProductionService {
       const mult = this.getProductionMultiplier(building);
 
       // Check if we can produce (have resources to consume)
+      // Use resourceService for current state check
       let canProduce = true;
       if (def.consumes) {
-        canProduce = Object.entries(def.consumes).every(
-          ([res, amt]) => (resources[res] || 0) >= amt
-        );
+        canProduce = this._resourceService.canAfford(def.consumes);
 
-        // Consume resources if we can produce
+        // Accumulate consumption if we can produce
         if (canProduce) {
           Object.entries(def.consumes).forEach(([res, amt]) => {
-            resources[res] -= amt;
-            totalConsumed[res] += amt;
+            totalConsumption[res] += amt;
           });
         }
       }
 
-      // Produce resources if consumption was satisfied
+      // Accumulate production if consumption was satisfied
       if (canProduce) {
         Object.entries(def.production || {}).forEach(([res, amt]) => {
           const produced = amt * mult;
-          resources[res] += produced;
-          totalProduced[res] += produced;
+          totalProduction[res] += produced;
         });
       }
     });
 
-    // Note: We're using direct refs for performance, but we should still
-    // notify about resource changes for any listeners
-    // The TICK event itself serves as the notification that resources may have changed
+    // Apply consumption first, then production through proper APIs
+    // Filter out zero values
+    const consumptionToApply = Object.fromEntries(
+      Object.entries(totalConsumption).filter(([, amt]) => amt > 0)
+    );
+    const productionToApply = Object.fromEntries(
+      Object.entries(totalProduction).filter(([, amt]) => amt > 0)
+    );
+
+    if (Object.keys(consumptionToApply).length > 0) {
+      this._resourceService.applyConsumption(consumptionToApply);
+    }
+    if (Object.keys(productionToApply).length > 0) {
+      this._resourceService.applyProduction(productionToApply);
+    }
   }
 
   // ==========================================

@@ -104,9 +104,8 @@ export class StipendService {
 
     const amount = 1;
 
-    // Add gold directly to resources
-    const resources = this._gameState.getResourcesRef();
-    resources.gold += amount;
+    // Add gold through proper mutation API
+    this._gameState.addResources({ gold: amount });
 
     // Record in stipend state
     this._gameState.recordStipend(amount);

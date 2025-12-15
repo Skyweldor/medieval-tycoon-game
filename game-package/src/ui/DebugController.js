@@ -3,14 +3,14 @@
  * Handles debug UI controls (sliders, toggles, dark mode)
  */
 
+import { Events } from '../core/EventBus.js';
+
 export class DebugController {
   /**
-   * @param {Function} updateUIFn - Function to call when debug values change
-   * @param {Function} notifyFn - Notification function for user feedback
+   * @param {import('../core/EventBus.js').EventBus} eventBus
    */
-  constructor(updateUIFn, notifyFn) {
-    this._updateUI = updateUIFn || (() => {});
-    this._notify = notifyFn || (() => {});
+  constructor(eventBus) {
+    this._eventBus = eventBus;
 
     // Debug offset values
     this._offsetX = 2;
@@ -23,6 +23,24 @@ export class DebugController {
     this._tilesVisible = true;
     this._slidersVisible = false;
     this._darkModeEnabled = false;
+  }
+
+  /**
+   * Request a UI update via EventBus
+   * @private
+   */
+  _updateUI() {
+    this._eventBus.publish(Events.UI_UPDATE_REQUESTED);
+  }
+
+  /**
+   * Show a notification to the user via EventBus
+   * @param {string} message - Message to display
+   * @param {string} [type='info'] - Notification type (info, success, error)
+   * @private
+   */
+  _notify(message, type = 'info') {
+    this._eventBus.publish(Events.NOTIFICATION, { message, type });
   }
 
   // ==========================================

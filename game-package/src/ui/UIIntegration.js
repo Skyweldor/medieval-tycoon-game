@@ -34,6 +34,7 @@ export class UIIntegration {
     this._setupMilestoneSubscriptions();
     this._setupStipendSubscriptions();
     this._setupTickSubscriptions();
+    this._setupNotificationSubscriptions();
 
     console.log('[UIIntegration] Event subscriptions initialized');
   }
@@ -162,6 +163,29 @@ export class UIIntegration {
       this._eventBus.subscribe(Events.TICK, () => {
         // Refresh build list so unlock conditions and affordability update
         this._placementController.renderBuildList();
+      })
+    );
+  }
+
+  // ==========================================
+  // NOTIFICATION EVENT SUBSCRIPTIONS
+  // ==========================================
+
+  /**
+   * Set up notification event subscriptions
+   * Forwards NOTIFICATION events to the legacy notify() function
+   * @private
+   */
+  _setupNotificationSubscriptions() {
+    this._unsubscribers.push(
+      this._eventBus.subscribe(Events.NOTIFICATION, (data) => {
+        // Forward to legacy notify function if it exists
+        if (typeof window.notify === 'function') {
+          window.notify(data.message, data.type);
+        } else {
+          // Fallback: log to console
+          console.log(`[${data.type}] ${data.message}`);
+        }
       })
     );
   }

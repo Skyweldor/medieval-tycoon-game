@@ -373,26 +373,8 @@ export class GameStateService {
   }
 
   // ==========================================
-  // BACKWARDS COMPATIBILITY BRIDGE
+  // BACKWARDS COMPATIBILITY BRIDGE (DEPRECATED)
   // ==========================================
-
-  /**
-   * Get direct reference to resources (for legacy code)
-   * WARNING: This bypasses event notifications - use only for backwards compatibility
-   * @returns {Object}
-   */
-  getResourcesRef() {
-    return this._state.resources;
-  }
-
-  /**
-   * Get direct reference to buildings array (for legacy code)
-   * WARNING: This bypasses event notifications - use only for backwards compatibility
-   * @returns {Array}
-   */
-  getBuildingsRef() {
-    return this._state.buildings;
-  }
 
   /**
    * Get direct reference to completed milestones (for legacy code)

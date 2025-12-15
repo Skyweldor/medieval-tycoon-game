@@ -279,7 +279,7 @@ export class BuildingService {
    * @returns {{success: boolean, error: string|null}}
    */
   upgradeBuilding(index) {
-    const buildings = this._gameState.getBuildingsRef();
+    const buildings = this._gameState.getBuildings();
     const building = buildings[index];
 
     if (!building) {
@@ -306,14 +306,14 @@ export class BuildingService {
     // Deduct cost
     this._resourceService.spendResources(upgradeCost);
 
-    // Upgrade
+    // Upgrade through proper mutation API
     const oldLevel = building.level;
-    building.level++;
-    const newLevel = building.level;
+    const newLevel = oldLevel + 1;
+    this._gameState.updateBuilding(index, { level: newLevel });
 
     // Publish upgrade event
     this._eventBus.publish(Events.BUILDING_UPGRADED, {
-      building: { ...building },
+      building: { ...building, level: newLevel },
       index,
       oldLevel,
       newLevel,

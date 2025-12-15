@@ -232,12 +232,14 @@ export class MerchantService {
       }
     }
 
-    const goldEarned = actualAmount * this.getPrice(resource);
+    const pricePerUnit = this.getPrice(resource);
 
-    // Update resources
-    const resources = this._gameState.getResourcesRef();
-    resources[resource] -= actualAmount;
-    resources.gold += goldEarned;
+    // Use ResourceService mutation API for the trade
+    const result = this._resourceService.sellResource(resource, actualAmount, pricePerUnit);
+
+    if (!result.success) {
+      return { success: false, amount: 0, gold: 0, error: `Failed to sell ${resource}!` };
+    }
 
     // Update sold this visit
     const merchant = this._gameState.getMerchant();
@@ -252,11 +254,11 @@ export class MerchantService {
     this._eventBus.publish(Events.MERCHANT_SALE, {
       resource,
       amount: actualAmount,
-      goldEarned,
+      goldEarned: result.goldReceived,
       remainingLimit: this.getRemainingLimit(resource)
     });
 
-    return { success: true, amount: actualAmount, gold: goldEarned, error: null };
+    return { success: true, amount: actualAmount, gold: result.goldReceived, error: null };
   }
 
   // ==========================================

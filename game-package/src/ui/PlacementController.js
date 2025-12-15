@@ -4,20 +4,21 @@
  */
 
 import { BUILDINGS, EMOJI_FALLBACKS, TILE_CONFIG, BUILDING_FOOTPRINT } from '../config/index.js';
+import { Events } from '../core/EventBus.js';
 
 export class PlacementController {
   /**
    * @param {import('../services/BuildingService.js').BuildingService} buildingService
    * @param {import('../services/ResourceService.js').ResourceService} resourceService
    * @param {import('../services/CoordinateService.js').CoordinateService} coordinateService
-   * @param {Function} notifyFn - Notification function for user feedback
+   * @param {import('../core/EventBus.js').EventBus} eventBus
    * @param {Function} renderBuildingsFn - Function to re-render buildings after placement
    */
-  constructor(buildingService, resourceService, coordinateService, notifyFn, renderBuildingsFn) {
+  constructor(buildingService, resourceService, coordinateService, eventBus, renderBuildingsFn) {
     this._buildingService = buildingService;
     this._resourceService = resourceService;
     this._coordinateService = coordinateService;
-    this._notify = notifyFn || (() => {});
+    this._eventBus = eventBus;
     this._renderBuildings = renderBuildingsFn || (() => {});
 
     // Placement mode state
@@ -30,6 +31,16 @@ export class PlacementController {
     this._boundMouseMove = this._handleMouseMove.bind(this);
     this._boundClick = this._handleClick.bind(this);
     this._boundMouseLeave = this._handleMouseLeave.bind(this);
+  }
+
+  /**
+   * Show a notification to the user via EventBus
+   * @param {string} message - Message to display
+   * @param {string} [type='info'] - Notification type (info, success, error)
+   * @private
+   */
+  _notify(message, type = 'info') {
+    this._eventBus.publish(Events.NOTIFICATION, { message, type });
   }
 
   // ==========================================
@@ -226,24 +237,17 @@ export class PlacementController {
     const col = Math.floor(gridPos.col) - 1;
     const row = Math.floor(gridPos.row) - 1;
 
-    // Attempt to place building using legacy function (uses local state)
-    // window.placeBuilding handles resources, placedBuildings array, and updateUI
-    if (window.placeBuilding) {
-      const success = window.placeBuilding(this._buildingType, row, col);
-      if (success) {
-        // Successfully placed - exit placement mode
-        this.cancel();
-      }
-      // Note: placeBuilding handles its own error notifications
-    } else {
-      // Fallback to service-based placement
-      const result = this._buildingService.placeBuilding(this._buildingType, row, col);
-      if (result.success) {
-        this.cancel();
-        this._renderBuildings();
-      } else if (result.error) {
-        this._notify(result.error, 'error');
-      }
+    // Place building through BuildingService (handles resources, state, and events)
+    // BuildingService publishes BUILDING_PLACED event which triggers UI updates via EventBus
+    const result = this._buildingService.placeBuilding(this._buildingType, row, col);
+
+    if (result.success) {
+      const buildingName = BUILDINGS[this._buildingType]?.name || this._buildingType;
+      this._notify(`${buildingName} placed!`, 'success');
+      // Note: Don't call _renderBuildings() here - BUILDING_PLACED event handles UI updates
+      this.cancel();
+    } else if (result.error) {
+      this._notify(result.error, 'error');
     }
   }
 
@@ -325,9 +329,9 @@ export class PlacementController {
     container.innerHTML = buildingTypes.map(type => {
       const def = BUILDINGS[type];
       const icon = EMOJI_FALLBACKS[type];
-      // Use window functions if available (allows legacy code to override)
-      const unlocked = window.isUnlocked ? window.isUnlocked(def.unlockReq) : this._resourceService.isUnlocked(def.unlockReq);
-      const affordable = window.canAfford ? window.canAfford(def.baseCost) : this._resourceService.canAfford(def.baseCost);
+      // Use service methods directly (no longer need legacy window fallbacks)
+      const unlocked = this._resourceService.isUnlocked(def.unlockReq);
+      const affordable = this._resourceService.canAfford(def.baseCost);
 
       // Cost text
       const costText = Object.entries(def.baseCost)
