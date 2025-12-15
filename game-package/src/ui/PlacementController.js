@@ -3,8 +3,31 @@
  * Handles building placement mode UI interactions
  */
 
-import { BUILDINGS, EMOJI_FALLBACKS, TILE_CONFIG, BUILDING_FOOTPRINT } from '../config/index.js';
+import { BUILDINGS, ASSETS, TILE_CONFIG, BUILDING_FOOTPRINT } from '../config/index.js';
 import { Events } from '../core/EventBus.js';
+
+// Resource sprite icon class mapping
+const RESOURCE_ICON_CLASS = {
+  gold: 'icon-gold',
+  wheat: 'icon-wheat',
+  stone: 'icon-stone',
+  wood: 'icon-wood',
+  bread: 'icon-bread',
+  iron: 'icon-iron'
+};
+
+/**
+ * Get the asset path for a building type (level 1)
+ * @param {string} type - Building type
+ * @returns {string} - Asset path or empty string
+ */
+function getBuildingAsset(type) {
+  const asset = ASSETS[type];
+  if (asset && asset[1]) {
+    return asset[1];
+  }
+  return '';
+}
 
 export class PlacementController {
   /**
@@ -296,70 +319,112 @@ export class PlacementController {
   // ==========================================
 
   /**
-   * Format unlock requirements as readable text
+   * Format unlock requirements as readable text with sprite icons
    * @param {Object} unlockReq - Unlock requirements object (e.g., {wheat: 10})
-   * @returns {string} Formatted requirement text
+   * @returns {string} Formatted requirement text with sprite icons
    * @private
    */
   _formatUnlockReq(unlockReq) {
     if (!unlockReq) return '';
 
-    const RESOURCE_ICONS = {
-      gold: '💰',
-      wheat: '🌾',
-      stone: '⛏️',
-      wood: '🌲'
-    };
-
     return Object.entries(unlockReq)
-      .map(([res, amt]) => `${amt}${RESOURCE_ICONS[res] || res}`)
+      .map(([res, amt]) => `${amt}<span class="icon icon-16 ${RESOURCE_ICON_CLASS[res] || 'icon-gold'}"></span>`)
       .join(' ');
   }
 
   /**
-   * Render the build list UI
+   * Initialize the build list UI (call once on startup)
+   * Creates the static HTML structure
+   */
+  initBuildList() {
+    const container = document.getElementById('build-list');
+    if (!container) return;
+
+    const buildingTypes = Object.keys(BUILDINGS);
+
+    container.innerHTML = buildingTypes.map(type => {
+      const def = BUILDINGS[type];
+      const assetPath = getBuildingAsset(type);
+
+      // Cost text with sprite icons (static)
+      const costText = Object.entries(def.baseCost)
+        .map(([r, a]) => `${a}<span class="icon icon-20 ${RESOURCE_ICON_CLASS[r] || 'icon-gold'}"></span>`)
+        .join(' ');
+
+      // Unlock requirements text (static structure, visibility controlled by CSS)
+      let unlockHtml = '';
+      if (def.unlockReq) {
+        const reqText = this._formatUnlockReq(def.unlockReq);
+        unlockHtml = `<div class="build-item-unlock">🔒 Need: ${reqText}</div>`;
+      }
+
+      // Building icon - use sprite if available
+      const buildingIcon = assetPath
+        ? `<img class="build-item-sprite" src="${assetPath}" alt="${def.name}">`
+        : `<span class="build-item-emoji">🏠</span>`;
+
+      return `
+        <div class="build-item" data-building-type="${type}">
+          <span class="build-item-icon">${buildingIcon}</span>
+          <div class="build-item-info">
+            <div class="build-item-name">${def.name}</div>
+            <div class="build-item-cost">${costText}</div>
+            ${unlockHtml}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Initial state update
+    this.renderBuildList();
+  }
+
+  /**
+   * Update the build list UI (call on tick)
+   * Only updates classes and states, not the entire HTML
    */
   renderBuildList() {
     const container = document.getElementById('build-list');
     if (!container) return;
 
-    // Show all building types from BUILDINGS object
+    // If not initialized yet, do full init
+    if (!container.querySelector('.build-item')) {
+      this.initBuildList();
+      return;
+    }
+
     const buildingTypes = Object.keys(BUILDINGS);
 
-    container.innerHTML = buildingTypes.map(type => {
+    buildingTypes.forEach(type => {
       const def = BUILDINGS[type];
-      const icon = EMOJI_FALLBACKS[type];
-      // Use service methods directly (no longer need legacy window fallbacks)
+      const item = container.querySelector(`[data-building-type="${type}"]`);
+      if (!item) return;
+
       const unlocked = this._resourceService.isUnlocked(def.unlockReq);
       const affordable = this._resourceService.canAfford(def.baseCost);
-
-      // Cost text
-      const costText = Object.entries(def.baseCost)
-        .map(([r, a]) => `${a}${r === 'gold' ? '💰' : r === 'wheat' ? '🌾' : r === 'stone' ? '⛏️' : '🌲'}`)
-        .join(' ');
-
       const isSelected = this._active && this._buildingType === type;
       const isLocked = !unlocked;
 
-      // Unlock requirements text for locked buildings
-      let unlockText = '';
-      if (!unlocked && def.unlockReq) {
-        const reqText = this._formatUnlockReq(def.unlockReq);
-        unlockText = `🔒 Need: ${reqText}`;
+      // Update classes
+      item.classList.toggle('locked', isLocked);
+      item.classList.toggle('selected', isSelected);
+
+      // Update onclick
+      item.onclick = isLocked ? null : () => window.selectBuildingForPlacement(type);
+
+      // Update cost affordability class
+      const costEl = item.querySelector('.build-item-cost');
+      if (costEl) {
+        costEl.classList.toggle('affordable', affordable && !isLocked);
+        costEl.classList.toggle('unaffordable', !affordable || isLocked);
       }
 
-      return `
-        <div class="build-item ${isLocked ? 'locked' : ''} ${isSelected ? 'selected' : ''}"
-             onclick="${isLocked ? '' : `selectBuildingForPlacement('${type}')`}">
-          <span class="build-item-icon">${icon}</span>
-          <div class="build-item-info">
-            <div class="build-item-name">${def.name}</div>
-            <div class="build-item-cost ${affordable && !isLocked ? 'affordable' : 'unaffordable'}">${costText}</div>
-            ${unlockText ? `<div class="build-item-unlock">${unlockText}</div>` : ''}
-          </div>
-        </div>
-      `;
-    }).join('');
+      // Show/hide unlock text
+      const unlockEl = item.querySelector('.build-item-unlock');
+      if (unlockEl) {
+        unlockEl.style.display = isLocked ? '' : 'none';
+      }
+    });
 
     // Show/hide cancel button
     const cancelBtn = document.getElementById('build-cancel');

@@ -1,6 +1,46 @@
 /* Medieval Tycoon - Component Styles */
 /* Buttons, resource bar, milestones, market, build list */
 
+/* Resource Icon Sprite Sheet */
+.icon {
+  display: inline-block;
+  background-image: url('../assets/icons_basic.png');
+  background-repeat: no-repeat;
+}
+
+.icon-64 {
+  width: 64px;
+  height: 64px;
+  background-size: 384px 126px;
+}
+
+.icon-32 {
+  width: 32px;
+  height: 32px;
+  background-size: 192px 63px;
+}
+
+.icon-20 {
+  width: 20px;
+  height: 20px;
+  background-size: 120px 40px;
+}
+
+.icon-16 {
+  width: 16px;
+  height: 16px;
+  background-size: 96px 32px;
+  vertical-align: middle;
+}
+
+/* Icon positions */
+.icon-gold  { background-position: 0% center; }
+.icon-wheat { background-position: 20% center; }
+.icon-stone { background-position: 40% center; }
+.icon-wood  { background-position: 60% center; }
+.icon-bread { background-position: 80% center; }
+.icon-iron  { background-position: 100% center; }
+
 /* Buttons */
 .btn {
   padding: 12px 25px;
@@ -188,8 +228,24 @@
 
 .build-item-icon {
   font-size: 1.5rem;
-  width: 36px;
+  width: 48px;
+  height: 48px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.build-item-sprite {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.build-item-emoji {
+  font-size: 1.5rem;
 }
 
 .build-item-info {

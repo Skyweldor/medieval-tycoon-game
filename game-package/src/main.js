@@ -147,6 +147,13 @@ window.switchLeftTab = (tabName) => container.get('tabController').switchLeftTab
 // Merchant Panel Controller - for merchant banner and panel onclick handlers
 window.openMerchantPanel = () => container.get('merchantPanelController').open();
 window.closeMerchantPanel = () => container.get('merchantPanelController').close();
+window.sellToMerchant = (resource, amount) => {
+  const merchantService = container.get('merchantService');
+  const result = merchantService.sell(resource, amount);
+  if (result.success) {
+    container.get('merchantPanelController').onSale();
+  }
+};
 
 // Debug Controller - for debug button onclick handlers
 window.toggleTiles = () => container.get('debugController').toggleTiles();
