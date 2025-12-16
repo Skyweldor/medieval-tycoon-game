@@ -3,7 +3,7 @@
  * Handles building placement mode UI interactions
  */
 
-import { BUILDINGS, ASSETS, TILE_CONFIG, BUILDING_FOOTPRINT } from '../config/index.js';
+import { BUILDINGS, ASSETS, TILE_CONFIG, BUILDING_FOOTPRINT, getResearchForBuilding } from '../config/index.js';
 import { Events } from '../core/EventBus.js';
 
 // Resource sprite icon class mapping
@@ -36,13 +36,15 @@ export class PlacementController {
    * @param {import('../services/CoordinateService.js').CoordinateService} coordinateService
    * @param {import('../core/EventBus.js').EventBus} eventBus
    * @param {Function} renderBuildingsFn - Function to re-render buildings after placement
+   * @param {import('../services/ResearchService.js').ResearchService} [researchService] - Research service for unlock checks
    */
-  constructor(buildingService, resourceService, coordinateService, eventBus, renderBuildingsFn) {
+  constructor(buildingService, resourceService, coordinateService, eventBus, renderBuildingsFn, researchService) {
     this._buildingService = buildingService;
     this._resourceService = resourceService;
     this._coordinateService = coordinateService;
     this._eventBus = eventBus;
     this._renderBuildings = renderBuildingsFn || (() => {});
+    this._researchService = researchService;
 
     // Placement mode state
     this._active = false;
@@ -453,12 +455,8 @@ export class PlacementController {
         .map(([r, a]) => `${a}<span class="icon icon-20 ${RESOURCE_ICON_CLASS[r] || 'icon-gold'}"></span>`)
         .join(' ');
 
-      // Unlock requirements text (static structure, visibility controlled by CSS)
-      let unlockHtml = '';
-      if (def.unlockReq) {
-        const reqText = this._formatUnlockReq(def.unlockReq);
-        unlockHtml = `<div class="build-item-unlock">🔒 Need: ${reqText}</div>`;
-      }
+      // Unlock container (always present, content updated dynamically in renderBuildList)
+      const unlockHtml = `<div class="build-item-unlock" style="display: none;"></div>`;
 
       // Building icon - use sprite if available
       const buildingIcon = assetPath
@@ -502,10 +500,16 @@ export class PlacementController {
       const item = container.querySelector(`[data-building-type="${type}"]`);
       if (!item) return;
 
-      const unlocked = this._resourceService.isUnlocked(def.unlockReq);
+      // Check research unlock first (if research service available), then resource unlock
+      const researchUnlocked = this._researchService
+        ? this._researchService.isBuildingUnlocked(type)
+        : true; // If no research service, default to unlocked
+      const resourceUnlocked = this._resourceService.isUnlocked(def.unlockReq);
+      const unlocked = researchUnlocked && resourceUnlocked;
       const affordable = this._resourceService.canAfford(def.baseCost);
       const isSelected = this._active && this._buildingType === type;
       const isLocked = !unlocked;
+      const isResearchLocked = !researchUnlocked;
 
       // Update classes
       item.classList.toggle('locked', isLocked);
@@ -521,10 +525,21 @@ export class PlacementController {
         costEl.classList.toggle('unaffordable', !affordable || isLocked);
       }
 
-      // Show/hide unlock text
+      // Show/hide unlock text and update for research locks
       const unlockEl = item.querySelector('.build-item-unlock');
       if (unlockEl) {
-        unlockEl.style.display = isLocked ? '' : 'none';
+        if (isResearchLocked) {
+          // Show research lock message
+          unlockEl.innerHTML = `<span class="research-lock">📚 Research required</span>`;
+          unlockEl.style.display = '';
+        } else if (!resourceUnlocked) {
+          // Show resource unlock requirements
+          const reqText = this._formatUnlockReq(def.unlockReq);
+          unlockEl.innerHTML = `🔒 Need: ${reqText}`;
+          unlockEl.style.display = '';
+        } else {
+          unlockEl.style.display = 'none';
+        }
       }
     });
 

@@ -51,3 +51,48 @@ export const TILE_MAP = [
 
 // Building footprint size (2x2 tiles)
 export const BUILDING_FOOTPRINT = 2;
+
+// ==========================================
+// DYNAMIC GRID FUNCTIONS
+// ==========================================
+
+/**
+ * Update grid size (for plot expansion)
+ * @param {number} rows
+ * @param {number} cols
+ */
+export function setGridSize(rows, cols) {
+  TILE_CONFIG.rows = rows;
+  TILE_CONFIG.cols = cols;
+}
+
+/**
+ * Generate a tile map for the given size
+ * Creates a diamond pattern of cobblestone with grass edges
+ * @param {number} rows
+ * @param {number} cols
+ */
+export function updateTileMap(rows, cols) {
+  // Clear and rebuild TILE_MAP
+  TILE_MAP.length = 0;
+
+  const centerRow = Math.floor(rows / 2);
+  const centerCol = Math.floor(cols / 2);
+
+  for (let r = 0; r < rows; r++) {
+    const row = [];
+    for (let c = 0; c < cols; c++) {
+      // Calculate distance from center (diamond pattern)
+      const distFromCenter = Math.abs(r - centerRow) + Math.abs(c - centerCol);
+      const maxDist = Math.floor((rows + cols) / 4);
+
+      // Cobblestone in center, grass on edges
+      if (distFromCenter <= maxDist) {
+        row.push(TILE.COBBLE);
+      } else {
+        row.push(TILE.GRASS);
+      }
+    }
+    TILE_MAP.push(row);
+  }
+}

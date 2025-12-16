@@ -9,7 +9,9 @@ export {
   TILE_CONFIG,
   TILE,
   TILE_MAP,
-  BUILDING_FOOTPRINT
+  BUILDING_FOOTPRINT,
+  setGridSize,
+  updateTileMap
 } from './tiles.config.js';
 
 // Asset configuration
@@ -44,3 +46,17 @@ export {
   getMerchantPrice,
   getMerchantMaxPerVisit
 } from './merchant.config.js';
+
+// Research configuration
+export {
+  RESEARCH,
+  getResearchDef,
+  getResearchIds,
+  getResearchCount,
+  getRootResearch,
+  getResearchForBuilding,
+  getMaxTierForBuilding,
+  getPlotExpansion,
+  DEFAULT_UNLOCKED_BUILDINGS,
+  DEFAULT_MAX_TIER
+} from './research.config.js';

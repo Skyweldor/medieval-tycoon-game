@@ -28,7 +28,8 @@
       "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" diff --stat)",
       "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" diff game-package/src/main.js)",
       "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" diff game-package/src/services/BuildingService.js)",
-      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" diff game-package/src/ui/PlacementController.js)"
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" diff game-package/src/ui/PlacementController.js)",
+      "Bash(git -C \"c:/Users/Shadow/Desktop/SynthCity_Interactive/medieval-tycoon-game\" commit -m \"$(cat <<''EOF''\nAdd storage system and demolish mode (Milestone C)\n\n- Add StorageService for resource storage capacity management\n- Add demolish mode to remove buildings with 50% resource refund\n- Add building removal with refund calculation in BuildingService\n- Add demolish UI with mode toggle and confirmation\n- Update ResourceService to support storage capacity clamping\n- Update GameStateService with building removal methods\n- Update SaveLoadService to persist storage data\n- Add demolish-mode styling for building slots\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

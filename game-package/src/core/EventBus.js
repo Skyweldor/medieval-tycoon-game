@@ -37,6 +37,17 @@ export class EventBus {
     STIPEND_TICK: 'stipend:tick',
     STIPEND_ENDED: 'stipend:ended',
 
+    // Research events
+    RESEARCH_COMPLETED: 'research:completed',
+
+    // Plot expansion events
+    PLOT_EXPANSION_UNLOCKED: 'plot:expansionUnlocked',
+    PLOT_EXPANDED: 'plot:expanded',
+
+    // Camera events
+    CAMERA_MOVED: 'camera:moved',
+    CAMERA_ZOOMED: 'camera:zoomed',
+
     // Game loop events
     TICK: 'game:tick',
 
@@ -65,7 +76,7 @@ export class EventBus {
    */
   subscribe(event, callback) {
     if (typeof callback !== 'function') {
-      throw new Error(`EventBus.subscribe: callback must be a function`);
+      throw new Error('EventBus callback must be a function');
     }
 
     if (!this._listeners.has(event)) {
@@ -115,7 +126,7 @@ export class EventBus {
         try {
           callback(data);
         } catch (error) {
-          console.error(`EventBus: Error in listener for "${event}":`, error);
+          console.error(`[EventBus] Error in ${event} listener:`, error);
         }
       });
     }

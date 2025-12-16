@@ -84,6 +84,15 @@ import { StorageService } from './services/StorageService.js';
 // Services (Phase B - Persistence)
 import { SaveLoadService } from './services/SaveLoadService.js';
 
+// Services (Phase E - Research)
+import { ResearchService } from './services/ResearchService.js';
+
+// Services (Phase E2 - Plot Expansion)
+import { PlotService } from './services/PlotService.js';
+
+// Services (Camera)
+import { CameraService } from './services/CameraService.js';
+
 // UI Controllers (Phase 8)
 import { PlacementController } from './ui/PlacementController.js';
 import { TabController } from './ui/TabController.js';
@@ -101,6 +110,7 @@ import { StipendIndicatorController } from './ui/StipendIndicatorController.js';
 import { MilestonePanelController } from './ui/MilestonePanelController.js';
 import { MarketPanelController } from './ui/MarketPanelController.js';
 import { BuildingInfoController } from './ui/BuildingInfoController.js';
+import { ResearchPanelController } from './ui/ResearchPanelController.js';
 
 // UI Integration (Phase 9)
 import { UIIntegration } from './ui/UIIntegration.js';
@@ -185,6 +195,15 @@ window.devSetSpeed = (idx) => container.get('devPanelController').setSpeed(idx);
 window.devSpawnResource = (type) => container.get('devPanelController').spawnResource(type);
 window.devSpawnAll = () => container.get('devPanelController').spawnAll();
 
+// Plot Service - for plot expansion
+window.expandPlot = () => container.get('plotService').expand();
+window.canExpandPlot = () => container.get('plotService').canExpand();
+
+// Camera Service - for camera controls
+window.resetCamera = () => container.get('cameraService').reset();
+window.panCamera = (dx, dy) => container.get('cameraService').pan(dx, dy);
+window.toggleCameraDebug = () => container.get('cameraService').toggleDebug();
+
 // Game Controller - initialization and reset
 window.initializeUI = () => {
   const gameController = container.get('gameController');
@@ -264,6 +283,35 @@ container.register('saveLoadService', (c) => new SaveLoadService(
   c.get('eventBus')
 ));
 
+// Phase E services (Research)
+container.register('researchService', (c) => new ResearchService(
+  c.get('gameState'),
+  c.get('resourceService'),
+  c.get('eventBus')
+));
+
+// Phase E2 services (Plot Expansion)
+container.register('plotService', (c) => {
+  const plotService = new PlotService(
+    c.get('gameState'),
+    c.get('researchService'),
+    c.get('eventBus')
+  );
+  // Set callback for re-rendering after expansion
+  plotService.setExpandCallback(() => {
+    c.get('tileRenderer').render();
+    c.get('buildingRenderer').render();
+    c.get('debugRenderer').render();
+  });
+  return plotService;
+});
+
+// Camera service (edge-panning and pan/zoom)
+container.register('cameraService', (c) => new CameraService(
+  c.get('gameState'),
+  c.get('eventBus')
+));
+
 // Phase 8 UI Controllers
 // Note: These require DOM elements, so they're created but not initialized until DOM ready
 container.register('placementController', (c) => new PlacementController(
@@ -271,7 +319,8 @@ container.register('placementController', (c) => new PlacementController(
   c.get('resourceService'),
   c.get('coordinateService'),
   c.get('eventBus'),
-  () => c.get('buildingRenderer').render() // Direct call to BuildingRenderer
+  () => c.get('buildingRenderer').render(), // Direct call to BuildingRenderer
+  c.get('researchService') // Research service for building unlock checks
 ));
 
 container.register('tabController', (c) => new TabController(
@@ -343,6 +392,12 @@ container.register('marketPanelController', (c) => new MarketPanelController(
 container.register('buildingInfoController', (c) => new BuildingInfoController(
   c.get('gameState'),
   c.get('productionService'),
+  c.get('eventBus')
+));
+
+container.register('researchPanelController', (c) => new ResearchPanelController(
+  c.get('researchService'),
+  c.get('resourceService'),
   c.get('eventBus')
 ));
 
@@ -461,6 +516,12 @@ export {
   StorageService,
   // Services (Phase B - Persistence)
   SaveLoadService,
+  // Services (Phase E - Research)
+  ResearchService,
+  // Services (Phase E2 - Plot)
+  PlotService,
+  // Services (Camera)
+  CameraService,
   // UI Controllers (Phase 8)
   PlacementController,
   TabController,
@@ -476,6 +537,7 @@ export {
   MilestonePanelController,
   MarketPanelController,
   BuildingInfoController,
+  ResearchPanelController,
   // UI Integration (Phase 9)
   UIIntegration,
   // Game Controller (Phase 10)

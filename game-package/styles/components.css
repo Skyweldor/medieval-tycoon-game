@@ -943,3 +943,243 @@
     box-shadow: 0 0 25px rgba(229, 115, 115, 0.8);
   }
 }
+
+/* ==========================================
+   RESEARCH PANEL STYLES (Milestone E)
+   ========================================== */
+
+/* Research Progress Header */
+.research-progress-header {
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* Expand Plot Section */
+.expand-plot-section {
+  padding: 10px;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(139, 195, 74, 0.3) 100%);
+  border-radius: 8px;
+  border: 1px solid rgba(76, 175, 80, 0.5);
+  text-align: center;
+}
+
+.btn-expand {
+  background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+  color: white;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-expand:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+/* Research List Container */
+.research-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Research Tier Header */
+.research-tier {
+  margin-bottom: 15px;
+}
+
+.research-tier-header {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #888;
+  padding: 5px 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Research Item */
+.research-item {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.research-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Research Status Classes */
+.research-available {
+  border-color: #4a9eff;
+  cursor: pointer;
+}
+
+.research-available:hover {
+  border-color: #6fb5ff;
+  transform: translateX(2px);
+}
+
+.research-completed {
+  border-color: #4caf50;
+  background: rgba(76, 175, 80, 0.1);
+  opacity: 0.8;
+}
+
+.research-locked {
+  opacity: 0.5;
+  border-color: #555;
+}
+
+/* Research Header */
+.research-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.research-icon {
+  font-size: 1.2rem;
+  width: 28px;
+  text-align: center;
+}
+
+.research-title {
+  flex: 1;
+}
+
+.research-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+}
+
+.research-desc {
+  font-size: 0.75rem;
+  color: #aaa;
+}
+
+/* Research Cost */
+.research-cost {
+  font-size: 0.8rem;
+  padding: 4px 0;
+  margin-bottom: 6px;
+}
+
+.research-cost.affordable {
+  color: #4caf50;
+}
+
+.research-cost.unaffordable {
+  color: #ff5252;
+}
+
+/* Research Prerequisites */
+.research-prereqs {
+  font-size: 0.7rem;
+  color: #ff9800;
+  padding: 4px 0;
+}
+
+/* Research Effects */
+.research-effects {
+  font-size: 0.7rem;
+  color: #8bc34a;
+  padding: 4px 0;
+  line-height: 1.4;
+}
+
+.effect-unlock {
+  color: #64b5f6;
+}
+
+.effect-upgrade {
+  color: #81c784;
+}
+
+.effect-expansion {
+  color: #ba68c8;
+}
+
+/* Research Status Text */
+.research-status {
+  font-size: 0.7rem;
+  color: #888;
+  text-align: right;
+  font-style: italic;
+}
+
+/* Plot Expansion Section */
+.plot-expansion-section {
+  margin-top: 15px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.plot-size-display {
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.btn-expand {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(180deg, #7e57c2, #5e35b1);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-expand:hover {
+  background: linear-gradient(180deg, #9575cd, #7e57c2);
+  transform: translateY(-1px);
+}
+
+.btn-expand:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Research Lock in Build List */
+.research-lock {
+  color: #64b5f6;
+  font-size: 0.75rem;
+}
+
+/* Scrollbar for research list */
+.research-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.research-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.research-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.research-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

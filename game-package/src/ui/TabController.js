@@ -71,7 +71,7 @@ export class TabController {
 
   /**
    * Switch active tab in left panel
-   * @param {string} tabName - Tab name (inspect, build)
+   * @param {string} tabName - Tab name (inspect, build, research)
    */
   switchLeftTab(tabName) {
     this._activeLeftTab = tabName;
@@ -81,10 +81,13 @@ export class TabController {
       btn.classList.remove('active');
     });
 
-    // Find and activate the correct button
+    // Find and activate the correct button by index
     const buttons = document.querySelectorAll('.left-tabbed-panel .tab-btn');
-    if (tabName === 'inspect' && buttons[0]) buttons[0].classList.add('active');
-    if (tabName === 'build' && buttons[1]) buttons[1].classList.add('active');
+    const tabIndices = { inspect: 0, build: 1, research: 2 };
+    const idx = tabIndices[tabName];
+    if (idx !== undefined && buttons[idx]) {
+      buttons[idx].classList.add('active');
+    }
 
     // Update tab content (left panel only)
     document.querySelectorAll('.left-tabbed-panel .tab-content').forEach(content => {
@@ -139,5 +142,12 @@ export class TabController {
    */
   openBuildTab() {
     this.switchLeftTab('build');
+  }
+
+  /**
+   * Open the research tab (left panel)
+   */
+  openResearchTab() {
+    this.switchLeftTab('research');
   }
 }

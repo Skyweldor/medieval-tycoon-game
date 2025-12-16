@@ -6,13 +6,13 @@
 import { Events } from '../core/EventBus.js';
 
 /** Current save schema version - increment when save format changes */
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 4;
 
 /** LocalStorage key for save data */
 const STORAGE_KEY = 'medieval_tycoon_save';
 
-/** Autosave interval in milliseconds (30 seconds) */
-const AUTOSAVE_INTERVAL = 30000;
+/** Autosave interval in milliseconds (10 seconds - captures resource production) */
+const AUTOSAVE_INTERVAL = 10000;
 
 /** Debounce delay for event-triggered saves (500ms - responsive but still batches rapid actions) */
 const DEBOUNCE_DELAY = 500;
@@ -55,16 +55,22 @@ export class SaveLoadService {
     // Milestone completed - save achievement progress
     this._eventBus.subscribe(Events.MILESTONE_COMPLETED, () => this._debouncedSave());
 
+    // Research completed - save research progress
+    this._eventBus.subscribe(Events.RESEARCH_COMPLETED, () => this._debouncedSave());
+
     // Merchant sale - save after trading
     this._eventBus.subscribe(Events.MERCHANT_SALE, () => this._debouncedSave());
     this._eventBus.subscribe(Events.MARKET_SALE, () => this._debouncedSave());
 
     // Save immediately when user leaves/refreshes the page
     window.addEventListener('beforeunload', () => {
+      // Clear any pending debounced save
       if (this._debounceTimeoutId !== null) {
-        // There's a pending save - do it now!
         clearTimeout(this._debounceTimeoutId);
         this._debounceTimeoutId = null;
+      }
+      // Always save on page unload to capture resource changes
+      if (this._autosaveEnabled) {
         this.save();
       }
     });
@@ -99,7 +105,7 @@ export class SaveLoadService {
       }
     }, AUTOSAVE_INTERVAL);
 
-    console.log('[SaveLoadService] Autosave started (every 30s)');
+    console.log('[SaveLoadService] Autosave started (every 10s)');
   }
 
   /**
@@ -266,9 +272,27 @@ export class SaveLoadService {
       // No migration needed for v0 -> v1, structure is compatible
     }
 
-    // Future migrations would go here:
-    // if (version < 2) { state = migrateV1toV2(state); }
-    // if (version < 3) { state = migrateV2toV3(state); }
+    // Migration from v2 to v3: Add research system and plot size
+    if (version < 3) {
+      console.log('[SaveLoadService] Migrating to v3: Adding research system');
+      // Add completedResearch array if missing
+      if (!state.completedResearch) {
+        state.completedResearch = [];
+      }
+      // Add plotSize if missing
+      if (!state.plotSize) {
+        state.plotSize = { rows: 10, cols: 10 };
+      }
+    }
+
+    // Migration from v3 to v4: Add camera state
+    if (version < 4) {
+      console.log('[SaveLoadService] Migrating to v4: Adding camera state');
+      // Add camera state if missing
+      if (!state.camera) {
+        state.camera = { offsetX: 0, offsetY: 0, zoom: 1.0 };
+      }
+    }
 
     if (version > SCHEMA_VERSION) {
       return {

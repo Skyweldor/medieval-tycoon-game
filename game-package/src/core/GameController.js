@@ -43,6 +43,9 @@ export class GameController {
     // Initialize UI controllers
     this._initializeUIControllers();
 
+    // Initialize camera (must be before rendering for proper transforms)
+    this._initializeCamera();
+
     // Render initial game state
     this._renderInitialState();
 
@@ -74,6 +77,10 @@ export class GameController {
         console.log('[GameController] Loaded saved game');
       }
     }
+
+    // Sync plot size from state (whether loaded or default)
+    const plotService = this._container.get('plotService');
+    plotService.syncFromState();
   }
 
   /**
@@ -83,6 +90,15 @@ export class GameController {
   _startAutosave() {
     const saveLoadService = this._container.get('saveLoadService');
     saveLoadService.startAutosave();
+  }
+
+  /**
+   * Initialize camera service
+   * @private
+   */
+  _initializeCamera() {
+    const cameraService = this._container.get('cameraService');
+    cameraService.initialize();
   }
 
   /**
@@ -98,6 +114,7 @@ export class GameController {
     const milestonePanelController = this._container.get('milestonePanelController');
     const marketPanelController = this._container.get('marketPanelController');
     const buildingInfoController = this._container.get('buildingInfoController');
+    const researchPanelController = this._container.get('researchPanelController');
     const placementController = this._container.get('placementController');
     const tabController = this._container.get('tabController');
     const merchantPanelController = this._container.get('merchantPanelController');
@@ -111,6 +128,7 @@ export class GameController {
     milestonePanelController.initialize();
     marketPanelController.initialize();
     buildingInfoController.initialize();
+    researchPanelController.init();
 
     // Existing controllers from Phase 8
     placementController.setupListeners();
@@ -130,6 +148,7 @@ export class GameController {
       milestonePanel: milestonePanelController,
       marketPanel: marketPanelController,
       buildingInfo: buildingInfoController,
+      researchPanel: researchPanelController,
       placement: placementController,
       tab: tabController,
       merchantPanel: merchantPanelController,
@@ -333,6 +352,12 @@ export class GameController {
    */
   destroy() {
     this._stopGameLoops();
+
+    // Destroy camera service
+    const cameraService = this._container.get('cameraService');
+    if (cameraService && typeof cameraService.destroy === 'function') {
+      cameraService.destroy();
+    }
 
     // Destroy UI controllers
     Object.values(this._uiControllers).forEach(controller => {

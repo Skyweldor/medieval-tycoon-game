@@ -157,17 +157,17 @@ export class BuildingRenderer {
 
   /**
    * Render all buildings
-   * @param {HTMLElement} [gameWorld] - Optional game world element (defaults to #game-world)
+   * @param {HTMLElement} [container] - Optional container element (defaults to #building-layer)
    */
-  render(gameWorld) {
-    const world = gameWorld || document.getElementById('game-world');
-    if (!world) {
-      console.warn('[BuildingRenderer] Game world element not found');
+  render(container) {
+    const layer = container || document.getElementById('building-layer') || document.getElementById('game-world');
+    if (!layer) {
+      console.warn('[BuildingRenderer] Building layer element not found');
       return;
     }
 
     // Remove existing building elements
-    world.querySelectorAll('.building-slot').forEach(el => el.remove());
+    layer.querySelectorAll('.building-slot').forEach(el => el.remove());
 
     // Get buildings from game state
     const buildings = this._gameState.getBuildings();
@@ -175,7 +175,7 @@ export class BuildingRenderer {
     // Render each building
     buildings.forEach((building, index) => {
       const element = this._createBuildingElement(building, index);
-      world.appendChild(element);
+      layer.appendChild(element);
     });
   }
 
@@ -183,60 +183,60 @@ export class BuildingRenderer {
    * Render a single building (for adding new buildings without full re-render)
    * @param {Object} building - Building data
    * @param {number} index - Building index
-   * @param {HTMLElement} [gameWorld] - Optional game world element
+   * @param {HTMLElement} [container] - Optional container element
    */
-  renderSingle(building, index, gameWorld) {
-    const world = gameWorld || document.getElementById('game-world');
-    if (!world) return;
+  renderSingle(building, index, container) {
+    const layer = container || document.getElementById('building-layer') || document.getElementById('game-world');
+    if (!layer) return;
 
     const element = this._createBuildingElement(building, index);
-    world.appendChild(element);
+    layer.appendChild(element);
   }
 
   /**
    * Clear all building elements
-   * @param {HTMLElement} [gameWorld] - Optional game world element
+   * @param {HTMLElement} [container] - Optional container element
    */
-  clear(gameWorld) {
-    const world = gameWorld || document.getElementById('game-world');
-    if (!world) return;
+  clear(container) {
+    const layer = container || document.getElementById('building-layer') || document.getElementById('game-world');
+    if (!layer) return;
 
-    world.querySelectorAll('.building-slot').forEach(el => el.remove());
+    layer.querySelectorAll('.building-slot').forEach(el => el.remove());
   }
 
   /**
    * Update a single building's appearance (e.g., after upgrade)
    * @param {number} index - Building index
-   * @param {HTMLElement} [gameWorld] - Optional game world element
+   * @param {HTMLElement} [container] - Optional container element
    */
-  updateBuilding(index, gameWorld) {
-    const world = gameWorld || document.getElementById('game-world');
-    if (!world) return;
+  updateBuilding(index, container) {
+    const layer = container || document.getElementById('building-layer') || document.getElementById('game-world');
+    if (!layer) return;
 
     const buildings = this._gameState.getBuildings();
     const building = buildings[index];
     if (!building) return;
 
     // Remove old element by data attribute (not DOM order)
-    const oldSlot = world.querySelector(`.building-slot[data-building-index="${index}"]`);
+    const oldSlot = layer.querySelector(`.building-slot[data-building-index="${index}"]`);
     if (oldSlot) {
       oldSlot.remove();
     }
 
     const element = this._createBuildingElement(building, index);
-    world.appendChild(element);
+    layer.appendChild(element);
   }
 
   /**
    * Get the building element at a specific index
    * @param {number} index - Building index
-   * @param {HTMLElement} [gameWorld] - Optional game world element
+   * @param {HTMLElement} [container] - Optional container element
    * @returns {HTMLElement|null}
    */
-  getBuildingElement(index, gameWorld) {
-    const world = gameWorld || document.getElementById('game-world');
-    if (!world) return null;
+  getBuildingElement(index, container) {
+    const layer = container || document.getElementById('building-layer') || document.getElementById('game-world');
+    if (!layer) return null;
 
-    return world.querySelector(`.building-slot[data-building-index="${index}"]`);
+    return layer.querySelector(`.building-slot[data-building-index="${index}"]`);
   }
 }

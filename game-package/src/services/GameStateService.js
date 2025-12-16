@@ -31,12 +31,19 @@ const DEFAULT_STATE = {
     disabled: false
   },
   completedMilestones: [],
+  completedResearch: [],
+  plotSize: { rows: 10, cols: 10 },
   ui: {
     placementMode: null,
     activeTab: 'build',
     activeLeftTab: 'build',
     debugOffsets: { x: 2, y: -8, sizeMult: 2 },
     cursorOffsets: { x: -1, y: -1 }
+  },
+  camera: {
+    offsetX: 0,
+    offsetY: 0,
+    zoom: 1.0
   }
 };
 
@@ -361,6 +368,77 @@ export class GameStateService {
     if (!this._state.completedMilestones.includes(id)) {
       this._state.completedMilestones.push(id);
     }
+  }
+
+  // ==========================================
+  // RESEARCH
+  // ==========================================
+
+  /**
+   * Get completed research
+   * @returns {string[]}
+   */
+  getCompletedResearch() {
+    return [...this._state.completedResearch];
+  }
+
+  /**
+   * Check if a research is completed
+   * @param {string} id
+   * @returns {boolean}
+   */
+  isResearchCompleted(id) {
+    return this._state.completedResearch.includes(id);
+  }
+
+  /**
+   * Mark a research as completed
+   * @param {string} id
+   */
+  completeResearch(id) {
+    if (!this._state.completedResearch.includes(id)) {
+      this._state.completedResearch.push(id);
+    }
+  }
+
+  // ==========================================
+  // PLOT SIZE
+  // ==========================================
+
+  /**
+   * Get current plot size
+   * @returns {{rows: number, cols: number}}
+   */
+  getPlotSize() {
+    return { ...this._state.plotSize };
+  }
+
+  /**
+   * Set plot size (for expansion)
+   * @param {{rows: number, cols: number}} size
+   */
+  setPlotSize(size) {
+    this._state.plotSize = { ...size };
+  }
+
+  // ==========================================
+  // CAMERA
+  // ==========================================
+
+  /**
+   * Get camera state
+   * @returns {{offsetX: number, offsetY: number, zoom: number}}
+   */
+  getCamera() {
+    return { ...this._state.camera };
+  }
+
+  /**
+   * Update camera state
+   * @param {Object} updates - Camera properties to update
+   */
+  updateCamera(updates) {
+    Object.assign(this._state.camera, updates);
   }
 
   // ==========================================
