@@ -60,3 +60,16 @@ export {
   DEFAULT_UNLOCKED_BUILDINGS,
   DEFAULT_MAX_TIER
 } from './research.config.js';
+
+// Resource configuration
+export {
+  RESOURCES,
+  CATEGORY_ORDER,
+  getResourceDef,
+  getResourceIds,
+  getSortedResources,
+  getResourcesByCategory,
+  getTradeableResources,
+  getStorableResourceIds,
+  getDefaultResources
+} from './resources.config.js';

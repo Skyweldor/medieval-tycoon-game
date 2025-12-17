@@ -4,7 +4,8 @@
  */
 
 import { Events } from '../core/EventBus.js';
-import { MERCHANT_CONFIG } from '../config/index.js';
+import { MERCHANT_CONFIG, getTradeableResources
+ } from '../config/index.js';
 
 export class MerchantService {
   /**
@@ -101,10 +102,16 @@ export class MerchantService {
    * Merchant arrives for a visit
    */
   arrive() {
+    // Initialize soldThisVisit from registry
+    const soldThisVisit = {};
+    getTradeableResources().forEach(r => {
+      soldThisVisit[r.id] = 0;
+    });
+
     this._gameState.updateMerchant({
       active: true,
       visitStartTime: Date.now(),
-      soldThisVisit: { wheat: 0, stone: 0, wood: 0 },
+      soldThisVisit,
       totalVisits: this._gameState.getMerchant().totalVisits + 1
     });
 
@@ -294,14 +301,13 @@ export class MerchantService {
    * @returns {Array<{resource: string, have: number, sold: number, maxPerVisit: number, remaining: number, price: number, canSell: number}>}
    */
   getTradeData() {
-    const resources = ['wheat', 'stone', 'wood'];
-
-    return resources.map(resource => {
+    return getTradeableResources().map(r => {
+      const resource = r.id;
       const have = this._resourceService.getResource(resource);
       const sold = this._gameState.getMerchant().soldThisVisit[resource] || 0;
-      const maxPerVisit = MERCHANT_CONFIG.maxPerVisit[resource];
-      const remaining = maxPerVisit - sold;
-      const price = MERCHANT_CONFIG.prices[resource];
+      const maxPerVisit = MERCHANT_CONFIG.maxPerVisit[resource] || 0;
+      const remaining = Math.max(0, maxPerVisit - sold);
+      const price = MERCHANT_CONFIG.prices[resource] || 0;
       const canSell = Math.min(have, remaining);
 
       return {

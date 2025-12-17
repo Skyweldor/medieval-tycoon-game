@@ -70,6 +70,9 @@ import { BuildingService } from './services/BuildingService.js';
 // Services (Phase 4)
 import { ProductionService } from './services/ProductionService.js';
 
+// Services (Phase F - Crafting)
+import { ProcessorService } from './services/ProcessorService.js';
+
 // Services (Phase 5)
 import { StipendService } from './services/StipendService.js';
 import { MilestoneService } from './services/MilestoneService.js';
@@ -244,6 +247,13 @@ container.register('productionService', (c) => new ProductionService(
   c.get('eventBus')
 ));
 
+// Phase F services (Crafting - Processor buildings)
+container.register('processorService', (c) => new ProcessorService(
+  c.get('gameState'),
+  c.get('resourceService'),
+  c.get('eventBus')
+));
+
 // Phase 5 services
 container.register('stipendService', (c) => new StipendService(
   c.get('gameState'),
@@ -392,7 +402,8 @@ container.register('marketPanelController', (c) => new MarketPanelController(
 container.register('buildingInfoController', (c) => new BuildingInfoController(
   c.get('gameState'),
   c.get('productionService'),
-  c.get('eventBus')
+  c.get('eventBus'),
+  c.get('processorService')
 ));
 
 container.register('researchPanelController', (c) => new ResearchPanelController(
@@ -506,6 +517,8 @@ export {
   BuildingService,
   // Services (Phase 4)
   ProductionService,
+  // Services (Phase F - Crafting)
+  ProcessorService,
   // Services (Phase 5)
   StipendService,
   MilestoneService,

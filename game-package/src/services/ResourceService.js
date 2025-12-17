@@ -4,6 +4,7 @@
  */
 
 import { Events } from '../core/EventBus.js';
+import { RESOURCES } from '../config/resources.config.js';
 
 export class ResourceService {
   /**
@@ -269,10 +270,8 @@ export class ResourceService {
   formatCost(cost) {
     if (!cost) return '';
 
-    const EMOJIS = { gold: '💰', wheat: '🌾', stone: '⛏️', wood: '🌲' };
-
     return Object.entries(cost)
-      .map(([res, amt]) => `${this.formatNumber(amt)} ${EMOJIS[res] || res}`)
+      .map(([res, amt]) => `${this.formatNumber(amt)} ${this.getResourceEmoji(res)}`)
       .join(' ');
   }
 
@@ -282,8 +281,8 @@ export class ResourceService {
    * @returns {string}
    */
   getResourceEmoji(type) {
-    const EMOJIS = { gold: '💰', wheat: '🌾', stone: '⛏️', wood: '🌲' };
-    return EMOJIS[type] || type;
+    const def = RESOURCES[type];
+    return def?.emoji || type;
   }
 
   // ==========================================

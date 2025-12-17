@@ -4,7 +4,7 @@
  */
 
 import { Events } from '../core/EventBus.js';
-import { MARKET_CONFIG } from '../config/index.js';
+import { MARKET_CONFIG, getTradeableResources, RESOURCES } from '../config/index.js';
 
 export class MarketService {
   /**
@@ -84,15 +84,15 @@ export class MarketService {
   }
 
   /**
-   * Get prices for all resources
-   * @returns {{wheat: number, stone: number, wood: number}}
+   * Get prices for all tradeable resources
+   * @returns {Object} Prices keyed by resource ID
    */
   getAllPrices() {
-    return {
-      wheat: this.getPrice('wheat'),
-      stone: this.getPrice('stone'),
-      wood: this.getPrice('wood')
-    };
+    const prices = {};
+    getTradeableResources().forEach(r => {
+      prices[r.id] = this.getPrice(r.id);
+    });
+    return prices;
   }
 
   // ==========================================
@@ -166,12 +166,10 @@ export class MarketService {
    * @returns {Array<{resource: string, have: number, price: number}>}
    */
   getTradeData() {
-    const resources = ['wheat', 'stone', 'wood'];
-
-    return resources.map(resource => ({
-      resource,
-      have: this._resourceService.getResource(resource),
-      price: this.getPrice(resource)
+    return getTradeableResources().map(r => ({
+      resource: r.id,
+      have: this._resourceService.getResource(r.id),
+      price: this.getPrice(r.id)
     }));
   }
 
@@ -193,12 +191,13 @@ export class MarketService {
    * @returns {string}
    */
   generateTradesHTML() {
-    const EMOJIS = { wheat: '🌾', stone: '⛏️', wood: '🌲' };
     const tradeData = this.getTradeData();
 
-    return tradeData.map(({ resource, have, price }) => `
+    return tradeData.map(({ resource, have, price }) => {
+      const emoji = RESOURCES[resource]?.emoji || resource;
+      return `
       <div class="market-row">
-        <span class="market-res">${EMOJIS[resource]} ${have}</span>
+        <span class="market-res">${emoji} ${have}</span>
         <span class="market-price">${price}💰</span>
         <div class="market-btns">
           <button onclick="sellAtMarket('${resource}', 1)" ${have < 1 ? 'disabled' : ''}>1</button>
@@ -206,6 +205,7 @@ export class MarketService {
           <button onclick="sellAtMarket('${resource}', ${have})" ${have === 0 ? 'disabled' : ''}>All</button>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
 }

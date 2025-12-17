@@ -62,18 +62,21 @@ export class ProductionService {
   }
 
   /**
-   * Calculate net production rates for all buildings
-   * This is used for UI display (shows +X/s rates)
-   * @returns {{gold: number, wheat: number, stone: number, wood: number}}
+   * Calculate net production rates for all continuous buildings
+   * Processor buildings (isProcessor: true) are handled by ProcessorService
+   * @returns {Object} Production rates per resource
    */
   calculateProduction() {
-    const production = { gold: 0, wheat: 0, stone: 0, wood: 0 };
+    const production = {};
     const buildings = this._gameState.getBuildings();
     const resources = this._gameState.getResources();
 
     buildings.forEach(building => {
       const def = getBuildingDef(building.type);
       if (!def) return;
+
+      // Skip processor buildings - handled by ProcessorService
+      if (def.isProcessor) return;
 
       const mult = this.getProductionMultiplier(building);
 
@@ -88,13 +91,13 @@ export class ProductionService {
       if (canProduce) {
         // Add production
         Object.entries(def.production || {}).forEach(([res, amt]) => {
-          production[res] += amt * mult;
+          production[res] = (production[res] || 0) + amt * mult;
         });
 
         // Subtract consumption
         if (def.consumes) {
           Object.entries(def.consumes).forEach(([res, amt]) => {
-            production[res] -= amt;
+            production[res] = (production[res] || 0) - amt;
           });
         }
       }
@@ -143,19 +146,23 @@ export class ProductionService {
   // ==========================================
 
   /**
-   * Process one production tick
+   * Process one production tick for continuous buildings
+   * Processor buildings are handled by ProcessorService
    * Called automatically via EventBus subscription to TICK event
    */
   tick() {
     const buildings = this._gameState.getBuildings();
 
     // Accumulate all production and consumption for batch processing
-    const totalProduction = { gold: 0, wheat: 0, stone: 0, wood: 0 };
-    const totalConsumption = { gold: 0, wheat: 0, stone: 0, wood: 0 };
+    const totalProduction = {};
+    const totalConsumption = {};
 
     buildings.forEach(building => {
       const def = getBuildingDef(building.type);
       if (!def) return;
+
+      // Skip processor buildings - handled by ProcessorService
+      if (def.isProcessor) return;
 
       const mult = this.getProductionMultiplier(building);
 
@@ -168,7 +175,7 @@ export class ProductionService {
         // Accumulate consumption if we can produce
         if (canProduce) {
           Object.entries(def.consumes).forEach(([res, amt]) => {
-            totalConsumption[res] += amt;
+            totalConsumption[res] = (totalConsumption[res] || 0) + amt;
           });
         }
       }
@@ -177,7 +184,7 @@ export class ProductionService {
       if (canProduce) {
         Object.entries(def.production || {}).forEach(([res, amt]) => {
           const produced = amt * mult;
-          totalProduction[res] += produced;
+          totalProduction[res] = (totalProduction[res] || 0) + produced;
         });
       }
     });

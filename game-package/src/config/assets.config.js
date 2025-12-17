@@ -57,6 +57,17 @@ export const ASSETS = {
     2: 'assets/barn_basic.png',
     3: 'assets/barn_basic.png',
   },
+  // Processor buildings (Milestone F)
+  mill: {
+    1: 'assets/mill_basic.png',
+    2: 'assets/mill_basic.png',
+    3: 'assets/mill_basic.png',
+  },
+  bread_oven: {
+    1: 'assets/bread_oven_basic.png',
+    2: 'assets/bread_oven_basic.png',
+    3: 'assets/bread_oven_basic.png',
+  },
 };
 
 // Fallback emojis when assets aren't available
@@ -69,6 +80,8 @@ export const EMOJI_FALLBACKS = {
   market: '🏪',
   townhall: '🏛️',
   barn: '🏚️',
+  mill: '🏭',
+  bread_oven: '🍞',
 };
 
 // Resource emojis

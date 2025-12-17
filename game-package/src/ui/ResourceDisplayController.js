@@ -2,9 +2,11 @@
  * ResourceDisplayController
  * Updates resource display UI (bar and overlay) based on game state
  * Subscribes to TICK events to refresh resource values and production rates
+ * Dynamically generates HUD from resource registry
  */
 
 import { Events } from '../core/EventBus.js';
+import { getSortedResources, RESOURCES } from '../config/resources.config.js';
 
 export class ResourceDisplayController {
   /**
@@ -20,13 +22,17 @@ export class ResourceDisplayController {
     this._eventBus = eventBus;
 
     this._unsubscribers = [];
-    this._resourceTypes = ['gold', 'wheat', 'stone', 'wood'];
+    // Get resource types from registry, sorted by display order
+    this._resourceTypes = getSortedResources().map(r => r.id);
   }
 
   /**
    * Initialize the controller and subscribe to events
    */
   initialize() {
+    // Generate dynamic overlay HTML
+    this._generateOverlayHTML();
+
     // Update on every tick
     this._unsubscribers.push(
       this._eventBus.subscribe(Events.TICK, () => this.update())
@@ -39,6 +45,28 @@ export class ResourceDisplayController {
 
     // Initial render
     this.update();
+  }
+
+  /**
+   * Generate the in-canvas resource overlay HTML dynamically
+   * @private
+   */
+  _generateOverlayHTML() {
+    const overlay = document.getElementById('resource-overlay');
+    if (!overlay) return;
+
+    const html = this._resourceTypes.map(id => {
+      const def = RESOURCES[id];
+      return `
+        <div class="resource-overlay-item" data-resource="${id}">
+          <span class="icon icon-32 ${def.icon}"></span>
+          <span class="resource-overlay-value" id="overlay-${id}-value">0</span>
+          <span class="resource-overlay-rate neutral" id="overlay-${id}-rate">+0/s</span>
+        </div>
+      `;
+    }).join('');
+
+    overlay.innerHTML = html;
   }
 
   /**
@@ -57,7 +85,8 @@ export class ResourceDisplayController {
     const production = this._productionService.calculateProduction();
 
     this._resourceTypes.forEach(res => {
-      this._updateResourceDisplay(res, resources[res], production[res]);
+      // Use 0 as default for resources without production rate
+      this._updateResourceDisplay(res, resources[res] || 0, production[res] || 0);
     });
   }
 

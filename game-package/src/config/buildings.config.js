@@ -93,6 +93,40 @@ export const BUILDINGS = {
     ],
     unlockReq: { wood: 10 },
   },
+
+  // Processor Buildings (cycle-based production)
+  mill: {
+    name: 'Mill',
+    baseCost: { gold: 80, wood: 25 },
+    production: {},
+    recipe: {
+      inputs: { wheat: 2 },
+      outputs: { flour: 1 },
+      cycleTime: 10000, // 10 seconds
+    },
+    upgrades: [
+      { cost: { gold: 200, wood: 30 }, mult: 1.5 },
+      { cost: { gold: 600, wood: 50 }, mult: 2 },
+    ],
+    unlockReq: { wheat: 20 },
+    isProcessor: true,
+  },
+  bread_oven: {
+    name: 'Bread Oven',
+    baseCost: { gold: 150, wood: 15 },
+    production: {},
+    recipe: {
+      inputs: { flour: 1 },
+      outputs: { bread: 1 },
+      cycleTime: 8000, // 8 seconds
+    },
+    upgrades: [
+      { cost: { gold: 400, wood: 25 }, mult: 1.5 },
+      { cost: { gold: 1200, wood: 40 }, mult: 2 },
+    ],
+    unlockReq: { flour: 5 },
+    isProcessor: true,
+  },
 };
 
 // Building types that produce gold (used for stipend check)

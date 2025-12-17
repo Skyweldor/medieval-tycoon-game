@@ -38,6 +38,7 @@
 .icon-wheat { background-position: 20% center; }
 .icon-stone { background-position: 40% center; }
 .icon-wood  { background-position: 60% center; }
+.icon-flour { background-position: 80% center; } /* Flour uses bread icon slot */
 .icon-bread { background-position: 80% center; }
 .icon-iron  { background-position: 100% center; }
 

@@ -5,17 +5,24 @@
  */
 
 import { Events } from '../core/EventBus.js';
+import { getDefaultResources, getTradeableResources } from '../config/resources.config.js';
+
+/**
+ * Get default sold tracking object for merchant
+ */
+function getDefaultSoldThisVisit() {
+  const sold = {};
+  getTradeableResources().forEach(r => {
+    sold[r.id] = 0;
+  });
+  return sold;
+}
 
 /**
  * Default initial state for a new game
  */
 const DEFAULT_STATE = {
-  resources: {
-    gold: 50,
-    wheat: 0,
-    stone: 0,
-    wood: 0
-  },
+  resources: getDefaultResources(),
   buildings: [],
   stipend: {
     active: true,
@@ -25,7 +32,7 @@ const DEFAULT_STATE = {
   merchant: {
     active: false,
     visitStartTime: null,
-    soldThisVisit: { wheat: 0, stone: 0, wood: 0 },
+    soldThisVisit: getDefaultSoldThisVisit(),
     nextVisitTime: null,
     totalVisits: 0,
     disabled: false

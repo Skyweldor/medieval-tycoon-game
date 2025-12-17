@@ -3,24 +3,24 @@
  * Computes resource storage caps based on buildings (primarily Barns)
  */
 
-import { getBuildingDef } from '../config/index.js';
+import { getBuildingDef, RESOURCES, getStorableResourceIds, getResourceIds } from '../config/index.js';
 
 /**
- * Default storage caps per resource type
- * Gold is uncapped (Infinity) while bulk resources have base caps
+ * Compute base storage caps from resource registry
  */
-const BASE_CAPS = {
-  gold: Infinity,  // Gold is never capped
-  wheat: 100,
-  stone: 100,
-  wood: 100
-};
+function getBaseCaps() {
+  const caps = {};
+  getResourceIds().forEach(id => {
+    caps[id] = RESOURCES[id].baseStorage;
+  });
+  return caps;
+}
 
 /**
- * Resources affected by barn storage bonus
- * Gold intentionally excluded - only bulk resources benefit from barns
+ * Get storable resource IDs from registry
+ * (resources that benefit from barn storage bonus)
  */
-const STORABLE_RESOURCES = ['wheat', 'stone', 'wood'];
+const STORABLE_RESOURCES = getStorableResourceIds();
 
 export class StorageService {
   /**
@@ -70,11 +70,11 @@ export class StorageService {
 
   /**
    * Compute storage caps based on current buildings
-   * @returns {{gold: number, wheat: number, stone: number, wood: number}}
+   * @returns {Object} Storage caps for all resources
    * @private
    */
   _computeCaps() {
-    const caps = { ...BASE_CAPS };
+    const caps = getBaseCaps();
     const buildings = this._gameState.getBuildings();
     const barnDef = getBuildingDef('barn');
     const baseBonus = barnDef?.storageBonus || 100;
