@@ -20,6 +20,18 @@ const ZOOM_STEP = 0.1;
 /** Pan speed (pixels per key press) */
 const PAN_SPEED = 50;
 
+/**
+ * Pan limits by plot size
+ * At 10x10 (initial), no panning allowed
+ * After expansions, allow panning with increasing limits
+ */
+const PAN_LIMITS = {
+  10: { minX: 0, maxX: 0, minY: 0, maxY: 0 },           // No panning at 10x10
+  12: { minX: -50, maxX: 50, minY: -50, maxY: 0 },      // First expansion
+  14: { minX: -100, maxX: 100, minY: -100, maxY: 50 },  // Second expansion
+  16: { minX: -150, maxX: 150, minY: -150, maxY: 100 }  // Third expansion
+};
+
 export class CameraService {
   /**
    * @param {import('./GameStateService.js').GameStateService} gameState
@@ -85,13 +97,49 @@ export class CameraService {
   // ==========================================
 
   /**
-   * Set camera offset (no clamping - for debugging)
+   * Get pan limits based on current plot size
+   * @returns {{minX: number, maxX: number, minY: number, maxY: number}}
+   * @private
+   */
+  _getPanLimits() {
+    const plotSize = this._gameState.getPlotSize();
+    const size = Math.max(plotSize.rows, plotSize.cols);
+    return PAN_LIMITS[size] || PAN_LIMITS[16]; // Default to max if larger
+  }
+
+  /**
+   * Clamp offset values to current pan limits
+   * @param {number} x
+   * @param {number} y
+   * @returns {{x: number, y: number}}
+   * @private
+   */
+  _clampOffset(x, y) {
+    const limits = this._getPanLimits();
+    return {
+      x: Math.max(limits.minX, Math.min(limits.maxX, x)),
+      y: Math.max(limits.minY, Math.min(limits.maxY, y))
+    };
+  }
+
+  /**
+   * Check if panning is enabled at current plot size
+   * @returns {boolean}
+   */
+  canPan() {
+    const limits = this._getPanLimits();
+    return limits.minX !== limits.maxX || limits.minY !== limits.maxY;
+  }
+
+  /**
+   * Set camera offset (clamped to pan limits)
    * @param {number} x
    * @param {number} y
    */
   setOffset(x, y) {
-    this._gameState.updateCamera({ offsetX: x, offsetY: y });
-    this._eventBus.publish(Events.CAMERA_MOVED, { offsetX: x, offsetY: y });
+    const clamped = this._clampOffset(x, y);
+    this._gameState.updateCamera({ offsetX: clamped.x, offsetY: clamped.y });
+    this._eventBus.publish(Events.CAMERA_MOVED, { offsetX: clamped.x, offsetY: clamped.y });
     this.applyTransform();
     this._updateDebugDisplay();
   }
@@ -215,6 +263,8 @@ export class CameraService {
 
     const cam = this.getCamera();
     const plotSize = this._gameState.getPlotSize();
+    const limits = this._getPanLimits();
+    const canPan = this.canPan();
 
     this._debugEl.innerHTML = `
       <div style="color: #fff; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #0f0; padding-bottom: 4px;">
@@ -226,6 +276,15 @@ export class CameraService {
       <div style="margin-top: 8px; border-top: 1px solid #333; padding-top: 4px;">
         <span style="color: #888;">plot:</span> <span style="color: #f0f;">${plotSize.rows}x${plotSize.cols}</span>
       </div>
+      <div style="margin-top: 4px;">
+        <span style="color: #888;">pan:</span> <span style="color: ${canPan ? '#0f0' : '#f00'};">${canPan ? 'enabled' : 'disabled'}</span>
+      </div>
+      ${canPan ? `
+      <div style="font-size: 10px; color: #888; margin-top: 4px;">
+        X: [${limits.minX}, ${limits.maxX}]<br>
+        Y: [${limits.minY}, ${limits.maxY}]
+      </div>
+      ` : ''}
       <div style="margin-top: 8px; font-size: 10px; color: #666;">
         Shift+drag or middle-click to pan<br>
         Arrow keys to pan<br>
