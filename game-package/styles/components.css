@@ -121,28 +121,42 @@
 .resource-rate.negative { color: #E57373; }
 .resource-rate.neutral { color: #666; }
 
-/* In-Canvas Resource Overlay */
+/* In-Canvas Resource Overlay - Horizontal Top Bar */
 .resource-overlay {
   position: absolute;
-  top: 15px;
-  left: 15px;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 100;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 10px 12px;
-  background: rgba(62, 39, 35, 0.9);
-  border-radius: 10px;
+  gap: 4px;
+  padding: 8px 16px;
+  background: rgba(62, 39, 35, 0.92);
+  border-radius: 8px;
   border: 2px solid rgba(141, 110, 99, 0.7);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
+  min-width: 500px;
+  max-width: 90%;
+}
+
+/* Resource rows within overlay */
+.resource-overlay-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .resource-overlay-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-width: 100px;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  min-width: 90px;
 }
 
 .resource-overlay-icon {
@@ -152,22 +166,58 @@
 }
 
 .resource-overlay-value {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #fff;
   font-family: 'Courier New', monospace;
-  min-width: 45px;
+  min-width: 40px;
 }
 
 .resource-overlay-rate {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
-  margin-left: auto;
+  color: #888;
 }
 
 .resource-overlay-rate.positive { color: #7CB342; }
 .resource-overlay-rate.negative { color: #E57373; }
 .resource-overlay-rate.neutral { color: #888; }
+
+/* Emoji fallback for resources without sprites */
+.resource-emoji {
+  font-size: 1.2rem;
+  min-width: 20px;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Production resources row - stone/wood production */
+.resource-overlay-production {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 2px;
+}
+
+.production-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #aaa;
+}
+
+.production-item .icon-16 {
+  opacity: 0.8;
+}
+
+.production-label {
+  color: #888;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+}
 
 /* Royal Stipend Indicator */
 .stipend-indicator {

@@ -3,7 +3,7 @@
  * Handles the merchant trading panel overlay UI
  */
 
-import { MERCHANT_CONFIG } from '../config/index.js';
+import { MERCHANT_CONFIG, RESOURCES } from '../config/index.js';
 
 export class MerchantPanelController {
   /**
@@ -148,6 +148,28 @@ export class MerchantPanelController {
   }
 
   /**
+   * Get emoji for a resource (from resource registry)
+   * @param {string} resourceId
+   * @returns {string}
+   * @private
+   */
+  _getResourceEmoji(resourceId) {
+    const def = RESOURCES[resourceId];
+    return def?.emoji || resourceId;
+  }
+
+  /**
+   * Format resource name for display (handle underscores)
+   * @param {string} resourceId
+   * @returns {string}
+   * @private
+   */
+  _formatResourceName(resourceId) {
+    const def = RESOURCES[resourceId];
+    return def?.name || this._capitalize(resourceId.replace('_', ' '));
+  }
+
+  /**
    * Render the trade rows in the merchant panel
    */
   renderTradeRows() {
@@ -155,15 +177,16 @@ export class MerchantPanelController {
     if (!container) return;
 
     const tradeData = this._merchantService.getTradeData();
-    const resourceEmoji = { wheat: '🌾', stone: '⛏️', wood: '🌲' };
 
     container.innerHTML = tradeData.map(({ resource, have, sold, maxPerVisit, remaining, price, canSell }) => {
+      const emoji = this._getResourceEmoji(resource);
+      const displayName = this._formatResourceName(resource);
       return `
         <div class="trade-row ${canSell === 0 ? 'disabled' : ''}">
           <div class="trade-resource">
-            <span class="trade-icon">${resourceEmoji[resource]}</span>
+            <span class="trade-icon">${emoji}</span>
             <div class="trade-info">
-              <span class="trade-name">${this._capitalize(resource)}</span>
+              <span class="trade-name">${displayName}</span>
               <span class="trade-have">You have: ${have}</span>
             </div>
           </div>

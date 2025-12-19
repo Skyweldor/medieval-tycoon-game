@@ -90,7 +90,7 @@ export class ProcessorService {
     } else if (!hasOutputSpace) {
       // Cannot start - output storage full
       state.state = 'stalled';
-      state.stallReason = 'Storage Full';
+      state.stallReason = this._getStorageFullReason(recipe.outputs);
       state.progress = 0;
       state.inputsConsumed = false;
     } else {
@@ -215,9 +215,29 @@ export class ProcessorService {
   _getMissingInputReason(inputs) {
     const missing = this._resourceService.getMissingResources(inputs);
     const resourceNames = Object.keys(missing).map(r =>
-      r.charAt(0).toUpperCase() + r.slice(1)
+      r.charAt(0).toUpperCase() + r.slice(1).replace('_', ' ')
     );
     return `Need ${resourceNames.join(', ')}`;
+  }
+
+  /**
+   * Generate stall reason for storage full
+   * @param {Object} outputs - Required outputs
+   * @returns {string}
+   * @private
+   */
+  _getStorageFullReason(outputs) {
+    const fullResources = Object.entries(outputs)
+      .filter(([resource, amount]) => {
+        const remaining = this._resourceService.getRemainingSpace(resource);
+        return remaining < amount;
+      })
+      .map(([resource]) => resource.charAt(0).toUpperCase() + resource.slice(1).replace('_', ' '));
+
+    if (fullResources.length > 0) {
+      return `Storage Full: ${fullResources.join(', ')}`;
+    }
+    return 'Storage Full';
   }
 
   /**

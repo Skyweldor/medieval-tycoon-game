@@ -127,6 +127,108 @@ export const BUILDINGS = {
     unlockReq: { flour: 5 },
     isProcessor: true,
   },
+
+  // Wood Processing Chain
+  sawmill: {
+    name: 'Sawmill',
+    baseCost: { gold: 120, wood: 30 },
+    production: {},
+    recipe: {
+      inputs: { wood: 2 },
+      outputs: { planks: 1 },
+      cycleTime: 10000, // 10 seconds
+    },
+    upgrades: [
+      { cost: { gold: 300, wood: 40 }, mult: 1.5 },
+      { cost: { gold: 800, wood: 60 }, mult: 2 },
+    ],
+    unlockResearchId: 'wood_processing',
+    isProcessor: true,
+  },
+  carpenter: {
+    name: 'Carpenter',
+    baseCost: { gold: 200, planks: 10 },
+    production: {},
+    recipe: {
+      inputs: { planks: 1 },
+      outputs: { furniture: 1 },
+      cycleTime: 10000, // 10 seconds
+    },
+    upgrades: [
+      { cost: { gold: 500, planks: 15 }, mult: 1.5 },
+      { cost: { gold: 1500, planks: 25 }, mult: 2 },
+    ],
+    unlockResearchId: 'carpentry',
+    isProcessor: true,
+  },
+
+  // Stone Processing Chain
+  stonecutter: {
+    name: 'Stonecutter',
+    baseCost: { gold: 130, stone: 25 },
+    production: {},
+    recipe: {
+      inputs: { stone: 2 },
+      outputs: { cut_stone: 1 },
+      cycleTime: 11000, // 11 seconds
+    },
+    upgrades: [
+      { cost: { gold: 350, stone: 35 }, mult: 1.5 },
+      { cost: { gold: 900, stone: 50 }, mult: 2 },
+    ],
+    unlockResearchId: 'stone_processing',
+    isProcessor: true,
+  },
+  mason_yard: {
+    name: 'Mason Yard',
+    baseCost: { gold: 220, cut_stone: 10 },
+    production: {},
+    recipe: {
+      inputs: { cut_stone: 1 },
+      outputs: { stone_blocks: 1 },
+      cycleTime: 10000, // 10 seconds
+    },
+    upgrades: [
+      { cost: { gold: 550, cut_stone: 15 }, mult: 1.5 },
+      { cost: { gold: 1600, cut_stone: 25 }, mult: 2 },
+    ],
+    unlockResearchId: 'block_masonry',
+    isProcessor: true,
+  },
+
+  // Cross-Chain Products
+  toolmaker: {
+    name: 'Toolmaker Workshop',
+    baseCost: { gold: 350, planks: 15, cut_stone: 15 },
+    production: {},
+    recipe: {
+      inputs: { planks: 1, cut_stone: 1 },
+      outputs: { tools: 1 },
+      cycleTime: 14000, // 14 seconds
+    },
+    upgrades: [
+      { cost: { gold: 800, planks: 20, cut_stone: 20 }, mult: 1.5 },
+      { cost: { gold: 2000, planks: 30, cut_stone: 30 }, mult: 2 },
+    ],
+    unlockResearchId: 'toolmaking',
+    isProcessor: true,
+  },
+  charcoal_kiln: {
+    name: 'Charcoal Kiln',
+    baseCost: { gold: 280, stone_blocks: 5 },
+    production: {},
+    recipe: {
+      inputs: { planks: 2 },
+      outputs: { charcoal: 1 },
+      cycleTime: 12000, // 12 seconds
+    },
+    upgrades: [
+      { cost: { gold: 600, stone_blocks: 8 }, mult: 1.5 },
+      { cost: { gold: 1500, stone_blocks: 12 }, mult: 2 },
+    ],
+    unlockResearchId: 'charcoal_burning',
+    isProcessor: true,
+  },
 };
 
 // Building types that produce gold (used for stipend check)

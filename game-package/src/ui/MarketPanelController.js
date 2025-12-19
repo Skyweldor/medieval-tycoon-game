@@ -5,6 +5,7 @@
  */
 
 import { Events } from '../core/EventBus.js';
+import { RESOURCES } from '../config/index.js';
 
 export class MarketPanelController {
   /**
@@ -101,26 +102,51 @@ export class MarketPanelController {
   }
 
   /**
+   * Get emoji for a resource
+   * @param {string} resourceId
+   * @returns {string}
+   * @private
+   */
+  _getResourceEmoji(resourceId) {
+    const def = RESOURCES[resourceId];
+    return def?.emoji || resourceId;
+  }
+
+  /**
+   * Get display name for a resource
+   * @param {string} resourceId
+   * @returns {string}
+   * @private
+   */
+  _getResourceName(resourceId) {
+    const def = RESOURCES[resourceId];
+    return def?.name || resourceId;
+  }
+
+  /**
    * Generate HTML for trade rows
    * Uses data attributes instead of onclick for proper event handling
    * @returns {string}
    * @private
    */
   _generateTradesHTML() {
-    const EMOJIS = { wheat: '🌾', stone: '⛏️', wood: '🌲' };
     const tradeData = this._marketService.getTradeData();
 
-    return tradeData.map(({ resource, have, price }) => `
-      <div class="market-row">
-        <span class="market-res">${EMOJIS[resource]} ${have}</span>
-        <span class="market-price">${price}💰</span>
-        <div class="market-btns">
-          <button data-action="sell" data-resource="${resource}" data-amount="1" ${have < 1 ? 'disabled' : ''}>1</button>
-          <button data-action="sell" data-resource="${resource}" data-amount="10" ${have < 10 ? 'disabled' : ''}>10</button>
-          <button data-action="sell" data-resource="${resource}" data-amount="${have}" ${have === 0 ? 'disabled' : ''}>All</button>
+    return tradeData.map(({ resource, have, price }) => {
+      const emoji = this._getResourceEmoji(resource);
+      const name = this._getResourceName(resource);
+      return `
+        <div class="market-row">
+          <span class="market-res" title="${name}">${emoji} ${have}</span>
+          <span class="market-price">${price}💰</span>
+          <div class="market-btns">
+            <button data-action="sell" data-resource="${resource}" data-amount="1" ${have < 1 ? 'disabled' : ''}>1</button>
+            <button data-action="sell" data-resource="${resource}" data-amount="10" ${have < 10 ? 'disabled' : ''}>10</button>
+            <button data-action="sell" data-resource="${resource}" data-amount="${have}" ${have === 0 ? 'disabled' : ''}>All</button>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   /**

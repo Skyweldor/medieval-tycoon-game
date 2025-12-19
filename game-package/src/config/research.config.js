@@ -116,6 +116,35 @@ export const RESEARCH = {
     }
   },
 
+  // Processing Research (Tier 1.5)
+  wood_processing: {
+    id: 'wood_processing',
+    name: 'Wood Processing',
+    desc: 'Cut logs into usable planks',
+    cost: { gold: 100, wood: 40 },
+    prereqs: ['forestry'],
+    effects: {
+      unlockBuildings: ['sawmill'],
+      unlockUpgradeTiers: [
+        { buildingId: 'sawmill', maxTier: 2 }
+      ]
+    }
+  },
+
+  stone_processing: {
+    id: 'stone_processing',
+    name: 'Stone Processing',
+    desc: 'Cut raw stone into refined blocks',
+    cost: { gold: 100, stone: 40 },
+    prereqs: ['stonework'],
+    effects: {
+      unlockBuildings: ['stonecutter'],
+      unlockUpgradeTiers: [
+        { buildingId: 'stonecutter', maxTier: 2 }
+      ]
+    }
+  },
+
   // ==========================================
   // TIER 2 - Advanced Research
   // ==========================================
@@ -130,6 +159,34 @@ export const RESEARCH = {
       unlockBuildings: ['blacksmith'],
       unlockUpgradeTiers: [
         { buildingId: 'blacksmith', maxTier: 2 }
+      ]
+    }
+  },
+
+  carpentry: {
+    id: 'carpentry',
+    name: 'Carpentry',
+    desc: 'Craft planks into fine furniture',
+    cost: { gold: 200, planks: 20 },
+    prereqs: ['wood_processing'],
+    effects: {
+      unlockBuildings: ['carpenter'],
+      unlockUpgradeTiers: [
+        { buildingId: 'carpenter', maxTier: 2 }
+      ]
+    }
+  },
+
+  block_masonry: {
+    id: 'block_masonry',
+    name: 'Block Masonry',
+    desc: 'Shape cut stone into building blocks',
+    cost: { gold: 200, cut_stone: 20 },
+    prereqs: ['stone_processing'],
+    effects: {
+      unlockBuildings: ['mason_yard'],
+      unlockUpgradeTiers: [
+        { buildingId: 'mason_yard', maxTier: 2 }
       ]
     }
   },
@@ -186,6 +243,34 @@ export const RESEARCH = {
     effects: {
       unlockUpgradeTiers: [
         { buildingId: 'market', maxTier: 4 }
+      ]
+    }
+  },
+
+  toolmaking: {
+    id: 'toolmaking',
+    name: 'Toolmaking',
+    desc: 'Combine wood and stone into useful tools',
+    cost: { gold: 400, planks: 30, cut_stone: 30 },
+    prereqs: ['carpentry', 'block_masonry'],
+    effects: {
+      unlockBuildings: ['toolmaker'],
+      unlockUpgradeTiers: [
+        { buildingId: 'toolmaker', maxTier: 2 }
+      ]
+    }
+  },
+
+  charcoal_burning: {
+    id: 'charcoal_burning',
+    name: 'Charcoal Burning',
+    desc: 'Convert planks into valuable charcoal fuel',
+    cost: { gold: 350, stone_blocks: 10, planks: 25 },
+    prereqs: ['carpentry', 'block_masonry'],
+    effects: {
+      unlockBuildings: ['charcoal_kiln'],
+      unlockUpgradeTiers: [
+        { buildingId: 'charcoal_kiln', maxTier: 2 }
       ]
     }
   },

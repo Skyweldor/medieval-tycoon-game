@@ -37,16 +37,16 @@ export const TILE = {
 // Layout: 10 cols x 10 rows isometric grid
 export const TILE_MAP = [
   //0  1  2  3  4  5  6  7  8  9
-  [ 0, 0, 0, 0, 1, 1, 0, 0, 0, 0 ],  // Row 0
-  [ 0, 0, 0, 1, 1, 1, 1, 0, 0, 0 ],  // Row 1
-  [ 0, 0, 1, 1, 1, 1, 1, 1, 0, 0 ],  // Row 2
-  [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 ],  // Row 3
-  [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],  // Row 4 - center
-  [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],  // Row 5 - center
-  [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 ],  // Row 6
-  [ 0, 0, 1, 1, 1, 1, 1, 1, 0, 0 ],  // Row 7
-  [ 0, 0, 0, 1, 1, 1, 1, 0, 0, 0 ],  // Row 8
-  [ 0, 0, 0, 0, 1, 1, 0, 0, 0, 0 ],  // Row 9
+  [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],  // Row 0
+  [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],  // Row 1
+  [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],  // Row 2
+  [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],  // Row 3
+  [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],  // Row 4
+  [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],  // Row 5
+  [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],  // Row 6
+  [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],  // Row 7
+  [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],  // Row 8
+  [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],  // Row 9
 ];
 
 // Building footprint size (2x2 tiles)
@@ -68,7 +68,7 @@ export function setGridSize(rows, cols) {
 
 /**
  * Generate a tile map for the given size
- * Creates a diamond pattern of cobblestone with grass edges
+ * Creates all grass tiles
  * @param {number} rows
  * @param {number} cols
  */
@@ -76,22 +76,10 @@ export function updateTileMap(rows, cols) {
   // Clear and rebuild TILE_MAP
   TILE_MAP.length = 0;
 
-  const centerRow = Math.floor(rows / 2);
-  const centerCol = Math.floor(cols / 2);
-
   for (let r = 0; r < rows; r++) {
     const row = [];
     for (let c = 0; c < cols; c++) {
-      // Calculate distance from center (diamond pattern)
-      const distFromCenter = Math.abs(r - centerRow) + Math.abs(c - centerCol);
-      const maxDist = Math.floor((rows + cols) / 4);
-
-      // Cobblestone in center, grass on edges
-      if (distFromCenter <= maxDist) {
-        row.push(TILE.COBBLE);
-      } else {
-        row.push(TILE.GRASS);
-      }
+      row.push(TILE.GRASS);
     }
     TILE_MAP.push(row);
   }

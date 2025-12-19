@@ -11,29 +11,56 @@ export const MERCHANT_CONFIG = {
 
   // Sell prices (what merchant pays player)
   prices: {
+    // Raw resources
     wheat: 2,
     stone: 3,
     wood: 3,
-    flour: 5,    // More valuable than wheat (requires processing)
-    bread: 10    // Most valuable (requires 2-step production)
+    // Intermediate resources
+    flour: 5,
+    planks: 6,
+    cut_stone: 6,
+    charcoal: 8,
+    // Product resources (2-step production)
+    bread: 10,
+    furniture: 12,
+    stone_blocks: 12,
+    tools: 18    // Cross-chain product, highest value
   },
 
   maxPerVisit: {
+    // Raw resources
     wheat: 20,
     stone: 15,
     wood: 15,
-    flour: 10,   // Less abundant
-    bread: 5     // Rarest
+    // Intermediate resources
+    flour: 10,
+    planks: 8,
+    cut_stone: 8,
+    charcoal: 6,
+    // Product resources (scarcer)
+    bread: 5,
+    furniture: 4,
+    stone_blocks: 4,
+    tools: 3
   }
 };
 
 export const MARKET_CONFIG = {
   prices: {
+    // Raw resources (better than merchant)
     wheat: 3,
     stone: 5,
     wood: 5,
-    flour: 6,    // Higher value than raw wheat
-    bread: 12    // Premium crafted good
+    // Intermediate resources
+    flour: 7,
+    planks: 8,
+    cut_stone: 8,
+    charcoal: 10,
+    // Product resources (premium prices)
+    bread: 14,
+    furniture: 16,
+    stone_blocks: 16,
+    tools: 24    // Cross-chain product, highest value
   },
   // Market level boosts prices: +10% per upgrade level
   levelBonusPercent: 10

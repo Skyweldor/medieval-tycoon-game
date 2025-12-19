@@ -49,24 +49,51 @@ export class ResourceDisplayController {
 
   /**
    * Generate the in-canvas resource overlay HTML dynamically
+   * Uses a horizontal layout with multiple rows
    * @private
    */
   _generateOverlayHTML() {
     const overlay = document.getElementById('resource-overlay');
     if (!overlay) return;
 
-    const html = this._resourceTypes.map(id => {
+    // Row 1: Main resources (gold, wheat, stone, wood)
+    const mainResources = this._resourceTypes.map(id => {
       const def = RESOURCES[id];
+      // Use sprite icon if available, otherwise show emoji
+      const iconHtml = def.hasSprite
+        ? `<span class="icon icon-20 ${def.icon}"></span>`
+        : `<span class="resource-emoji">${def.emoji}</span>`;
       return `
         <div class="resource-overlay-item" data-resource="${id}">
-          <span class="icon icon-32 ${def.icon}"></span>
+          ${iconHtml}
           <span class="resource-overlay-value" id="overlay-${id}-value">0</span>
           <span class="resource-overlay-rate neutral" id="overlay-${id}-rate">+0/s</span>
         </div>
       `;
     }).join('');
 
-    overlay.innerHTML = html;
+    // Row 2: Production resources (stone/wood production - placeholders for now)
+    const productionRow = `
+      <div class="resource-overlay-production">
+        <div class="production-item">
+          <span class="production-label">Stone Prod:</span>
+          <span class="icon icon-16 icon-stone"></span>
+          <span id="overlay-stone-production">0/s</span>
+        </div>
+        <div class="production-item">
+          <span class="production-label">Wood Prod:</span>
+          <span class="icon icon-16 icon-wood"></span>
+          <span id="overlay-wood-production">0/s</span>
+        </div>
+      </div>
+    `;
+
+    overlay.innerHTML = `
+      <div class="resource-overlay-row">
+        ${mainResources}
+      </div>
+      ${productionRow}
+    `;
   }
 
   /**
@@ -88,6 +115,31 @@ export class ResourceDisplayController {
       // Use 0 as default for resources without production rate
       this._updateResourceDisplay(res, resources[res] || 0, production[res] || 0);
     });
+
+    // Update production row (stone/wood production placeholders)
+    this._updateProductionRow(production);
+  }
+
+  /**
+   * Update the production row display (stone/wood production)
+   * @param {Object} production - Production rates object
+   * @private
+   */
+  _updateProductionRow(production) {
+    const stoneEl = document.getElementById('overlay-stone-production');
+    const woodEl = document.getElementById('overlay-wood-production');
+
+    if (stoneEl) {
+      const stoneRate = production.stone || 0;
+      stoneEl.textContent = `${stoneRate.toFixed(1)}/s`;
+      stoneEl.style.color = stoneRate > 0 ? '#7CB342' : '#888';
+    }
+
+    if (woodEl) {
+      const woodRate = production.wood || 0;
+      woodEl.textContent = `${woodRate.toFixed(1)}/s`;
+      woodEl.style.color = woodRate > 0 ? '#7CB342' : '#888';
+    }
   }
 
   /**
