@@ -37,7 +37,10 @@
       "Bash(git -C \"a:/Intentional_Sports/eSports_Academy/Roblox/isometric_assets/medieval-tycoon-game\" status)",
       "Bash(git -C \"a:/Intentional_Sports/eSports_Academy/Roblox/isometric_assets/medieval-tycoon-game\" log --oneline -5)",
       "Bash(git -C \"a:/Intentional_Sports/eSports_Academy/Roblox/isometric_assets/medieval-tycoon-game\" diff --stat)",
-      "Bash(git -C \"a:/Intentional_Sports/eSports_Academy/Roblox/isometric_assets/medieval-tycoon-game\" add -A)"
+      "Bash(git -C \"a:/Intentional_Sports/eSports_Academy/Roblox/isometric_assets/medieval-tycoon-game\" add -A)",
+      "Bash(git -C \"a:/Intentional_Sports/eSports_Academy/Roblox/isometric_assets/medieval-tycoon-game\" diff --cached --stat)",
+      "Bash(git -C \"a:/Intentional_Sports/eSports_Academy/Roblox/isometric_assets/medieval-tycoon-game\" commit -m \"$\\(cat <<''EOF''\nAdd processed resources, new buildings, and grass-only tiles\n\n- Add 10 new building/resource assets \\(bread-oven, sawmill, mill, etc.\\)\n- Add processed resources: flour, planks, charcoal, stone-blocks, tools, furniture\n- Expand buildings config with new processing buildings\n- Update merchant config with new tradeable goods\n- Expand research config with new unlockable items\n- Update ProcessorService for new resource chains\n- Improve UI panels: market, merchant, resource display\n- Change all tiles to grass \\(remove cobblestone diamond pattern\\)\n- Update component styles for new features\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"a:/Intentional_Sports/eSports_Academy/Roblox/isometric_assets/medieval-tycoon-game\" push)"
     ],
     "deny": [],
     "ask": []

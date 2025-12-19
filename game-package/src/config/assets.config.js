@@ -64,9 +64,39 @@ export const ASSETS = {
     3: 'assets/mill_basic.png',
   },
   bread_oven: {
-    1: 'assets/bread_oven_basic.png',
-    2: 'assets/bread_oven_basic.png',
-    3: 'assets/bread_oven_basic.png',
+    1: 'assets/bread-oven_basic.png',
+    2: 'assets/bread-oven_basic.png',
+    3: 'assets/bread-oven_basic.png',
+  },
+  sawmill: {
+    1: 'assets/sawmill_basic.png',
+    2: 'assets/sawmill_basic.png',
+    3: 'assets/sawmill_basic.png',
+  },
+  carpenter: {
+    1: 'assets/carpentet-workshop_basic.png',
+    2: 'assets/carpentet-workshop_basic.png',
+    3: 'assets/carpentet-workshop_basic.png',
+  },
+  stonecutter: {
+    1: 'assets/quarry_basic.png', // Reuse quarry for now
+    2: 'assets/quarry_basic.png',
+    3: 'assets/quarry_basic.png',
+  },
+  mason_yard: {
+    1: 'assets/quarry_basic.png', // Reuse quarry for now
+    2: 'assets/quarry_basic.png',
+    3: 'assets/quarry_basic.png',
+  },
+  toolmaker: {
+    1: 'assets/blacksmith_basic.png', // Reuse blacksmith for now
+    2: 'assets/blacksmith_basic.png',
+    3: 'assets/blacksmith_basic.png',
+  },
+  charcoal_kiln: {
+    1: 'assets/blacksmith_basic.png', // Reuse blacksmith for now
+    2: 'assets/blacksmith_basic.png',
+    3: 'assets/blacksmith_basic.png',
   },
 };
 
@@ -82,6 +112,12 @@ export const EMOJI_FALLBACKS = {
   barn: '🏚️',
   mill: '🏭',
   bread_oven: '🍞',
+  sawmill: '🪚',
+  carpenter: '🪑',
+  stonecutter: '🪨',
+  mason_yard: '🧱',
+  toolmaker: '🔧',
+  charcoal_kiln: '🔥',
 };
 
 // Resource emojis
@@ -90,4 +126,22 @@ export const RESOURCE_EMOJIS = {
   wheat: '🌾',
   stone: '⛏️',
   wood: '🌲',
+  flour: '🌾',
+  bread: '🍞',
+  planks: '🪵',
+  furniture: '🪑',
+  cut_stone: '🪨',
+  stone_blocks: '🧱',
+  tools: '🔧',
+  charcoal: '🔥',
+};
+
+// Resource asset paths (for processed resources)
+export const RESOURCE_ASSETS = {
+  flour: 'assets/flour_basic.png',
+  planks: 'assets/planks_basic.png',
+  stone_blocks: 'assets/stone-blocks_basic.png',
+  furniture: 'assets/furniture_basic.png',
+  tools: 'assets/tools_basic.png',
+  charcoal: 'assets/charcoal_basic.png',
 };
