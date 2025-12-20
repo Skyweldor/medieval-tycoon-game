@@ -5,10 +5,11 @@
  */
 
 export const RESOURCES = {
-  // Raw Resources (hasSprite: true = has dedicated icon in sprite sheet)
+  // Raw Resources - icons_basic.png (iconBase: 'icon')
   wheat: {
     id: 'wheat',
     name: 'Wheat',
+    iconBase: 'icon',
     icon: 'icon-wheat',
     emoji: '🌾',
     hasSprite: true,
@@ -20,6 +21,7 @@ export const RESOURCES = {
   stone: {
     id: 'stone',
     name: 'Stone',
+    iconBase: 'icon',
     icon: 'icon-stone',
     emoji: '🪨',
     hasSprite: true,
@@ -31,6 +33,7 @@ export const RESOURCES = {
   wood: {
     id: 'wood',
     name: 'Wood',
+    iconBase: 'icon',
     icon: 'icon-wood',
     emoji: '🪵',
     hasSprite: true,
@@ -40,12 +43,13 @@ export const RESOURCES = {
     order: 12,
   },
 
-  // Intermediate Resources
+  // Intermediate Resources - icons-01_basic.png (iconBase: 'icon-01')
   flour: {
     id: 'flour',
     name: 'Flour',
+    iconBase: 'icon-01',
     icon: 'icon-flour',
-    emoji: '🫓',
+    emoji: '🌾',
     hasSprite: true,
     category: 'intermediate',
     sellValue: 5,
@@ -55,9 +59,10 @@ export const RESOURCES = {
   planks: {
     id: 'planks',
     name: 'Planks',
-    icon: 'icon-wood',
-    emoji: '🪓',
-    hasSprite: false, // NEEDS SPRITE: processed wood planks
+    iconBase: 'icon-01',
+    icon: 'icon-planks',
+    emoji: '🪵',
+    hasSprite: true,
     category: 'intermediate',
     sellValue: 6,
     baseStorage: 100,
@@ -66,19 +71,33 @@ export const RESOURCES = {
   cut_stone: {
     id: 'cut_stone',
     name: 'Cut Stone',
-    icon: 'icon-stone',
-    emoji: '🧱',
-    hasSprite: false, // NEEDS SPRITE: refined/cut stone blocks
+    iconBase: 'icon-02',
+    icon: 'icon-stone_blocks',
+    emoji: '🪨',
+    hasSprite: true,
     category: 'intermediate',
     sellValue: 6,
     baseStorage: 100,
     order: 22,
+  },
+  charcoal: {
+    id: 'charcoal',
+    name: 'Charcoal',
+    iconBase: 'icon-01',
+    icon: 'icon-charcoal',
+    emoji: '🔥',
+    hasSprite: true,
+    category: 'intermediate',
+    sellValue: 8,
+    baseStorage: 50,
+    order: 23,
   },
 
   // Products
   bread: {
     id: 'bread',
     name: 'Bread',
+    iconBase: 'icon',
     icon: 'icon-bread',
     emoji: '🍞',
     hasSprite: true,
@@ -90,20 +109,22 @@ export const RESOURCES = {
   furniture: {
     id: 'furniture',
     name: 'Furniture',
-    icon: 'icon-wood',
+    iconBase: 'icon-01',
+    icon: 'icon-furniture',
     emoji: '🪑',
-    hasSprite: false, // NEEDS SPRITE: chair/table/furniture
+    hasSprite: true,
     category: 'product',
     sellValue: 12,
     baseStorage: 50,
     order: 31,
   },
-  stone_blocks: {
-    id: 'stone_blocks',
-    name: 'Stone Blocks',
-    icon: 'icon-stone',
-    emoji: '🏛️',
-    hasSprite: false, // NEEDS SPRITE: finished stone building blocks
+  mortar: {
+    id: 'mortar',
+    name: 'Mortar',
+    iconBase: 'icon-01',
+    icon: 'icon-mortar',
+    emoji: '🪣',
+    hasSprite: true,
     category: 'product',
     sellValue: 12,
     baseStorage: 50,
@@ -112,30 +133,21 @@ export const RESOURCES = {
   tools: {
     id: 'tools',
     name: 'Tools',
-    icon: 'icon-iron',
+    iconBase: 'icon-01',
+    icon: 'icon-tools',
     emoji: '🔧',
-    hasSprite: false, // NEEDS SPRITE: hammer/tools
+    hasSprite: true,
     category: 'product',
     sellValue: 18,
     baseStorage: 30,
     order: 33,
   },
-  charcoal: {
-    id: 'charcoal',
-    name: 'Charcoal',
-    icon: 'icon-stone',
-    emoji: 'CC',
-    hasSprite: false, // NEEDS SPRITE: dark charcoal/fuel
-    category: 'intermediate',
-    sellValue: 8,
-    baseStorage: 50,
-    order: 23,
-  },
 
-  // Currency
+  // Currency - icons_basic.png (iconBase: 'icon')
   gold: {
     id: 'gold',
     name: 'Gold',
+    iconBase: 'icon',
     icon: 'icon-gold',
     emoji: '💰',
     hasSprite: true,

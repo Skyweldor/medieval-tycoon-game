@@ -24,6 +24,8 @@ export class ResourceDisplayController {
     this._unsubscribers = [];
     // Get resource types from registry, sorted by display order
     this._resourceTypes = getSortedResources().map(r => r.id);
+    // Collapse state for overlay
+    this._collapsed = false;
   }
 
   /**
@@ -49,51 +51,92 @@ export class ResourceDisplayController {
 
   /**
    * Generate the in-canvas resource overlay HTML dynamically
-   * Uses a horizontal layout with multiple rows
+   * Uses a grid layout with production chains as columns
+   * Row 1 (raw) always visible, rows 2-3 collapsible
    * @private
    */
   _generateOverlayHTML() {
     const overlay = document.getElementById('resource-overlay');
     if (!overlay) return;
 
-    // Row 1: Main resources (gold, wheat, stone, wood)
-    const mainResources = this._resourceTypes.map(id => {
+    // Define production chains as columns
+    // Column order: Wheat chain, Stone chain, Wood chain, Gold/misc
+    const columns = [
+      { raw: 'wheat', intermediate: 'flour', product: 'bread' },
+      { raw: 'stone', intermediate: 'cut_stone', product: 'mortar' },
+      { raw: 'wood', intermediate: 'planks', product: 'furniture' },
+      { raw: 'gold', intermediate: 'charcoal', product: 'tools' }
+    ];
+
+    // Helper to generate a resource cell
+    const makeCell = (id) => {
       const def = RESOURCES[id];
-      // Use sprite icon if available, otherwise show emoji
+      if (!def) return '<div class="resource-overlay-cell empty"></div>';
       const iconHtml = def.hasSprite
-        ? `<span class="icon icon-20 ${def.icon}"></span>`
+        ? `<span class="${def.iconBase} icon-32 ${def.icon}"></span>`
         : `<span class="resource-emoji">${def.emoji}</span>`;
       return `
-        <div class="resource-overlay-item" data-resource="${id}">
+        <div class="resource-overlay-cell" data-resource="${id}">
           ${iconHtml}
           <span class="resource-overlay-value" id="overlay-${id}-value">0</span>
           <span class="resource-overlay-rate neutral" id="overlay-${id}-rate">+0/s</span>
         </div>
       `;
-    }).join('');
+    };
 
-    // Row 2: Production resources (stone/wood production - placeholders for now)
-    const productionRow = `
-      <div class="resource-overlay-production">
-        <div class="production-item">
-          <span class="production-label">Stone Prod:</span>
-          <span class="icon icon-16 icon-stone"></span>
-          <span id="overlay-stone-production">0/s</span>
-        </div>
-        <div class="production-item">
-          <span class="production-label">Wood Prod:</span>
-          <span class="icon icon-16 icon-wood"></span>
-          <span id="overlay-wood-production">0/s</span>
-        </div>
-      </div>
-    `;
+    // Build rows
+    const rawRow = columns.map(col => makeCell(col.raw)).join('');
+    const intermediateRow = columns.map(col => makeCell(col.intermediate)).join('');
+    const productRow = columns.map(col => makeCell(col.product)).join('');
 
     overlay.innerHTML = `
-      <div class="resource-overlay-row">
-        ${mainResources}
+      <div class="resource-overlay-grid">
+        <div class="resource-overlay-row row-raw" id="overlay-row-raw">
+          ${rawRow}
+        </div>
+        <div class="resource-overlay-collapsible" id="overlay-collapsible">
+          <div class="resource-overlay-row row-intermediate">
+            ${intermediateRow}
+          </div>
+          <div class="resource-overlay-row row-product">
+            ${productRow}
+          </div>
+        </div>
       </div>
-      ${productionRow}
+      <button class="resource-overlay-toggle" id="overlay-toggle" title="Collapse">▲</button>
     `;
+
+    // Attach toggle event
+    const toggleBtn = document.getElementById('overlay-toggle');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => this._toggleCollapse());
+    }
+  }
+
+  /**
+   * Toggle the collapsed state of the resource overlay
+   * Only collapses intermediate/product rows, raw row stays visible
+   * @private
+   */
+  _toggleCollapse() {
+    this._collapsed = !this._collapsed;
+    const collapsible = document.getElementById('overlay-collapsible');
+    const toggle = document.getElementById('overlay-toggle');
+    const overlay = document.getElementById('resource-overlay');
+
+    if (collapsible && toggle && overlay) {
+      if (this._collapsed) {
+        collapsible.classList.add('collapsed');
+        toggle.textContent = '▼';
+        toggle.title = 'Expand resources';
+        overlay.classList.add('collapsed');
+      } else {
+        collapsible.classList.remove('collapsed');
+        toggle.textContent = '▲';
+        toggle.title = 'Collapse resources';
+        overlay.classList.remove('collapsed');
+      }
+    }
   }
 
   /**
@@ -115,31 +158,6 @@ export class ResourceDisplayController {
       // Use 0 as default for resources without production rate
       this._updateResourceDisplay(res, resources[res] || 0, production[res] || 0);
     });
-
-    // Update production row (stone/wood production placeholders)
-    this._updateProductionRow(production);
-  }
-
-  /**
-   * Update the production row display (stone/wood production)
-   * @param {Object} production - Production rates object
-   * @private
-   */
-  _updateProductionRow(production) {
-    const stoneEl = document.getElementById('overlay-stone-production');
-    const woodEl = document.getElementById('overlay-wood-production');
-
-    if (stoneEl) {
-      const stoneRate = production.stone || 0;
-      stoneEl.textContent = `${stoneRate.toFixed(1)}/s`;
-      stoneEl.style.color = stoneRate > 0 ? '#7CB342' : '#888';
-    }
-
-    if (woodEl) {
-      const woodRate = production.wood || 0;
-      woodEl.textContent = `${woodRate.toFixed(1)}/s`;
-      woodEl.style.color = woodRate > 0 ? '#7CB342' : '#888';
-    }
   }
 
   /**
@@ -269,3 +287,4 @@ export class ResourceDisplayController {
     return production[type] || 0;
   }
 }
+

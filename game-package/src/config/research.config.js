@@ -265,7 +265,7 @@ export const RESEARCH = {
     id: 'charcoal_burning',
     name: 'Charcoal Burning',
     desc: 'Convert planks into valuable charcoal fuel',
-    cost: { gold: 350, stone_blocks: 10, planks: 25 },
+    cost: { gold: 350, mortar: 10, planks: 25 },
     prereqs: ['carpentry', 'block_masonry'],
     effects: {
       unlockBuildings: ['charcoal_kiln'],

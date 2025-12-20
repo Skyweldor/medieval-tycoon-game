@@ -148,14 +148,20 @@ export class MerchantPanelController {
   }
 
   /**
-   * Get emoji for a resource (from resource registry)
+   * Get icon HTML for a resource (sprite or emoji fallback)
    * @param {string} resourceId
+   * @param {number} [size=20] - Icon size (16, 20, 32, 64)
    * @returns {string}
    * @private
    */
-  _getResourceEmoji(resourceId) {
+  _getResourceIcon(resourceId, size = 20) {
     const def = RESOURCES[resourceId];
-    return def?.emoji || resourceId;
+    if (!def) return resourceId;
+
+    if (def.hasSprite) {
+      return `<span class="${def.iconBase} icon-${size} ${def.icon}"></span>`;
+    }
+    return `<span class="resource-emoji">${def.emoji}</span>`;
   }
 
   /**
@@ -177,14 +183,15 @@ export class MerchantPanelController {
     if (!container) return;
 
     const tradeData = this._merchantService.getTradeData();
+    const goldIcon = this._getResourceIcon('gold', 16);
 
     container.innerHTML = tradeData.map(({ resource, have, sold, maxPerVisit, remaining, price, canSell }) => {
-      const emoji = this._getResourceEmoji(resource);
+      const icon = this._getResourceIcon(resource, 32);
       const displayName = this._formatResourceName(resource);
       return `
         <div class="trade-row ${canSell === 0 ? 'disabled' : ''}">
           <div class="trade-resource">
-            <span class="trade-icon">${emoji}</span>
+            <span class="trade-icon">${icon}</span>
             <div class="trade-info">
               <span class="trade-name">${displayName}</span>
               <span class="trade-have">You have: ${have}</span>
@@ -193,7 +200,7 @@ export class MerchantPanelController {
 
           <div class="trade-price">
             <span class="price-value">${price}</span>
-            <span class="price-label">💰 each</span>
+            <span class="price-label">${goldIcon} each</span>
           </div>
 
           <div class="trade-limit">

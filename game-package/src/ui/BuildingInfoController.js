@@ -5,7 +5,7 @@
  */
 
 import { Events } from '../core/EventBus.js';
-import { getBuildingDef, EMOJI_FALLBACKS, RESOURCES } from '../config/index.js';
+import { getBuildingDef, EMOJI_FALLBACKS, RESOURCES, ASSETS } from '../config/index.js';
 
 export class BuildingInfoController {
   /**
@@ -98,8 +98,8 @@ export class BuildingInfoController {
     if (emptyEl) emptyEl.style.display = 'none';
     if (contentEl) contentEl.style.display = 'block';
 
-    // Set basic info
-    this._updateElement('info-icon', EMOJI_FALLBACKS[building.type] || '🏠');
+    // Set basic info - use building sprite
+    this._updateHTML('info-icon', this._getBuildingIcon(building.type, building.level));
     this._updateElement('info-name', def.name);
 
     const level = building.level + 1;
@@ -110,8 +110,8 @@ export class BuildingInfoController {
     const upgradeRow = document.getElementById('info-upgrade-row');
     if (building.level < def.upgrades.length) {
       const upgradeCost = def.upgrades[building.level].cost;
-      const costText = this._formatCost(upgradeCost);
-      this._updateElement('info-upgrade-cost', costText);
+      const costHTML = this._formatCost(upgradeCost);
+      this._updateHTML('info-upgrade-cost', costHTML);
       if (upgradeRow) upgradeRow.style.display = 'flex';
       const upgradeLabel = upgradeRow?.querySelector('.info-stat-label');
       if (upgradeLabel) upgradeLabel.textContent = 'Upgrade Cost';
@@ -142,7 +142,7 @@ export class BuildingInfoController {
     // Production outputs
     if (def.production && Object.keys(def.production).length > 0) {
       Object.entries(def.production).forEach(([res, amt]) => {
-        const icon = this._getResourceEmoji(res);
+        const icon = this._getResourceIcon(res, 16);
         const displayName = res.charAt(0).toUpperCase() + res.slice(1);
         prodHTML += `<div class="info-stat-row">
           <span class="info-stat-label">${icon} ${displayName}</span>
@@ -154,7 +154,7 @@ export class BuildingInfoController {
     // Consumption
     if (def.consumes) {
       Object.entries(def.consumes).forEach(([res, amt]) => {
-        const icon = this._getResourceEmoji(res);
+        const icon = this._getResourceIcon(res, 16);
         const displayName = res.charAt(0).toUpperCase() + res.slice(1);
         prodHTML += `<div class="info-stat-row">
           <span class="info-stat-label">${icon} ${displayName}</span>
@@ -201,7 +201,7 @@ export class BuildingInfoController {
     // Recipe inputs
     prodHTML += '<div class="info-section-title">Inputs (per cycle)</div>';
     Object.entries(recipe.inputs).forEach(([res, amt]) => {
-      const icon = this._getResourceEmoji(res);
+      const icon = this._getResourceIcon(res, 16);
       const displayName = res.charAt(0).toUpperCase() + res.slice(1);
       prodHTML += `<div class="info-stat-row">
         <span class="info-stat-label">${icon} ${displayName}</span>
@@ -212,7 +212,7 @@ export class BuildingInfoController {
     // Recipe outputs
     prodHTML += '<div class="info-section-title">Outputs (per cycle)</div>';
     Object.entries(recipe.outputs).forEach(([res, amt]) => {
-      const icon = this._getResourceEmoji(res);
+      const icon = this._getResourceIcon(res, 16);
       const displayName = res.charAt(0).toUpperCase() + res.slice(1);
       prodHTML += `<div class="info-stat-row">
         <span class="info-stat-label">${icon} ${displayName}</span>
@@ -316,6 +316,35 @@ export class BuildingInfoController {
   }
 
   /**
+   * Update element HTML content
+   * @param {string} id - Element ID
+   * @param {string} html - HTML content
+   * @private
+   */
+  _updateHTML(id, html) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  }
+
+  /**
+   * Get building icon HTML (sprite image or emoji fallback)
+   * @param {string} buildingType - Building type ID
+   * @param {number} level - Building level (0-indexed)
+   * @returns {string} HTML for the building icon
+   * @private
+   */
+  _getBuildingIcon(buildingType, level) {
+    const assetDef = ASSETS[buildingType];
+    const displayLevel = level + 1;
+
+    if (assetDef && assetDef[displayLevel]) {
+      return `<img src="${assetDef[displayLevel]}" alt="${buildingType}" class="building-info-sprite">`;
+    }
+    // Fallback to emoji
+    return EMOJI_FALLBACKS[buildingType] || '🏠';
+  }
+
+  /**
    * Set element class
    * @param {string} id - Element ID
    * @param {string} className - CSS class
@@ -327,14 +356,20 @@ export class BuildingInfoController {
   }
 
   /**
-   * Get resource emoji from registry
-   * @param {string} type - Resource type
+   * Get icon HTML for a resource (sprite or emoji fallback)
+   * @param {string} resourceId
+   * @param {number} [size=16] - Icon size (16, 20, 32, 64)
    * @returns {string}
    * @private
    */
-  _getResourceEmoji(type) {
-    const def = RESOURCES[type];
-    return def?.emoji || type;
+  _getResourceIcon(resourceId, size = 16) {
+    const def = RESOURCES[resourceId];
+    if (!def) return resourceId;
+
+    if (def.hasSprite) {
+      return `<span class="${def.iconBase} icon-${size} ${def.icon}"></span>`;
+    }
+    return `<span class="resource-emoji">${def.emoji}</span>`;
   }
 
   /**
@@ -345,7 +380,7 @@ export class BuildingInfoController {
    */
   _formatCost(cost) {
     return Object.entries(cost)
-      .map(([r, a]) => `${a}${this._getResourceEmoji(r)}`)
+      .map(([r, a]) => `${a}${this._getResourceIcon(r, 16)}`)
       .join(' ');
   }
 }

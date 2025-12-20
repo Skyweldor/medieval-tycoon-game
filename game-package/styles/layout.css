@@ -119,6 +119,18 @@
 
 .building-info-icon {
   font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.building-info-sprite {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 
 .building-info-title {
@@ -159,6 +171,9 @@
 }
 
 .info-stat-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   color: #A99584;
   font-size: 0.8rem;
 }

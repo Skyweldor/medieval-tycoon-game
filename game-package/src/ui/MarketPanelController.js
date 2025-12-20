@@ -102,14 +102,20 @@ export class MarketPanelController {
   }
 
   /**
-   * Get emoji for a resource
+   * Get icon HTML for a resource (sprite or emoji fallback)
    * @param {string} resourceId
+   * @param {number} [size=16] - Icon size (16, 20, 32, 64)
    * @returns {string}
    * @private
    */
-  _getResourceEmoji(resourceId) {
+  _getResourceIcon(resourceId, size = 16) {
     const def = RESOURCES[resourceId];
-    return def?.emoji || resourceId;
+    if (!def) return resourceId;
+
+    if (def.hasSprite) {
+      return `<span class="${def.iconBase} icon-${size} ${def.icon}"></span>`;
+    }
+    return `<span class="resource-emoji">${def.emoji}</span>`;
   }
 
   /**
@@ -133,12 +139,13 @@ export class MarketPanelController {
     const tradeData = this._marketService.getTradeData();
 
     return tradeData.map(({ resource, have, price }) => {
-      const emoji = this._getResourceEmoji(resource);
+      const icon = this._getResourceIcon(resource, 16);
+      const goldIcon = this._getResourceIcon('gold', 16);
       const name = this._getResourceName(resource);
       return `
         <div class="market-row">
-          <span class="market-res" title="${name}">${emoji} ${have}</span>
-          <span class="market-price">${price}💰</span>
+          <span class="market-res" title="${name}">${icon} ${have}</span>
+          <span class="market-price">${price}${goldIcon}</span>
           <div class="market-btns">
             <button data-action="sell" data-resource="${resource}" data-amount="1" ${have < 1 ? 'disabled' : ''}>1</button>
             <button data-action="sell" data-resource="${resource}" data-amount="10" ${have < 10 ? 'disabled' : ''}>10</button>

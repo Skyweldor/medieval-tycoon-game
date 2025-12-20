@@ -23,7 +23,7 @@ export const MERCHANT_CONFIG = {
     // Product resources (2-step production)
     bread: 10,
     furniture: 12,
-    stone_blocks: 12,
+    mortar: 12,
     tools: 18    // Cross-chain product, highest value
   },
 
@@ -40,7 +40,7 @@ export const MERCHANT_CONFIG = {
     // Product resources (scarcer)
     bread: 5,
     furniture: 4,
-    stone_blocks: 4,
+    mortar: 4,
     tools: 3
   }
 };
@@ -59,7 +59,7 @@ export const MARKET_CONFIG = {
     // Product resources (premium prices)
     bread: 14,
     furniture: 16,
-    stone_blocks: 16,
+    mortar: 16,
     tools: 24    // Cross-chain product, highest value
   },
   // Market level boosts prices: +10% per upgrade level

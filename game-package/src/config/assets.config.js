@@ -79,24 +79,24 @@ export const ASSETS = {
     3: 'assets/carpentet-workshop_basic.png',
   },
   stonecutter: {
-    1: 'assets/quarry_basic.png', // Reuse quarry for now
-    2: 'assets/quarry_basic.png',
-    3: 'assets/quarry_basic.png',
+    1: 'assets/stonecutter_basic.png',
+    2: 'assets/stonecutter_basic.png',
+    3: 'assets/stonecutter_basic.png',
   },
   mason_yard: {
-    1: 'assets/quarry_basic.png', // Reuse quarry for now
-    2: 'assets/quarry_basic.png',
-    3: 'assets/quarry_basic.png',
+    1: 'assets/mason-yard_basic.png',
+    2: 'assets/mason-yard_basic.png',
+    3: 'assets/mason-yard_basic.png',
   },
   toolmaker: {
-    1: 'assets/blacksmith_basic.png', // Reuse blacksmith for now
-    2: 'assets/blacksmith_basic.png',
-    3: 'assets/blacksmith_basic.png',
+    1: 'assets/toolmaker-workshop_basic.png',
+    2: 'assets/toolmaker-workshop_basic.png',
+    3: 'assets/toolmaker-workshop_basic.png',
   },
   charcoal_kiln: {
-    1: 'assets/blacksmith_basic.png', // Reuse blacksmith for now
-    2: 'assets/blacksmith_basic.png',
-    3: 'assets/blacksmith_basic.png',
+    1: 'assets/charcoal-kiln_basic.png',
+    2: 'assets/charcoal-kiln_basic.png',
+    3: 'assets/charcoal-kiln_basic.png',
   },
 };
 
@@ -131,7 +131,7 @@ export const RESOURCE_EMOJIS = {
   planks: '🪵',
   furniture: '🪑',
   cut_stone: '🪨',
-  stone_blocks: '🧱',
+  mortar: '🪣',
   tools: '🔧',
   charcoal: '🔥',
 };
@@ -140,7 +140,7 @@ export const RESOURCE_EMOJIS = {
 export const RESOURCE_ASSETS = {
   flour: 'assets/flour_basic.png',
   planks: 'assets/planks_basic.png',
-  stone_blocks: 'assets/stone-blocks_basic.png',
+  mortar: 'assets/mortar_basic.png',
   furniture: 'assets/furniture_basic.png',
   tools: 'assets/tools_basic.png',
   charcoal: 'assets/charcoal_basic.png',

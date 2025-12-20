@@ -22,14 +22,13 @@ const PAN_SPEED = 50;
 
 /**
  * Pan limits by plot size
- * At 10x10 (initial), no panning allowed
- * After expansions, allow panning with increasing limits
+ * maxY increases by 50 each expansion (starts at 50)
  */
 const PAN_LIMITS = {
-  10: { minX: 0, maxX: 0, minY: 0, maxY: 0 },           // No panning at 10x10
-  12: { minX: -50, maxX: 50, minY: -50, maxY: 0 },      // First expansion
-  14: { minX: -100, maxX: 100, minY: -100, maxY: 50 },  // Second expansion
-  16: { minX: -150, maxX: 150, minY: -150, maxY: 100 }  // Third expansion
+  10: { minX: 0, maxX: 0, minY: 0, maxY: 50 },           // Initial - limited vertical pan
+  12: { minX: -50, maxX: 50, minY: -50, maxY: 100 },     // First expansion
+  14: { minX: -100, maxX: 100, minY: -100, maxY: 150 },  // Second expansion
+  16: { minX: -150, maxX: 150, minY: -150, maxY: 200 }   // Third expansion
 };
 
 export class CameraService {

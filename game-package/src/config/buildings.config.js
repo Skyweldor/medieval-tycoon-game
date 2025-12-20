@@ -185,7 +185,7 @@ export const BUILDINGS = {
     production: {},
     recipe: {
       inputs: { cut_stone: 1 },
-      outputs: { stone_blocks: 1 },
+      outputs: { mortar: 1 },
       cycleTime: 10000, // 10 seconds
     },
     upgrades: [
@@ -215,7 +215,7 @@ export const BUILDINGS = {
   },
   charcoal_kiln: {
     name: 'Charcoal Kiln',
-    baseCost: { gold: 280, stone_blocks: 5 },
+    baseCost: { gold: 280, mortar: 5 },
     production: {},
     recipe: {
       inputs: { planks: 2 },
@@ -223,8 +223,8 @@ export const BUILDINGS = {
       cycleTime: 12000, // 12 seconds
     },
     upgrades: [
-      { cost: { gold: 600, stone_blocks: 8 }, mult: 1.5 },
-      { cost: { gold: 1500, stone_blocks: 12 }, mult: 2 },
+      { cost: { gold: 600, mortar: 8 }, mult: 1.5 },
+      { cost: { gold: 1500, mortar: 12 }, mult: 2 },
     ],
     unlockResearchId: 'charcoal_burning',
     isProcessor: true,

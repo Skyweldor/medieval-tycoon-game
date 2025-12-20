@@ -125,13 +125,15 @@ export class DevPanelController {
   }
 
   /**
-   * Clear saved game
+   * Clear saved game and reload for fresh start
    */
   clearSave() {
-    if (confirm('Are you sure you want to clear your saved game?')) {
+    if (confirm('Are you sure you want to clear your saved game? The page will reload.')) {
+      // Disable autosave to prevent beforeunload from re-saving current state
+      this._saveLoadService.setAutosaveEnabled(false);
       this._saveLoadService.clearSave();
-      this._notify('Save cleared!', 'info');
-      this._updateSaveStatus();
+      // Reload page to start fresh with default state
+      window.location.reload();
     }
   }
 
