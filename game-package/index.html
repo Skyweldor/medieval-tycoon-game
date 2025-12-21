@@ -165,30 +165,6 @@
           </div>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-panel">
-          <div class="stat-box">
-            <div class="stat-label">Buildings</div>
-            <div class="stat-value" id="stat-buildings">0</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">Total Levels</div>
-            <div class="stat-value" id="stat-levels">0</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">Net Worth</div>
-            <div class="stat-value" id="stat-worth">50</div>
-          </div>
-        </div>
-
-        <!-- Buttons -->
-        <div class="button-row">
-          <button class="btn btn-reset" onclick="resetGame()">🔄 Reset</button>
-          <button class="btn btn-reset" onclick="toggleCameraDebug()" title="Toggle camera debug display">📷 Camera</button>
-          <button class="btn btn-reset" onclick="toggleTiles()" id="toggle-tiles-btn">🙈 Tiles</button>
-          <button class="btn btn-reset" onclick="toggleDebugSliders()" id="toggle-sliders-btn">🔧 Offsets</button>
-          <button class="btn btn-reset" onclick="toggleDarkMode()" id="toggle-dark-btn">🌙 Dark</button>
-        </div>
 
         <!-- Debug Sliders (hidden by default) -->
         <div class="debug-sliders" id="debug-sliders" style="display: none;">
@@ -340,6 +316,19 @@
         <button class="dev-btn" onclick="window.devSpawnResource('wood')">+50 🪵</button>
       </div>
       <button class="dev-btn wide" onclick="window.devSpawnAll()">🎁 Spawn All</button>
+    </div>
+
+    <!-- Debug Tools -->
+    <div class="dev-section">
+      <div class="dev-section-title">Debug Tools</div>
+      <div class="dev-btn-row">
+        <button class="dev-btn" onclick="toggleCameraDebug()" title="Toggle camera debug display">📷 Camera</button>
+        <button class="dev-btn" onclick="toggleTiles()" id="toggle-tiles-btn">🙈 Tiles</button>
+      </div>
+      <div class="dev-btn-row">
+        <button class="dev-btn" onclick="toggleDebugSliders()" id="toggle-sliders-btn">🔧 Offsets</button>
+        <button class="dev-btn" onclick="toggleDarkMode()" id="toggle-dark-btn">🌙 Dark</button>
+      </div>
     </div>
   </div>
 

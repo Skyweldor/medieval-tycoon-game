@@ -5,14 +5,7 @@
 
 import { Events } from '../core/EventBus.js';
 import { RESEARCH, getResearchDef, getResearchIds } from '../config/research.config.js';
-
-// Resource sprite icon class mapping
-const RESOURCE_ICON_CLASS = {
-  gold: 'icon-gold',
-  wheat: 'icon-wheat',
-  stone: 'icon-stone',
-  wood: 'icon-wood'
-};
+import { getResourceDef } from '../config/resources.config.js';
 
 export class ResearchPanelController {
   /**
@@ -95,7 +88,18 @@ export class ResearchPanelController {
     if (!cost || Object.keys(cost).length === 0) return '';
 
     return Object.entries(cost)
-      .map(([res, amt]) => `${amt}<span class="icon icon-16 ${RESOURCE_ICON_CLASS[res] || 'icon-gold'}"></span>`)
+      .map(([res, amt]) => {
+        const resourceDef = getResourceDef(res);
+        if (resourceDef && resourceDef.hasSprite) {
+          // Use proper icon base class (icon, icon-01, icon-02) and icon class
+          const baseClass = resourceDef.iconBase || 'icon';
+          const iconClass = resourceDef.icon || 'icon-gold';
+          return `${amt}<span class="${baseClass} icon-16 ${iconClass}"></span>`;
+        }
+        // Fallback to emoji
+        const emoji = resourceDef?.emoji || '💰';
+        return `${amt}${emoji}`;
+      })
       .join(' ');
   }
 

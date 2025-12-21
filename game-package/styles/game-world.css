@@ -141,6 +141,21 @@
   filter: drop-shadow(0 0 12px rgba(255,220,100,0.9)) drop-shadow(3px 3px 5px rgba(0,0,0,0.4)) brightness(1.1);
 }
 
+/* Programmatic hover state (tile-based detection) */
+.building-slot.hovered {
+  transform: scale(1.05);
+  z-index: 1000 !important;
+}
+
+.building-slot.hovered .building-image {
+  filter: drop-shadow(0 0 12px rgba(255,220,100,0.9)) drop-shadow(3px 3px 5px rgba(0,0,0,0.4)) brightness(1.1);
+}
+
+.building-slot.hovered .slot-placeholder {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 25px rgba(100,255,100,0.8);
+  background: rgba(100,255,100,0.3);
+}
+
 .slot-placeholder {
   width: var(--placeholder-size, 42px);
   height: calc(var(--placeholder-size, 42px) * 0.6);

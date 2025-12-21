@@ -58,6 +58,20 @@ export class BuildingService {
   }
 
   /**
+   * Find building index at a specific grid position
+   * @param {number} row - Grid row
+   * @param {number} col - Grid column
+   * @returns {number} Building index or -1 if no building at position
+   */
+  getBuildingIndexAt(row, col) {
+    const buildings = this._gameState.getBuildings();
+    return buildings.findIndex(b =>
+      row >= b.row && row < b.row + BUILDING_FOOTPRINT &&
+      col >= b.col && col < b.col + BUILDING_FOOTPRINT
+    );
+  }
+
+  /**
    * Find building by index
    * @param {number} index - Building index in array
    * @returns {Object|null}

@@ -135,6 +135,10 @@ export class GameController {
     placementController.renderBuildList();
     debugController.setupSliders();
 
+    // Building hover controller (tile-based hover detection for inspect/upgrade)
+    const buildingHoverController = this._container.get('buildingHoverController');
+    buildingHoverController.setupListeners();
+
     // Dev panel controller (only initializes if ?dev=1)
     const devPanelController = this._container.get('devPanelController');
     devPanelController.initialize();
@@ -150,6 +154,7 @@ export class GameController {
       buildingInfo: buildingInfoController,
       researchPanel: researchPanelController,
       placement: placementController,
+      buildingHover: buildingHoverController,
       tab: tabController,
       merchantPanel: merchantPanelController,
       debug: debugController,

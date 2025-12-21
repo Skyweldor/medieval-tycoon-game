@@ -37,14 +37,16 @@ export class PlacementController {
    * @param {import('../core/EventBus.js').EventBus} eventBus
    * @param {Function} renderBuildingsFn - Function to re-render buildings after placement
    * @param {import('../services/ResearchService.js').ResearchService} [researchService] - Research service for unlock checks
+   * @param {import('../services/CameraService.js').CameraService} [cameraService] - Camera service for pan offset
    */
-  constructor(buildingService, resourceService, coordinateService, eventBus, renderBuildingsFn, researchService) {
+  constructor(buildingService, resourceService, coordinateService, eventBus, renderBuildingsFn, researchService, cameraService) {
     this._buildingService = buildingService;
     this._resourceService = resourceService;
     this._coordinateService = coordinateService;
     this._eventBus = eventBus;
     this._renderBuildings = renderBuildingsFn || (() => {});
     this._researchService = researchService;
+    this._cameraService = cameraService;
 
     // Placement mode state
     this._active = false;
@@ -326,8 +328,15 @@ export class PlacementController {
     const rect = world.getBoundingClientRect();
 
     // Get mouse position relative to game world
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    let mouseX = e.clientX - rect.left;
+    let mouseY = e.clientY - rect.top;
+
+    // Account for camera pan offset - subtract the offset to get position in world space
+    if (this._cameraService) {
+      const camOffset = this._cameraService.getOffset();
+      mouseX -= camOffset.x;
+      mouseY -= camOffset.y;
+    }
 
     // Convert to grid coordinates
     const gridPos = this._coordinateService.screenToGrid(mouseX, mouseY);
@@ -355,8 +364,15 @@ export class PlacementController {
     const rect = world.getBoundingClientRect();
 
     // Get mouse position relative to game world
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    let mouseX = e.clientX - rect.left;
+    let mouseY = e.clientY - rect.top;
+
+    // Account for camera pan offset - subtract the offset to get position in world space
+    if (this._cameraService) {
+      const camOffset = this._cameraService.getOffset();
+      mouseX -= camOffset.x;
+      mouseY -= camOffset.y;
+    }
 
     // Convert to grid coordinates
     const gridPos = this._coordinateService.screenToGrid(mouseX, mouseY);

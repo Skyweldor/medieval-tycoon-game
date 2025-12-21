@@ -98,6 +98,7 @@ import { CameraService } from './services/CameraService.js';
 
 // UI Controllers (Phase 8)
 import { PlacementController } from './ui/PlacementController.js';
+import { BuildingHoverController } from './ui/BuildingHoverController.js';
 import { TabController } from './ui/TabController.js';
 import { MerchantPanelController } from './ui/MerchantPanelController.js';
 import { DebugController } from './ui/DebugController.js';
@@ -330,7 +331,8 @@ container.register('placementController', (c) => new PlacementController(
   c.get('coordinateService'),
   c.get('eventBus'),
   () => c.get('buildingRenderer').render(), // Direct call to BuildingRenderer
-  c.get('researchService') // Research service for building unlock checks
+  c.get('researchService'), // Research service for building unlock checks
+  c.get('cameraService') // Camera service for pan offset correction
 ));
 
 container.register('tabController', (c) => new TabController(
@@ -425,44 +427,58 @@ container.register('tileRenderer', (c) => new TileRenderer(
 ));
 
 container.register('buildingRenderer', (c) => {
-  // Get buildingInfoController for hover handlers
-  // Note: Using lazy callbacks to avoid circular dependency issues
+  // BuildingRenderer now only handles rendering, not hover/click events
+  // BuildingHoverController handles tile-based hover detection
   return new BuildingRenderer(
     c.get('coordinateService'),
     c.get('gameState'),
-    {
-      onBuildingClick: (index) => {
-        const placementController = c.get('placementController');
+    {} // No DOM-based event handlers - using tile-based detection instead
+  );
+});
 
-        // Check if demolish mode is active
-        if (placementController.isDemolishMode()) {
-          const building = c.get('buildingService').getBuildingByIndex(index);
-          if (building) {
-            placementController.demolishBuilding(building);
-          }
-          return;
-        }
+container.register('buildingHoverController', (c) => {
+  // Handle building clicks (upgrade or demolish)
+  const handleBuildingClick = (index) => {
+    const placementController = c.get('placementController');
 
-        // Normal mode: Delegate to buildingService for upgrade
-        const result = c.get('buildingService').upgradeBuilding(index);
-        if (result.success) {
-          const building = c.get('buildingService').getBuildingByIndex(index);
-          const def = c.get('buildingService').getBuildingDef?.(building.type) ||
-            { name: building.type };
-          c.get('eventBus').publish(Events.NOTIFICATION, {
-            message: `${def.name || building.type} upgraded to level ${building.level + 1}!`,
-            type: 'success'
-          });
-        } else if (result.error) {
-          c.get('eventBus').publish(Events.NOTIFICATION, {
-            message: result.error,
-            type: result.error.includes('max level') ? 'info' : 'error'
-          });
-        }
-      },
-      onBuildingHover: (index) => c.get('buildingInfoController').show(index),
-      onBuildingLeave: () => c.get('buildingInfoController').hide()
+    // Skip if placement mode is active
+    if (placementController.isActive()) {
+      return;
     }
+
+    // Check if demolish mode is active
+    if (placementController.isDemolishMode()) {
+      const building = c.get('buildingService').getBuildingByIndex(index);
+      if (building) {
+        placementController.demolishBuilding(building);
+      }
+      return;
+    }
+
+    // Normal mode: Delegate to buildingService for upgrade
+    const result = c.get('buildingService').upgradeBuilding(index);
+    if (result.success) {
+      const building = c.get('buildingService').getBuildingByIndex(index);
+      const def = c.get('buildingService').getBuildingDef?.(building.type) ||
+        { name: building.type };
+      c.get('eventBus').publish(Events.NOTIFICATION, {
+        message: `${def.name || building.type} upgraded to level ${building.level + 1}!`,
+        type: 'success'
+      });
+    } else if (result.error) {
+      c.get('eventBus').publish(Events.NOTIFICATION, {
+        message: result.error,
+        type: result.error.includes('max level') ? 'info' : 'error'
+      });
+    }
+  };
+
+  return new BuildingHoverController(
+    c.get('buildingService'),
+    c.get('coordinateService'),
+    c.get('cameraService'),
+    c.get('buildingInfoController'),
+    handleBuildingClick
   );
 });
 
