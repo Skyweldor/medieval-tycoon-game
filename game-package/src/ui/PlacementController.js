@@ -5,16 +5,21 @@
 
 import { BUILDINGS, ASSETS, TILE_CONFIG, BUILDING_FOOTPRINT, getResearchForBuilding } from '../config/index.js';
 import { Events } from '../core/EventBus.js';
+import { RESOURCES } from '../config/resources.config.js';
 
-// Resource sprite icon class mapping
-const RESOURCE_ICON_CLASS = {
-  gold: 'icon-gold',
-  wheat: 'icon-wheat',
-  stone: 'icon-stone',
-  wood: 'icon-wood',
-  bread: 'icon-bread',
-  iron: 'icon-iron'
-};
+/**
+ * Get the CSS icon classes for a resource type
+ * Uses the resource config to get proper iconBase and icon
+ * @param {string} resourceId - Resource ID
+ * @returns {string} CSS classes for the icon
+ */
+function getResourceIconClass(resourceId) {
+  const def = RESOURCES[resourceId];
+  if (def && def.hasSprite) {
+    return `${def.iconBase} ${def.icon}`;
+  }
+  return 'icon icon-gold'; // Fallback
+}
 
 /**
  * Get the asset path for a building type (level 1)
@@ -387,6 +392,10 @@ export class PlacementController {
     if (result.success) {
       const buildingName = BUILDINGS[this._buildingType]?.name || this._buildingType;
       this._notify(`${buildingName} placed!`, 'success');
+      // IMPORTANT: Stop immediate propagation BEFORE cancel() to prevent
+      // BuildingHoverController from triggering upgrade on the newly placed building.
+      // stopImmediatePropagation prevents other listeners on the SAME element from firing.
+      e.stopImmediatePropagation();
       // Note: Don't call _renderBuildings() here - BUILDING_PLACED event handles UI updates
       this.cancel();
     } else if (result.error) {
@@ -448,7 +457,7 @@ export class PlacementController {
     if (!unlockReq) return '';
 
     return Object.entries(unlockReq)
-      .map(([res, amt]) => `${amt}<span class="icon icon-16 ${RESOURCE_ICON_CLASS[res] || 'icon-gold'}"></span>`)
+      .map(([res, amt]) => `${amt}<span class="icon icon-16 ${getResourceIconClass(res)}"></span>`)
       .join(' ');
   }
 
@@ -468,7 +477,7 @@ export class PlacementController {
 
       // Cost text with sprite icons (static)
       const costText = Object.entries(def.baseCost)
-        .map(([r, a]) => `${a}<span class="icon icon-20 ${RESOURCE_ICON_CLASS[r] || 'icon-gold'}"></span>`)
+        .map(([r, a]) => `${a}<span class="icon icon-20 ${getResourceIconClass(r)}"></span>`)
         .join(' ');
 
       // Unlock container (always present, content updated dynamically in renderBuildList)

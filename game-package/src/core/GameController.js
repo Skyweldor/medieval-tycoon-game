@@ -49,6 +49,9 @@ export class GameController {
     // Render initial game state
     this._renderInitialState();
 
+    // Initialize character system (after rendering so layer exists)
+    this._initializeCharacters();
+
     // Set up event subscriptions for UI updates
     this._setupEventSubscriptions();
 
@@ -160,6 +163,23 @@ export class GameController {
       debug: debugController,
       devPanel: devPanelController
     };
+  }
+
+  /**
+   * Initialize character system
+   * @private
+   */
+  _initializeCharacters() {
+    // Initialize character service
+    const characterService = this._container.get('characterService');
+    characterService.initialize();
+
+    // Initialize character renderer
+    const characterRenderer = this._container.get('characterRenderer');
+    characterRenderer.initialize();
+
+    // Spawn an initial peasant at grid intersection (5, 5)
+    characterService.spawnCharacter(5, 5, 'peasant');
   }
 
   /**
@@ -317,6 +337,14 @@ export class GameController {
     // Re-render everything
     this._renderInitialState();
 
+    // Reset characters - clear and spawn fresh peasant
+    const characterService = this._container.get('characterService');
+    const characterRenderer = this._container.get('characterRenderer');
+    characterService.destroy();
+    characterRenderer.clear();
+    characterService.initialize();
+    characterService.spawnCharacter(5, 5, 'peasant');
+
     // Reschedule merchant
     this._scheduleMerchantVisit();
 
@@ -362,6 +390,18 @@ export class GameController {
     const cameraService = this._container.get('cameraService');
     if (cameraService && typeof cameraService.destroy === 'function') {
       cameraService.destroy();
+    }
+
+    // Destroy character service
+    const characterService = this._container.get('characterService');
+    if (characterService && typeof characterService.destroy === 'function') {
+      characterService.destroy();
+    }
+
+    // Destroy character renderer
+    const characterRenderer = this._container.get('characterRenderer');
+    if (characterRenderer && typeof characterRenderer.destroy === 'function') {
+      characterRenderer.destroy();
     }
 
     // Destroy UI controllers

@@ -56,6 +56,7 @@ import { GameLoop } from './core/GameLoop.js';
 // Models (Phase 1)
 import { Building } from './models/Building.js';
 import { Position, createPositionSet, hasPosition } from './models/Position.js';
+import { AnimatedSprite } from './models/AnimatedSprite.js';
 
 // Services (Phase 1)
 import { CoordinateService, coordinateService } from './services/CoordinateService.js';
@@ -96,6 +97,9 @@ import { PlotService } from './services/PlotService.js';
 // Services (Camera)
 import { CameraService } from './services/CameraService.js';
 
+// Services (Characters)
+import { CharacterService } from './services/CharacterService.js';
+
 // UI Controllers (Phase 8)
 import { PlacementController } from './ui/PlacementController.js';
 import { BuildingHoverController } from './ui/BuildingHoverController.js';
@@ -126,6 +130,7 @@ import { GameController } from './core/GameController.js';
 import { TileRenderer } from './renderers/TileRenderer.js';
 import { BuildingRenderer } from './renderers/BuildingRenderer.js';
 import { DebugRenderer } from './renderers/DebugRenderer.js';
+import { CharacterRenderer } from './renderers/CharacterRenderer.js';
 
 // Configuration imports
 import {
@@ -207,6 +212,11 @@ window.canExpandPlot = () => container.get('plotService').canExpand();
 window.resetCamera = () => container.get('cameraService').reset();
 window.panCamera = (dx, dy) => container.get('cameraService').pan(dx, dy);
 window.toggleCameraDebug = () => container.get('cameraService').toggleDebug();
+
+// Character Service - for character controls
+window.spawnCharacter = (col, row) => container.get('characterService').spawnCharacter(col, row);
+window.removeCharacter = (id) => container.get('characterService').removeCharacter(id);
+window.getCharacters = () => container.get('characterService').getCharacters();
 
 // Game Controller - initialization and reset
 window.initializeUI = () => {
@@ -323,6 +333,13 @@ container.register('cameraService', (c) => new CameraService(
   c.get('eventBus')
 ));
 
+// Character service (pathfinding and movement)
+container.register('characterService', (c) => new CharacterService(
+  c.get('gameState'),
+  c.get('buildingService'),
+  c.get('eventBus')
+));
+
 // Phase 8 UI Controllers
 // Note: These require DOM elements, so they're created but not initialized until DOM ready
 container.register('placementController', (c) => new PlacementController(
@@ -373,7 +390,6 @@ container.register('notificationController', (c) => new NotificationController(
 
 container.register('resourceDisplayController', (c) => new ResourceDisplayController(
   c.get('gameState'),
-  c.get('productionService'),
   c.get('resourceService'),
   c.get('eventBus')
 ));
@@ -478,12 +494,19 @@ container.register('buildingHoverController', (c) => {
     c.get('coordinateService'),
     c.get('cameraService'),
     c.get('buildingInfoController'),
-    handleBuildingClick
+    handleBuildingClick,
+    c.get('eventBus')
   );
 });
 
 container.register('debugRenderer', (c) => new DebugRenderer(
   c.get('coordinateService')
+));
+
+// Character renderer (with z-ordering and x-ray outline)
+container.register('characterRenderer', (c) => new CharacterRenderer(
+  c.get('coordinateService'),
+  c.get('characterService')
 ));
 
 // ==========================================
@@ -523,6 +546,7 @@ export {
   Position,
   createPositionSet,
   hasPosition,
+  AnimatedSprite,
   // Services (Phase 1)
   CoordinateService,
   coordinateService,
@@ -551,6 +575,8 @@ export {
   PlotService,
   // Services (Camera)
   CameraService,
+  // Services (Characters)
+  CharacterService,
   // UI Controllers (Phase 8)
   PlacementController,
   TabController,
@@ -574,5 +600,6 @@ export {
   // Renderers (Phase 7)
   TileRenderer,
   BuildingRenderer,
-  DebugRenderer
+  DebugRenderer,
+  CharacterRenderer
 };

@@ -4,6 +4,8 @@
  * Uses grid position rather than DOM events to determine hovered building
  */
 
+import { Events } from '../core/EventBus.js';
+
 export class BuildingHoverController {
   /**
    * @param {import('../services/BuildingService.js').BuildingService} buildingService
@@ -11,13 +13,15 @@ export class BuildingHoverController {
    * @param {import('../services/CameraService.js').CameraService} cameraService
    * @param {import('./BuildingInfoController.js').BuildingInfoController} buildingInfoController
    * @param {Function} onBuildingClick - Callback when building is clicked
+   * @param {import('../core/EventBus.js').EventBus} [eventBus] - EventBus for building update events
    */
-  constructor(buildingService, coordinateService, cameraService, buildingInfoController, onBuildingClick) {
+  constructor(buildingService, coordinateService, cameraService, buildingInfoController, onBuildingClick, eventBus) {
     this._buildingService = buildingService;
     this._coordinateService = coordinateService;
     this._cameraService = cameraService;
     this._buildingInfoController = buildingInfoController;
     this._onBuildingClick = onBuildingClick || (() => {});
+    this._eventBus = eventBus;
 
     // Current hover state
     this._hoveredIndex = -1;
@@ -28,6 +32,33 @@ export class BuildingHoverController {
     this._boundMouseMove = this._handleMouseMove.bind(this);
     this._boundClick = this._handleClick.bind(this);
     this._boundMouseLeave = this._handleMouseLeave.bind(this);
+
+    // Subscribe to building events to refresh highlight after DOM updates
+    this._unsubscribers = [];
+    if (this._eventBus) {
+      this._unsubscribers.push(
+        this._eventBus.subscribe(Events.BUILDING_UPGRADED, (data) => {
+          this._onBuildingUpdated(data.index);
+        })
+      );
+    }
+  }
+
+  /**
+   * Handle building update (upgrade/etc) - re-apply highlight if needed
+   * @param {number} index - Building index that was updated
+   * @private
+   */
+  _onBuildingUpdated(index) {
+    // If this is the currently hovered building, re-apply highlight after DOM update
+    if (index === this._hoveredIndex) {
+      // Use requestAnimationFrame to wait for DOM to update
+      requestAnimationFrame(() => {
+        this._setHighlight(index, true);
+        // Also refresh the building info panel
+        this._buildingInfoController.show(index);
+      });
+    }
   }
 
   // ==========================================
@@ -216,5 +247,8 @@ export class BuildingHoverController {
    */
   destroy() {
     this.removeListeners();
+    // Unsubscribe from events
+    this._unsubscribers.forEach(unsub => unsub());
+    this._unsubscribers = [];
   }
 }

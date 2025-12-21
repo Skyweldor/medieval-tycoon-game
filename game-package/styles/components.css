@@ -192,15 +192,6 @@
   font-family: 'Courier New', monospace;
 }
 
-.resource-rate {
-  font-size: 0.7rem;
-  font-weight: 600;
-}
-
-.resource-rate.positive { color: #7CB342; }
-.resource-rate.negative { color: #E57373; }
-.resource-rate.neutral { color: #666; }
-
 /* In-Canvas Resource Overlay - Grid Layout */
 .resource-overlay {
   position: absolute;
@@ -315,20 +306,6 @@
   min-width: 65px;
   text-align: right;
 }
-
-/* Resource rate */
-.resource-overlay-rate {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #888;
-  font-variant-numeric: tabular-nums;
-  min-width: 45px;
-  text-align: right;
-}
-
-.resource-overlay-rate.positive { color: #7CB342; }
-.resource-overlay-rate.negative { color: #E57373; }
-.resource-overlay-rate.neutral { color: #888; }
 
 /* Emoji fallback for resources without sprites */
 .resource-emoji {
@@ -1015,13 +992,6 @@
 .resource-value.near-cap,
 .resource-overlay-value.near-cap {
   color: #FFB74D;
-}
-
-/* Rate indicator when at cap */
-.resource-rate.at-cap,
-.resource-overlay-rate.at-cap {
-  color: #E57373;
-  font-weight: 700;
 }
 
 /* ==========================================

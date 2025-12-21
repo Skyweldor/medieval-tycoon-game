@@ -7,35 +7,53 @@ export const BUILDINGS = {
   wheat_farm: {
     name: 'Wheat Farm',
     baseCost: { gold: 10 },
-    production: { wheat: 1 },
+    production: {},
+    recipe: {
+      inputs: {},
+      outputs: { wheat: 5 },
+      cycleTime: 5000, // 5 seconds → 1 wheat/s at base
+    },
     upgrades: [
       { cost: { gold: 50 }, mult: 2 },
       { cost: { gold: 200 }, mult: 3 },
       { cost: { gold: 800 }, mult: 5 },
     ],
     unlockReq: null,
+    isProcessor: true,
   },
   quarry: {
     name: 'Stone Quarry',
     baseCost: { gold: 25 },
-    production: { stone: 1 },
+    production: {},
+    recipe: {
+      inputs: {},
+      outputs: { stone: 5 },
+      cycleTime: 5000, // 5 seconds → 1 stone/s at base
+    },
     upgrades: [
       { cost: { gold: 100 }, mult: 2 },
       { cost: { gold: 400 }, mult: 3 },
       { cost: { gold: 1500 }, mult: 5 },
     ],
     unlockReq: { wheat: 10 },
+    isProcessor: true,
   },
   lumber: {
     name: 'Lumber Camp',
     baseCost: { gold: 40 },
-    production: { wood: 1 },
+    production: {},
+    recipe: {
+      inputs: {},
+      outputs: { wood: 5 },
+      cycleTime: 5000, // 5 seconds → 1 wood/s at base
+    },
     upgrades: [
       { cost: { gold: 150 }, mult: 2 },
       { cost: { gold: 500 }, mult: 3 },
       { cost: { gold: 2000 }, mult: 5 },
     ],
     unlockReq: { stone: 5 },
+    isProcessor: true,
   },
   bakery: {
     name: 'Bakery',
