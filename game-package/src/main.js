@@ -100,6 +100,9 @@ import { CameraService } from './services/CameraService.js';
 // Services (Characters)
 import { CharacterService } from './services/CharacterService.js';
 
+// Services (Phase G - Collection System)
+import { DropService } from './services/DropService.js';
+
 // UI Controllers (Phase 8)
 import { PlacementController } from './ui/PlacementController.js';
 import { BuildingHoverController } from './ui/BuildingHoverController.js';
@@ -131,6 +134,7 @@ import { TileRenderer } from './renderers/TileRenderer.js';
 import { BuildingRenderer } from './renderers/BuildingRenderer.js';
 import { DebugRenderer } from './renderers/DebugRenderer.js';
 import { CharacterRenderer } from './renderers/CharacterRenderer.js';
+import { DropRenderer } from './renderers/DropRenderer.js';
 
 // Configuration imports
 import {
@@ -217,6 +221,12 @@ window.toggleCameraDebug = () => container.get('cameraService').toggleDebug();
 window.spawnCharacter = (col, row) => container.get('characterService').spawnCharacter(col, row);
 window.removeCharacter = (id) => container.get('characterService').removeCharacter(id);
 window.getCharacters = () => container.get('characterService').getCharacters();
+
+// Drop Service - for collection system (Phase G)
+window.spawnDrops = (buildingIndex) => container.get('dropService').spawnFromBuilding(buildingIndex);
+window.collectDrop = (dropId) => container.get('dropService').collectDrop(dropId);
+window.getDrops = () => container.get('dropService').getDrops();
+window.getReadyProcessors = () => container.get('processorService').getReadyProcessors();
 
 // Game Controller - initialization and reset
 window.initializeUI = () => {
@@ -340,6 +350,20 @@ container.register('characterService', (c) => new CharacterService(
   c.get('eventBus')
 ));
 
+// Phase G - Drop service (collection system)
+container.register('dropService', (c) => {
+  const dropService = new DropService(
+    c.get('gameState'),
+    c.get('resourceService'),
+    c.get('processorService'),
+    c.get('coordinateService'),
+    c.get('eventBus')
+  );
+  // Wire CharacterService to DropService for villager AI
+  c.get('characterService').setDropService(dropService);
+  return dropService;
+});
+
 // Phase 8 UI Controllers
 // Note: These require DOM elements, so they're created but not initialized until DOM ready
 container.register('placementController', (c) => new PlacementController(
@@ -453,9 +477,11 @@ container.register('buildingRenderer', (c) => {
 });
 
 container.register('buildingHoverController', (c) => {
-  // Handle building clicks (upgrade or demolish)
+  // Handle building clicks (upgrade, demolish, or spawn drops)
   const handleBuildingClick = (index) => {
     const placementController = c.get('placementController');
+    const processorService = c.get('processorService');
+    const dropService = c.get('dropService');
 
     // Skip if placement mode is active
     if (placementController.isActive()) {
@@ -467,6 +493,20 @@ container.register('buildingHoverController', (c) => {
       const building = c.get('buildingService').getBuildingByIndex(index);
       if (building) {
         placementController.demolishBuilding(building);
+      }
+      return;
+    }
+
+    // Phase G: Check if processor is ready - spawn drops instead of upgrading
+    if (processorService.isReady(index)) {
+      const dropIds = dropService.spawnFromBuilding(index);
+      if (dropIds.length > 0) {
+        c.get('eventBus').publish(Events.NOTIFICATION, {
+          message: 'Resources ready for collection!',
+          type: 'success'
+        });
+        // Update ready badge immediately
+        c.get('buildingRenderer').setReadyState(index, false);
       }
       return;
     }
@@ -507,6 +547,13 @@ container.register('debugRenderer', (c) => new DebugRenderer(
 container.register('characterRenderer', (c) => new CharacterRenderer(
   c.get('coordinateService'),
   c.get('characterService')
+));
+
+// Drop renderer (Phase G - collection system)
+container.register('dropRenderer', (c) => new DropRenderer(
+  c.get('coordinateService'),
+  c.get('dropService'),
+  c.get('cameraService')
 ));
 
 // ==========================================
@@ -577,6 +624,8 @@ export {
   CameraService,
   // Services (Characters)
   CharacterService,
+  // Services (Phase G - Collection System)
+  DropService,
   // UI Controllers (Phase 8)
   PlacementController,
   TabController,
@@ -601,5 +650,7 @@ export {
   TileRenderer,
   BuildingRenderer,
   DebugRenderer,
-  CharacterRenderer
+  CharacterRenderer,
+  // Renderers (Phase G - Collection System)
+  DropRenderer
 };

@@ -9,6 +9,7 @@
 
 import { AnimatedSprite } from '../models/AnimatedSprite.js';
 import { TILE_CONFIG } from '../config/index.js';
+import { RESOURCES } from '../config/resources.config.js';
 
 // Character sprite configuration
 const CHARACTER_SPRITES = {
@@ -17,7 +18,7 @@ const CHARACTER_SPRITES = {
     frameWidth: 32,
     frameHeight: 32,
     framesPerRow: 6,
-    scale: 2 // Display scale multiplier
+    scale: 1.25 // Display scale multiplier
   }
 };
 
@@ -135,6 +136,11 @@ export class CharacterRenderer {
     container.appendChild(outline);
     container.appendChild(sprite);
 
+    // Create carry icon (Phase G - villagers carry resources)
+    const carryIcon = document.createElement('div');
+    carryIcon.className = 'carry-icon hidden';
+    container.appendChild(carryIcon);
+
     // Create animator
     const animator = new AnimatedSprite(
       sprite,
@@ -157,6 +163,7 @@ export class CharacterRenderer {
       container,
       sprite,
       outline,
+      carryIcon,
       animator,
       config
     });
@@ -271,6 +278,19 @@ export class CharacterRenderer {
       container.classList.add('behind-building');
     } else {
       container.classList.remove('behind-building');
+    }
+
+    // Update carry icon (Phase G - villagers carry resources)
+    const carryIcon = elements.carryIcon;
+    if (character.carryData && Object.keys(character.carryData).length > 0) {
+      const resourceId = Object.keys(character.carryData)[0];
+      const resourceDef = RESOURCES[resourceId];
+      if (resourceDef) {
+        carryIcon.textContent = resourceDef.emoji || '?';
+        carryIcon.classList.remove('hidden');
+      }
+    } else {
+      carryIcon.classList.add('hidden');
     }
   }
 

@@ -17,7 +17,13 @@ import { TILE_CONFIG, BUILDING_FOOTPRINT } from '../config/index.js';
 export const CharacterState = {
   IDLE: 'idle',
   WALKING: 'walking',
-  BLOCKED: 'blocked'
+  BLOCKED: 'blocked',
+  // Villager-specific states (Phase G)
+  MOVING_TO_DROP: 'moving_to_drop',
+  PICKING_UP: 'picking_up',
+  DELIVERING: 'delivering',
+  DEPOSITING: 'depositing',
+  BLOCKED_FULL: 'blocked_full'
 };
 
 // Movement directions (in isometric grid terms)
@@ -44,6 +50,9 @@ export class CharacterService {
     this._buildingService = buildingService;
     this._eventBus = eventBus;
 
+    // DropService is set later to avoid circular dependency
+    this._dropService = null;
+
     /**
      * Characters array
      * @type {Array<{
@@ -57,7 +66,11 @@ export class CharacterService {
      *   progress: number,
      *   speed: number,
      *   facing: string,
-     *   sprite: string
+     *   sprite: string,
+     *   isVillager: boolean,
+     *   carryData: Object|null,
+     *   targetDropId: string|null,
+     *   targetBuildingIndex: number|null
      * }>}
      */
     this._characters = [];
@@ -69,6 +82,14 @@ export class CharacterService {
     // Update interval for smooth movement (60 fps target)
     this._updateInterval = null;
     this._lastUpdateTime = 0;
+  }
+
+  /**
+   * Set DropService reference (called after container setup to avoid circular dependency)
+   * @param {import('./DropService.js').DropService} dropService
+   */
+  setDropService(dropService) {
+    this._dropService = dropService;
   }
 
   /**
@@ -116,7 +137,12 @@ export class CharacterService {
       progress: 0,
       speed: this._defaultSpeed,
       facing: 'east', // Default facing direction
-      sprite
+      sprite,
+      // Villager-specific fields (Phase G)
+      isVillager: sprite === 'peasant', // All peasants are villagers
+      carryData: null,  // { resourceId, amount } when carrying
+      targetDropId: null,  // Drop they're moving to collect
+      targetBuildingIndex: null  // Storage building they're delivering to
     };
 
     this._characters.push(character);
@@ -486,7 +512,13 @@ export class CharacterService {
    */
   _onTick() {
     for (const character of this._characters) {
-      // If idle, randomly decide to wander
+      // Villager AI (Phase G)
+      if (character.isVillager && this._dropService) {
+        this._processVillagerAI(character);
+        continue; // Skip regular wander logic for villagers
+      }
+
+      // Non-villager: If idle, randomly decide to wander
       if (character.state === CharacterState.IDLE) {
         // 30% chance to start wandering each tick
         if (Math.random() < 0.3) {
@@ -495,6 +527,227 @@ export class CharacterService {
         }
       }
     }
+  }
+
+  // ==========================================
+  // VILLAGER AI (Phase G)
+  // ==========================================
+
+  /**
+   * Process villager AI for a single character
+   * @param {Object} character - Character to process
+   * @private
+   */
+  _processVillagerAI(character) {
+    switch (character.state) {
+      case CharacterState.IDLE:
+        // Look for drops to collect
+        this._villagerSeekDrop(character);
+        break;
+
+      case CharacterState.MOVING_TO_DROP:
+        // Check if we've arrived at the drop
+        if (character.path.length === 0) {
+          this._villagerPickUpDrop(character);
+        }
+        break;
+
+      case CharacterState.DELIVERING:
+        // Check if we've arrived at storage
+        if (character.path.length === 0) {
+          this._villagerDeposit(character);
+        }
+        break;
+
+      case CharacterState.BLOCKED_FULL:
+        // Check if storage has space now
+        if (character.carryData) {
+          const resourceId = Object.keys(character.carryData)[0];
+          // Try to find storage again
+          if (this._findAndPathToStorage(character)) {
+            character.state = CharacterState.DELIVERING;
+          }
+        } else {
+          character.state = CharacterState.IDLE;
+        }
+        break;
+
+      case CharacterState.WALKING:
+      case CharacterState.PICKING_UP:
+      case CharacterState.DEPOSITING:
+        // These states are transitional, handled by movement system
+        break;
+
+      default:
+        // Occasional wander when nothing to do
+        if (Math.random() < 0.1) {
+          this.wander(character.id);
+        }
+    }
+  }
+
+  /**
+   * Villager looks for nearest drop to collect
+   * @param {Object} character
+   * @private
+   */
+  _villagerSeekDrop(character) {
+    if (!this._dropService) return;
+
+    const nearestDrop = this._dropService.findNearestDrop(character.col, character.row);
+    if (nearestDrop) {
+      // Try to reserve the drop
+      if (this._dropService.reserveDrop(nearestDrop.id, character.id)) {
+        character.targetDropId = nearestDrop.id;
+        character.state = CharacterState.MOVING_TO_DROP;
+
+        // Path to drop position
+        const targetCol = Math.round(nearestDrop.gridX);
+        const targetRow = Math.round(nearestDrop.gridY);
+        const pathFound = this.moveTo(character.id, targetCol, targetRow);
+
+        if (!pathFound) {
+          // Can't reach drop, release reservation
+          this._dropService.releaseDrop(nearestDrop.id);
+          character.targetDropId = null;
+          character.state = CharacterState.IDLE;
+        }
+      }
+    } else {
+      // No drops available, occasional wander
+      if (Math.random() < 0.1) {
+        this.wander(character.id);
+      }
+    }
+  }
+
+  /**
+   * Villager picks up drop at current location
+   * @param {Object} character
+   * @private
+   */
+  _villagerPickUpDrop(character) {
+    if (!this._dropService || !character.targetDropId) {
+      character.state = CharacterState.IDLE;
+      return;
+    }
+
+    const drop = this._dropService.getDrop(character.targetDropId);
+    if (!drop) {
+      // Drop was collected by someone else
+      character.targetDropId = null;
+      character.state = CharacterState.IDLE;
+      return;
+    }
+
+    // Collect the drop (the drop service adds resources to inventory)
+    const result = this._dropService.collectDrop(character.targetDropId);
+
+    if (result.success) {
+      // Set carry data for visual display
+      character.carryData = result.collected;
+      character.targetDropId = null;
+      character.state = CharacterState.DELIVERING;
+
+      // Find nearest storage building and path to it
+      if (!this._findAndPathToStorage(character)) {
+        // No storage available or can't reach it
+        character.state = CharacterState.BLOCKED_FULL;
+      }
+
+      this._eventBus.publish('villager:pickedUp', {
+        characterId: character.id,
+        resources: result.collected
+      });
+    } else {
+      // Collection failed (storage full or drop gone)
+      this._dropService.releaseDrop(character.targetDropId);
+      character.targetDropId = null;
+      character.state = CharacterState.IDLE;
+    }
+  }
+
+  /**
+   * Find storage building and path to it
+   * @param {Object} character
+   * @returns {boolean} True if path found
+   * @private
+   */
+  _findAndPathToStorage(character) {
+    const storageBuildings = this._findStorageBuildings();
+    if (storageBuildings.length === 0) {
+      return false;
+    }
+
+    // Find nearest storage building
+    let nearest = null;
+    let nearestDist = Infinity;
+
+    for (const building of storageBuildings) {
+      // Path to front-center of building
+      const targetCol = building.col + 1;
+      const targetRow = building.row + 2; // Just in front of the building
+      const dist = Math.abs(character.col - targetCol) + Math.abs(character.row - targetRow);
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearest = building;
+      }
+    }
+
+    if (nearest) {
+      const buildings = this._gameState.getBuildings();
+      character.targetBuildingIndex = buildings.indexOf(nearest);
+
+      // Path to front of building
+      const targetCol = nearest.col + 1;
+      const targetRow = nearest.row + 2;
+      return this.moveTo(character.id, targetCol, targetRow);
+    }
+
+    return false;
+  }
+
+  /**
+   * Get buildings that accept deposits (Town Hall, Barn)
+   * @returns {Array} Storage buildings
+   * @private
+   */
+  _findStorageBuildings() {
+    return this._gameState.getBuildings().filter(b =>
+      b.type === 'townhall' || b.type === 'barn'
+    );
+  }
+
+  /**
+   * Villager deposits resources at storage
+   * @param {Object} character
+   * @private
+   */
+  _villagerDeposit(character) {
+    if (!character.carryData) {
+      character.state = CharacterState.IDLE;
+      return;
+    }
+
+    // Resources were already added to inventory when the drop was collected
+    // This is just the visual/state transition
+    this._eventBus.publish('villager:deposited', {
+      characterId: character.id,
+      resources: character.carryData,
+      buildingIndex: character.targetBuildingIndex
+    });
+
+    character.carryData = null;
+    character.targetBuildingIndex = null;
+    character.state = CharacterState.IDLE;
+  }
+
+  /**
+   * Get villagers that are carrying resources
+   * @returns {Array} Villagers with carry data
+   */
+  getCarryingVillagers() {
+    return this._characters.filter(c => c.isVillager && c.carryData);
   }
 
   /**

@@ -307,3 +307,169 @@
       sepia(1) saturate(5) hue-rotate(120deg);
   }
 }
+
+/* ==========================================
+   PHASE G: DROP LAYER & READY BADGES
+   ========================================== */
+
+/* Drop layer - container for all drops with camera transform */
+.drop-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: translate(var(--camera-x), var(--camera-y)) scale(var(--camera-zoom));
+  transform-origin: center center;
+}
+
+/* Drop container - positioned in game world */
+.drop-container {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.1s ease-out;
+}
+
+.drop-container.hovered {
+  filter: brightness(1.3) drop-shadow(0 0 8px rgba(255, 255, 100, 0.8));
+}
+
+.drop-container.collecting {
+  animation: dropCollect 0.2s ease-out forwards;
+  pointer-events: none;
+}
+
+.drop-container.rejected {
+  animation: dropReject 0.3s ease-out;
+}
+
+@keyframes dropCollect {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3) translateY(-10px);
+  }
+  100% {
+    transform: scale(0.5) translateY(-30px);
+    opacity: 0;
+  }
+}
+
+@keyframes dropReject {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(-5px);
+  }
+  40%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+/* Drop icon using sprite sheets */
+.drop-icon {
+  width: 24px;
+  height: 24px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.5));
+}
+
+/* Emoji fallback for drops */
+.drop-icon.drop-emoji {
+  font-size: 20px;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.4));
+}
+
+/* Drop amount badge */
+.drop-amount {
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+  background: linear-gradient(135deg, #333 0%, #111 100%);
+  color: #fff;
+  font-size: 9px;
+  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.3);
+  min-width: 12px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  z-index: 1;
+}
+
+/* Ready badge on processor buildings */
+.ready-badge {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  white-space: nowrap;
+  animation: readyPulse 1.2s ease-in-out infinite;
+  cursor: pointer;
+  z-index: 2001;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4), 0 0 10px rgba(76, 175, 80, 0.5);
+  border: 2px solid rgba(255,255,255,0.5);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.ready-badge.hidden {
+  display: none;
+}
+
+@keyframes readyPulse {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4), 0 0 10px rgba(76, 175, 80, 0.5);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.08);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4), 0 0 20px rgba(76, 175, 80, 0.8);
+  }
+}
+
+/* Villager carry icon - shows resource being carried above head */
+.carry-icon {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+  filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5));
+  animation: carryBob 0.5s ease-in-out infinite;
+  z-index: 10;
+}
+
+.carry-icon.hidden {
+  display: none;
+}
+
+@keyframes carryBob {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-2px);
+  }
+}

@@ -178,6 +178,10 @@ export class GameController {
     const characterRenderer = this._container.get('characterRenderer');
     characterRenderer.initialize();
 
+    // Initialize drop renderer (Phase G - collection system)
+    const dropRenderer = this._container.get('dropRenderer');
+    dropRenderer.initialize();
+
     // Spawn an initial peasant at grid intersection (5, 5)
     characterService.spawnCharacter(5, 5, 'peasant');
   }
@@ -246,6 +250,12 @@ export class GameController {
     // Update build list on every tick so affordability/unlock states refresh
     this._eventBus.subscribe(Events.TICK, () => {
       this._uiControllers.placement.renderBuildList();
+
+      // Phase G: Update ready badges on processor buildings
+      const processorService = this._container.get('processorService');
+      const buildingRenderer = this._container.get('buildingRenderer');
+      const readyProcessors = processorService.getReadyProcessors();
+      buildingRenderer.updateReadyBadges(readyProcessors);
     });
 
     // Handle stipend ended notification
@@ -345,6 +355,12 @@ export class GameController {
     characterService.initialize();
     characterService.spawnCharacter(5, 5, 'peasant');
 
+    // Reset drops (Phase G)
+    const dropService = this._container.get('dropService');
+    const dropRenderer = this._container.get('dropRenderer');
+    dropService.clear();
+    dropRenderer.clear();
+
     // Reschedule merchant
     this._scheduleMerchantVisit();
 
@@ -402,6 +418,12 @@ export class GameController {
     const characterRenderer = this._container.get('characterRenderer');
     if (characterRenderer && typeof characterRenderer.destroy === 'function') {
       characterRenderer.destroy();
+    }
+
+    // Destroy drop renderer (Phase G)
+    const dropRenderer = this._container.get('dropRenderer');
+    if (dropRenderer && typeof dropRenderer.destroy === 'function') {
+      dropRenderer.destroy();
     }
 
     // Destroy UI controllers

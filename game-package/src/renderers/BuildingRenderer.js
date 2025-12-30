@@ -83,6 +83,18 @@ export class BuildingRenderer {
   }
 
   /**
+   * Create "Ready!" badge element for processors with buffered outputs
+   * @returns {HTMLElement}
+   * @private
+   */
+  _createReadyBadge() {
+    const badge = document.createElement('div');
+    badge.className = 'ready-badge hidden';
+    badge.textContent = 'Ready!';
+    return badge;
+  }
+
+  /**
    * Create building slot element with all children
    * @param {Object} building - Building data {type, row, col, level}
    * @param {number} index - Building index in array
@@ -129,6 +141,11 @@ export class BuildingRenderer {
 
     // Add level badge
     slot.appendChild(this._createLevelBadge(level));
+
+    // Add ready badge (hidden by default, shown for processors with buffered outputs)
+    if (def.isProcessor) {
+      slot.appendChild(this._createReadyBadge());
+    }
 
     // Attach event handlers
     slot.addEventListener('click', () => this._onBuildingClick(index));
@@ -238,5 +255,44 @@ export class BuildingRenderer {
     if (!layer) return null;
 
     return layer.querySelector(`.building-slot[data-building-index="${index}"]`);
+  }
+
+  /**
+   * Update ready badges on all buildings based on processor states
+   * @param {Array<{buildingIndex: number}>} readyProcessors - Array of ready processor info
+   * @param {HTMLElement} [container] - Optional container element
+   */
+  updateReadyBadges(readyProcessors, container) {
+    const layer = container || document.getElementById('building-layer') || document.getElementById('game-world');
+    if (!layer) return;
+
+    // Create a set of ready building indices for fast lookup
+    const readyIndices = new Set(readyProcessors.map(p => p.buildingIndex));
+
+    // Update all building slots
+    layer.querySelectorAll('.building-slot').forEach(slot => {
+      const index = parseInt(slot.dataset.buildingIndex);
+      const badge = slot.querySelector('.ready-badge');
+      if (badge) {
+        const isReady = readyIndices.has(index);
+        badge.classList.toggle('hidden', !isReady);
+      }
+    });
+  }
+
+  /**
+   * Set ready state for a single building
+   * @param {number} index - Building index
+   * @param {boolean} isReady - Whether the building is ready
+   * @param {HTMLElement} [container] - Optional container element
+   */
+  setReadyState(index, isReady, container) {
+    const element = this.getBuildingElement(index, container);
+    if (!element) return;
+
+    const badge = element.querySelector('.ready-badge');
+    if (badge) {
+      badge.classList.toggle('hidden', !isReady);
+    }
   }
 }

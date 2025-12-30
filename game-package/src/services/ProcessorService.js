@@ -14,6 +14,8 @@ import { getBuildingDef } from '../config/index.js';
  * @property {'idle'|'running'|'stalled'} state - Current processor state
  * @property {string|null} stallReason - Reason for stall (if stalled)
  * @property {boolean} inputsConsumed - Whether inputs have been consumed for current cycle
+ * @property {Object|null} bufferedOutputs - Resources waiting to be collected as drops
+ * @property {boolean} ready - Whether outputs are ready for collection
  */
 
 export class ProcessorService {
@@ -115,14 +117,19 @@ export class ProcessorService {
 
     // Check for cycle completion
     if (state.progress >= 1) {
-      // Produce outputs
-      this._resourceService.applyProduction(recipe.outputs);
+      // Buffer outputs instead of auto-injecting into inventory
+      // This allows drops to be spawned and collected manually or by villagers
+      state.bufferedOutputs = state.bufferedOutputs
+        ? this._mergeOutputs(state.bufferedOutputs, recipe.outputs)
+        : { ...recipe.outputs };
+      state.ready = true;
 
-      // Emit cycle complete event
+      // Emit cycle complete event (indicates buffered, not yet collected)
       this._eventBus.publish('processor:cycleComplete', {
         buildingIndex: index,
         buildingType: building.type,
-        outputs: recipe.outputs
+        outputs: recipe.outputs,
+        buffered: true
       });
 
       // Reset for next cycle
@@ -130,6 +137,21 @@ export class ProcessorService {
       state.state = 'idle';
       state.inputsConsumed = false;
     }
+  }
+
+  /**
+   * Merge outputs for accumulating multiple cycles
+   * @param {Object} existing - Existing buffered outputs
+   * @param {Object} newOutputs - New outputs to add
+   * @returns {Object} Merged outputs
+   * @private
+   */
+  _mergeOutputs(existing, newOutputs) {
+    const merged = { ...existing };
+    Object.entries(newOutputs).forEach(([resource, amount]) => {
+      merged[resource] = (merged[resource] || 0) + amount;
+    });
+    return merged;
   }
 
   // ==========================================
@@ -148,7 +170,9 @@ export class ProcessorService {
         progress: 0,
         state: 'idle',
         stallReason: null,
-        inputsConsumed: false
+        inputsConsumed: false,
+        bufferedOutputs: null,
+        ready: false
       });
     }
     return this._processorStates.get(index);
@@ -164,7 +188,9 @@ export class ProcessorService {
       progress: 0,
       state: 'idle',
       stallReason: null,
-      inputsConsumed: false
+      inputsConsumed: false,
+      bufferedOutputs: null,
+      ready: false
     };
   }
 
@@ -191,6 +217,59 @@ export class ProcessorService {
     // For now, clear all states - they'll be recreated on next tick
     // A more sophisticated approach would track by building ID instead of index
     this._processorStates.clear();
+  }
+
+  // ==========================================
+  // BUFFER MANAGEMENT (for drop system)
+  // ==========================================
+
+  /**
+   * Get buffered outputs for a processor
+   * @param {number} buildingIndex
+   * @returns {Object|null}
+   */
+  getBufferedOutputs(buildingIndex) {
+    const state = this._processorStates.get(buildingIndex);
+    return state?.bufferedOutputs || null;
+  }
+
+  /**
+   * Check if a processor has ready outputs
+   * @param {number} buildingIndex
+   * @returns {boolean}
+   */
+  isReady(buildingIndex) {
+    const state = this._processorStates.get(buildingIndex);
+    return state?.ready === true;
+  }
+
+  /**
+   * Clear buffered outputs (called when drops are spawned)
+   * @param {number} buildingIndex
+   * @returns {Object|null} The outputs that were buffered
+   */
+  clearBuffer(buildingIndex) {
+    const state = this._processorStates.get(buildingIndex);
+    if (!state) return null;
+
+    const outputs = state.bufferedOutputs;
+    state.bufferedOutputs = null;
+    state.ready = false;
+    return outputs;
+  }
+
+  /**
+   * Get all processors that have ready outputs
+   * @returns {Array<{buildingIndex: number, outputs: Object}>}
+   */
+  getReadyProcessors() {
+    const ready = [];
+    this._processorStates.forEach((state, index) => {
+      if (state.ready && state.bufferedOutputs) {
+        ready.push({ buildingIndex: index, outputs: state.bufferedOutputs });
+      }
+    });
+    return ready;
   }
 
   // ==========================================
@@ -356,7 +435,15 @@ export class ProcessorService {
     this._processorStates.clear();
     if (savedStates) {
       Object.entries(savedStates).forEach(([index, state]) => {
-        this._processorStates.set(parseInt(index), { ...state });
+        // Ensure backward compatibility with saves that don't have buffer fields
+        this._processorStates.set(parseInt(index), {
+          progress: state.progress || 0,
+          state: state.state || 'idle',
+          stallReason: state.stallReason || null,
+          inputsConsumed: state.inputsConsumed || false,
+          bufferedOutputs: state.bufferedOutputs || null,
+          ready: state.ready || false
+        });
       });
     }
   }
